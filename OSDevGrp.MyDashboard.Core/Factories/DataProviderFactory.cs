@@ -9,9 +9,11 @@ namespace OSDevGrp.MyDashboard.Core.Factories
 {
     public class DataProviderFactory : IDataProviderFactory
     {
-        public Task<IEnumerable<IDataProvider>> GetNewsProvidersAsync()
+        public Task<IEnumerable<INewsProvider>> GetNewsProvidersAsync()
         {
-            throw new NotImplementedException();
+            IEnumerable<INewsProvider> newsProviders = new List<INewsProvider>();
+
+            return Task.Run(() => newsProviders);
         } 
     }
 }

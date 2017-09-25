@@ -7,6 +7,6 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Factories
 {
     public interface IDataProviderFactory
     {
-        Task<IEnumerable<IDataProvider>> GetNewsProvidersAsync(); 
+        Task<IEnumerable<INewsProvider>> GetNewsProvidersAsync(); 
     }
 }
