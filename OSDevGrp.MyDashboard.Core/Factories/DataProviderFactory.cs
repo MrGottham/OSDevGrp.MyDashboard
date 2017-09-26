@@ -11,7 +11,12 @@ namespace OSDevGrp.MyDashboard.Core.Factories
     {
         public Task<IEnumerable<INewsProvider>> GetNewsProvidersAsync()
         {
-            IEnumerable<INewsProvider> newsProviders = new List<INewsProvider>();
+            IEnumerable<INewsProvider> newsProviders = new List<INewsProvider>
+            {
+                new NewsProvider("DR", new Uri("http://www.dr.dk/nyheder/service/feeds/allenyheder")),
+                new NewsProvider("TV 2", new Uri("http://feeds.tv2.dk/nyheder/rss")),
+                new NewsProvider("Børsen", new Uri("http://borsen.dk/rss"))
+            };
 
             return Task.Run(() => newsProviders);
         } 
