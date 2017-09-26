@@ -9,6 +9,8 @@ namespace OSDevGrp.MyDashboard.Core.Factories
 {
     public class DataProviderFactory : IDataProviderFactory
     {
+        #region Methods
+
         public Task<IEnumerable<INewsProvider>> GetNewsProvidersAsync()
         {
             IEnumerable<INewsProvider> newsProviders = new List<INewsProvider>
@@ -19,6 +21,8 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             };
 
             return Task.Run(() => newsProviders);
-        } 
+        }
+
+        #endregion 
     }
 }
