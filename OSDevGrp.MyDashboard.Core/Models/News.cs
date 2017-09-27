@@ -7,7 +7,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
     {
         #region Constructor
 
-        public News(string inforamtion, string details, DateTime timestamp, INewsProvider provider) : base(Guid.NewGuid().ToString("D"), inforamtion, details, timestamp)
+        public News(string identifier, string inforamtion, string details, DateTime timestamp, INewsProvider provider) : base(identifier, inforamtion, details, timestamp)
         {
             if (provider == null)
             {
@@ -24,6 +24,12 @@ namespace OSDevGrp.MyDashboard.Core.Models
         {
             get;
             private set;
+        }
+
+        public Uri Link 
+        { 
+            get;
+            set;
         }
 
         #endregion

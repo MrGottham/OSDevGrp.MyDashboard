@@ -42,6 +42,19 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
         }
 
         [TestMethod]
+        public void GetNewsAsync_WhenCalled_ReturnsNonEmptyCollection()
+        {
+            INewsRepository sut = CreateSut();
+            
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
+            getNewsTask.Wait();
+
+            IEnumerable<INews> result = getNewsTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Any());
+        }
+
+        [TestMethod]
         public void GetNewsAsync_WhenCalled_AssertGetNewsProvidersAsyncWasCalledOnDataProviderFactory()
         {
             INewsRepository sut = CreateSut();
