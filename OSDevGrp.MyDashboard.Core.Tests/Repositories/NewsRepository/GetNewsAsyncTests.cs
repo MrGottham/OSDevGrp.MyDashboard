@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -33,8 +34,11 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
         {
             INewsRepository sut = CreateSut();
             
-            Task getNewsTask = sut.GetNewsAsync();
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
             getNewsTask.Wait();
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
@@ -42,10 +46,36 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
         {
             INewsRepository sut = CreateSut();
             
-            Task getNewsTask = sut.GetNewsAsync();
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
             getNewsTask.Wait();
 
-            _dataProviderFactoryMock.Verify(m => m.GetNewsProvidersAsync());
+            _dataProviderFactoryMock.Verify(m => m.GetNewsProvidersAsync(), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetNewsAsync_WhenCalledAndGetNewsProvidersReturnsNull_ReturnEmptyCollection()
+        {
+            INewsRepository sut = CreateSut(newsProvidersIsNull: true);
+            
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
+            getNewsTask.Wait();
+
+            IEnumerable<INews> result = getNewsTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Any());
+        }
+
+        [TestMethod]
+        public void GetNewsAsync_WhenCalledAndGetNewsProvidersReturnsEmptyCollection_ReturnEmptyCollection()
+        {
+            INewsRepository sut = CreateSut(hasNewsProviders: false);
+            
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
+            getNewsTask.Wait();
+
+            IEnumerable<INews> result = getNewsTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Any());
         }
 
         [TestMethod]
@@ -53,12 +83,27 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
         {
             AggregateException aggregateException = new AggregateException();
 
-            INewsRepository sut = CreateSut(aggregateException);
+            INewsRepository sut = CreateSut(provokeException: aggregateException);
             
-            Task getNewsTask = sut.GetNewsAsync();
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
             getNewsTask.Wait();
 
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(ex => ex == aggregateException)));
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(ex => ex == aggregateException)), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetNewsAsync_WhenCalledAndAggregateExceptionOccurs_ReturnEmptyCollection()
+        {
+            AggregateException aggregateException = new AggregateException();
+
+            INewsRepository sut = CreateSut(provokeException: aggregateException);
+            
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
+            getNewsTask.Wait();
+
+            IEnumerable<INews> result = getNewsTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Any());
         }
 
         [TestMethod]
@@ -66,17 +111,40 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
         {
             Exception exception = new Exception();
 
-            INewsRepository sut = CreateSut(exception);
+            INewsRepository sut = CreateSut(provokeException: exception);
             
-            Task getNewsTask = sut.GetNewsAsync();
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
             getNewsTask.Wait();
 
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(ex => ex == exception)));
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(ex => ex == exception)), Times.Once);
         }
 
-        private INewsRepository CreateSut(Exception provokeException = null)
+        [TestMethod]
+        public void GetNewsAsync_WhenCalledAndExceptionOccurs_ReturnEmptyCollection()
         {
-            INewsProvider newsProvider = BuildNewsProvider("DR", "http://www.dr.dk/nyheder/service/feeds/allenyheder");
+            Exception exception = new Exception();
+
+            INewsRepository sut = CreateSut(provokeException: exception);
+            
+            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
+            getNewsTask.Wait();
+
+            IEnumerable<INews> result = getNewsTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.Any());
+        }
+
+        private INewsRepository CreateSut(bool newsProvidersIsNull = false, bool hasNewsProviders = true, Exception provokeException = null)
+        {
+            IList<INewsProvider> newsProviders = null;
+            if (newsProvidersIsNull == false)
+            {
+                newsProviders = new List<INewsProvider>();
+                if (hasNewsProviders)
+                {
+                    newsProviders.Add(BuildNewsProvider("DR", "http://www.dr.dk/nyheder/service/feeds/allenyheder"));
+                }
+            }
 
             if (provokeException != null)
             {
@@ -86,8 +154,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
             else
             {
                 _dataProviderFactoryMock.Setup(m => m.GetNewsProvidersAsync())
-                    .Returns(Task.Run<IEnumerable<INewsProvider>>(() => new List<INewsProvider> {newsProvider}));
+                    .Returns(Task.Run<IEnumerable<INewsProvider>>(() => newsProviders));
             }
+
+            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<AggregateException>()))
+                .Returns(Task.Run(() => { }));
+            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<Exception>()))
+                .Returns(Task.Run(() => { }));
 
             return new OSDevGrp.MyDashboard.Core.Repositories.NewsRepository(
                 _dataProviderFactoryMock.Object,

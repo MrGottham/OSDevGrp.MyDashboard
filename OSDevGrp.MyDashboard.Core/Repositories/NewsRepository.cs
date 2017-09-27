@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
@@ -40,7 +41,46 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
 
         public Task<IEnumerable<INews>> GetNewsAsync()
         {
-            throw new NotImplementedException();
+            return Task.Run<IEnumerable<INews>>(async () => 
+            {
+                try
+                {
+                    IEnumerable<INewsProvider> newsProviders = await _dataProviderFactory.GetNewsProvidersAsync();
+                    if (newsProviders == null || newsProviders.Any() == false)
+                    {
+                        return new List<INews>(0);
+                    }
+
+                    Task<IEnumerable<INews>>[] getNewsFromNewsProviderTasks = newsProviders.Select(GetNewsFromNewsProviderAsync).ToArray();
+                    Task.WaitAll(getNewsFromNewsProviderTasks);
+
+                    return getNewsFromNewsProviderTasks
+                        .Where(task => task.IsFaulted == false)
+                        .SelectMany(task => task.Result);
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                return new List<INews>(0);
+            });
+        }
+
+        private Task<IEnumerable<INews>> GetNewsFromNewsProviderAsync(INewsProvider newsProvider)
+        {
+            if (newsProvider == null)
+            {
+                throw new ArgumentNullException(nameof(newsProvider));
+            }
+
+            return Task.Run<IEnumerable<INews>>(() => 
+            {
+                return new List<INews>(0);
+            });
         }
 
         #endregion
