@@ -126,7 +126,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.NewsLogic
         public void GetNewsAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             Exception exception = new Exception();
-
             INewsLogic sut = CreateSut(provokedException: exception);
 
             Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
@@ -139,7 +138,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.NewsLogic
         public void GetNewsAsync_WhenCalledAndExceptionOccurs_ReturnsEmptyCollection()
         {
             Exception exception = new Exception();
-
             INewsLogic sut = CreateSut(provokedException: exception);
 
             Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
@@ -155,7 +153,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.NewsLogic
             if (provokedException == null)
             {
                 _newRepositoryMock.Setup(m => m.GetNewsAsync())
-                    .Returns(Task.Run<IEnumerable<INews>>(() =>  news ?? BuildNews(getNewsAsyncReturnsNull)));
+                    .Returns(Task.Run<IEnumerable<INews>>(() => news ?? BuildNews(getNewsAsyncReturnsNull)));
             }
             else
             {
