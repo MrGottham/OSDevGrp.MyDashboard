@@ -55,14 +55,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalled_AssertGetNewsProvidersAsyncWasCalledOnDataProviderFactory()
+        public void GetNewsAsync_WhenCalled_AssertBuildNewsProvidersAsyncWasCalledOnDataProviderFactory()
         {
             INewsRepository sut = CreateSut();
             
             Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync();
             getNewsTask.Wait();
 
-            _dataProviderFactoryMock.Verify(m => m.GetNewsProvidersAsync(), Times.Once);
+            _dataProviderFactoryMock.Verify(m => m.BuildNewsProvidersAsync(), Times.Once);
         }
 
         [TestMethod]
@@ -161,12 +161,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
 
             if (provokeException != null)
             {
-                _dataProviderFactoryMock.Setup(m => m.GetNewsProvidersAsync())
+                _dataProviderFactoryMock.Setup(m => m.BuildNewsProvidersAsync())
                     .Throws(provokeException);
             }
             else
             {
-                _dataProviderFactoryMock.Setup(m => m.GetNewsProvidersAsync())
+                _dataProviderFactoryMock.Setup(m => m.BuildNewsProvidersAsync())
                     .Returns(Task.Run<IEnumerable<INewsProvider>>(() => newsProviders));
             }
 

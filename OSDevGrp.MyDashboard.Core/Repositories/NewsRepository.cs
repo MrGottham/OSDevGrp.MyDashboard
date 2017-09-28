@@ -50,7 +50,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             {
                 try
                 {
-                    IEnumerable<INewsProvider> newsProviders = await _dataProviderFactory.GetNewsProvidersAsync();
+                    IEnumerable<INewsProvider> newsProviders = await _dataProviderFactory.BuildNewsProvidersAsync();
                     if (newsProviders == null || newsProviders.Any() == false)
                     {
                         return new List<INews>(0);

@@ -11,7 +11,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
     {
         #region Methods
 
-        public Task<IEnumerable<INewsProvider>> GetNewsProvidersAsync()
+        public Task<IEnumerable<INewsProvider>> BuildNewsProvidersAsync()
         {
             IEnumerable<INewsProvider> newsProviders = new List<INewsProvider>
             {

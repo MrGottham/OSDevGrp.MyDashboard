@@ -9,14 +9,14 @@ using OSDevGrp.MyDashboard.Core.Factories;
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 {
     [TestClass]
-    public class GetNewsProvidersAsyncTests
+    public class BuildNewsProvidersAsyncTests
     {
         [TestMethod]
-        public void GetNewsProvidersAsync_WhenCalled_ReturnsNewsProviders()
+        public void BuildNewsProvidersAsync_WhenCalled_ReturnsNewsProviders()
         {
             IDataProviderFactory sut = CreateSut();
 
-            Task<IEnumerable<INewsProvider>> newsProvidersTask = sut.GetNewsProvidersAsync();
+            Task<IEnumerable<INewsProvider>> newsProvidersTask = sut.BuildNewsProvidersAsync();
             newsProvidersTask.Wait();
 
             Assert.IsNotNull(newsProvidersTask.Result);
