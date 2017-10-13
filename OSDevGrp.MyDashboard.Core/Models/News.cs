@@ -32,6 +32,12 @@ namespace OSDevGrp.MyDashboard.Core.Models
             set;
         }
 
+        public IAuthor Author
+        {
+            get;
+            set;
+        }
+
         #endregion
     }
 }

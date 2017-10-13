@@ -7,5 +7,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
         INewsProvider Provider { get; }
 
         Uri Link { get; set; }
+
+        IAuthor Author { get; set; }
     }
 }

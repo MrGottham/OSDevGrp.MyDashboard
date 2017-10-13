@@ -219,6 +219,28 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             return null;
         }
 
+        private IAuthor ExtractAuthor(XmlNode item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            XmlNode authorNode = item.SelectSingleNode("author");
+            if (authorNode == null)
+            {
+                return null;
+            }
+
+            string name = ReadChildNodeValue(authorNode, "name");
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            return new Author(name);
+        }
+
         #endregion
     }
 }
