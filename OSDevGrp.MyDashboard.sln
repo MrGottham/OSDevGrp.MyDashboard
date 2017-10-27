@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSDevGrp.MyDashboard.Core.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSDevGrp.MyDashboard.Web", "OSDevGrp.MyDashboard.Web\OSDevGrp.MyDashboard.Web.csproj", "{FC8B4F9F-7698-449F-8E72-27BA8AABF7CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSDevGrp.MyDashboard.Web.Tests", "OSDevGrp.MyDashboard.Web.Tests\OSDevGrp.MyDashboard.Web.Tests.csproj", "{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,5 +60,17 @@ Global
 		{FC8B4F9F-7698-449F-8E72-27BA8AABF7CE}.Release|x64.Build.0 = Release|x64
 		{FC8B4F9F-7698-449F-8E72-27BA8AABF7CE}.Release|x86.ActiveCfg = Release|x86
 		{FC8B4F9F-7698-449F-8E72-27BA8AABF7CE}.Release|x86.Build.0 = Release|x86
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Debug|x64.ActiveCfg = Debug|x64
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Debug|x64.Build.0 = Debug|x64
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Debug|x86.ActiveCfg = Debug|x86
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Debug|x86.Build.0 = Debug|x86
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Release|x64.ActiveCfg = Release|x64
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Release|x64.Build.0 = Release|x64
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Release|x86.ActiveCfg = Release|x86
+		{EC2CB1CE-80CA-4E59-8DFB-FA6B1C7602F2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 EndGlobal
