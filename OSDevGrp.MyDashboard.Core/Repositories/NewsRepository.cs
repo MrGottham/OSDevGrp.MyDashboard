@@ -128,8 +128,14 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             XmlNodeList items = xmlDocument.SelectNodes("/rss/channel/item");
             foreach (XmlNode item in items)
             {
-                news.Add(GenerateNews(newsProvider, item));
-
+                try
+                {
+                    news.Add(GenerateNews(newsProvider, item));
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(new Exception($"Unable to generate and add news for the item '{item.OuterXml}': {ex.Message}", ex)).Wait();
+                }
             }
 
             return news;
