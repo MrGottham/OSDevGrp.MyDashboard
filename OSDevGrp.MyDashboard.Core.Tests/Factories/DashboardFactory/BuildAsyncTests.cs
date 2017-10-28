@@ -8,7 +8,6 @@ using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
@@ -21,8 +20,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         private Mock<IDashboardContentBuilder> _dashboardContentBuilder1Mock;
         private Mock<IDashboardContentBuilder> _dashboardContentBuilder2Mock;
         private Mock<IDashboardContentBuilder> _dashboardContentBuilder3Mock;
+        private Mock<ISystemErrorLogic> _systemErrorLogic;
         private Mock<IExceptionHandler> _exceptionHandlerMock;
-        private Mock<IExceptionRepository> _exceptionRepositoryMock;
         private Random _random;
 
         #endregion
@@ -33,8 +32,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             _dashboardContentBuilder1Mock = new Mock<IDashboardContentBuilder>();
             _dashboardContentBuilder2Mock = new Mock<IDashboardContentBuilder>();
             _dashboardContentBuilder3Mock = new Mock<IDashboardContentBuilder>();
+            _systemErrorLogic = new Mock<ISystemErrorLogic>();
             _exceptionHandlerMock = new Mock<IExceptionHandler>();
-            _exceptionRepositoryMock = new Mock<IExceptionRepository>();
             _random = new Random(DateTime.Now.Millisecond);
         }
         
@@ -135,7 +134,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertGetSystemErrorsAsyncWasCalledOnExceptionRepository()
+        public void BuildAsync_WhenCalled_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
@@ -144,7 +143,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
             buildTask.Wait();
 
-            _exceptionRepositoryMock.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
+            _systemErrorLogic.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
         }
 
         [TestMethod]
@@ -181,7 +180,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndAggregateExceptionOccurs_AssertGetSystemErrorsAsyncWasCalledOnExceptionRepository()
+        public void BuildAsync_WhenCalledAndAggregateExceptionOccurs_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
@@ -191,7 +190,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
             buildTask.Wait();
 
-            _exceptionRepositoryMock.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
+            _systemErrorLogic.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
         }
 
         [TestMethod]
@@ -229,7 +228,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndExceptionOccurs_AssertGetSystemErrorsAsyncWasCalledOnExceptionRepository()
+        public void BuildAsync_WhenCalledAndExceptionOccurs_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
@@ -239,7 +238,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
             buildTask.Wait();
 
-            _exceptionRepositoryMock.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
+            _systemErrorLogic.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
         }
 
         [TestMethod]
@@ -279,7 +278,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
                     .Throws(provokeException);
             }
             
-            _exceptionRepositoryMock.Setup(m => m.GetSystemErrorsAsync())
+            _systemErrorLogic.Setup(m => m.GetSystemErrorsAsync())
                 .Returns(Task.Run<IEnumerable<ISystemError>>(() => systemErrors ?? BuildSystemErrors()));
 
             return new OSDevGrp.MyDashboard.Core.Factories.DashboardFactory(
@@ -289,8 +288,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
                     _dashboardContentBuilder2Mock.Object,
                     _dashboardContentBuilder3Mock.Object
                 },
-                _exceptionHandlerMock.Object,
-                _exceptionRepositoryMock.Object
+                _systemErrorLogic.Object,
+                _exceptionHandlerMock.Object
             );
         }
 

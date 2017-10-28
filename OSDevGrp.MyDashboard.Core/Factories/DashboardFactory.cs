@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
-using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
+using OSDevGrp.MyDashboard.Core.Contracts.Logic;
+using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
 
 namespace OSDevGrp.MyDashboard.Core.Factories
@@ -15,31 +15,31 @@ namespace OSDevGrp.MyDashboard.Core.Factories
         #region Private variables
 
         private readonly IEnumerable<IDashboardContentBuilder> _dashboardContentBuilderCollection;
+        private readonly ISystemErrorLogic _systemErrorLogic;
         private readonly IExceptionHandler _exceptionHandler;
-        private readonly IExceptionRepository _exceptionRepository;
 
         #endregion
 
         #region Constructor
 
-        public DashboardFactory(IEnumerable<IDashboardContentBuilder> dashboardContentBuilderCollection, IExceptionHandler exceptionHandler, IExceptionRepository exceptionRepository)
+        public DashboardFactory(IEnumerable<IDashboardContentBuilder> dashboardContentBuilderCollection, ISystemErrorLogic systemErrorLogic, IExceptionHandler exceptionHandler)
         {
             if (dashboardContentBuilderCollection == null)
             {
                 throw new ArgumentNullException(nameof(dashboardContentBuilderCollection));
             }
+            if (systemErrorLogic == null)
+            {
+                throw new ArgumentNullException(nameof(systemErrorLogic));
+            }
             if (exceptionHandler == null)
             {
                 throw new ArgumentNullException(nameof(exceptionHandler));
             }
-            if (exceptionRepository == null)
-            {
-                throw new ArgumentNullException(nameof(exceptionRepository));
-            }
 
             _dashboardContentBuilderCollection = dashboardContentBuilderCollection;
+            _systemErrorLogic = systemErrorLogic;
             _exceptionHandler = exceptionHandler;
-            _exceptionRepository = exceptionRepository;
         }
 
         #endregion
@@ -74,7 +74,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 }
                 finally
                 {
-                    IEnumerable<ISystemError> systemErrors = await _exceptionRepository.GetSystemErrorsAsync();
+                    IEnumerable<ISystemError> systemErrors = await _systemErrorLogic.GetSystemErrorsAsync();
                     dashboard.Replace(systemErrors.OrderByDescending(systemError => systemError.Timestamp));
                 }
                 return dashboard;

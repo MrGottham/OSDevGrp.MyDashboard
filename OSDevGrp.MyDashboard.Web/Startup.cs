@@ -37,6 +37,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddSingleton<IExceptionRepository, ExceptionRepository>();
             // Adds dependencies for the logic.
             services.AddTransient<INewsLogic, NewsLogic>();
+            services.AddTransient<ISystemErrorLogic, SystemErrorLogic>();
             // Adds dependencies for the dashboard content builders.
             services.AddTransient<IDashboardContentBuilder, DashboardNewsBuilder>();
             // Adds dependencies for the dashboard factory.
