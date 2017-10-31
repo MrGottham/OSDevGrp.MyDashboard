@@ -10,8 +10,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
     public class BuildAsyncTests
     {
         [TestMethod]
-        [ExpectedArgumentNullExceptionAttribute("dashboard")]
-        public void BuildAsync_WhenDashboardIsNull_Throws()
+        [ExpectedArgumentNullExceptionAttribute("input")]
+        public void BuildAsync_WhenDashboardIsNull_ThrowsArgumentNullException()
         {
             IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut();
 

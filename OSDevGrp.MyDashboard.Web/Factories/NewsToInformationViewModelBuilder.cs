@@ -4,11 +4,11 @@ using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Factories
 {
-    public class DashboardViewModelBuilder : ViewModelBuilderBase<DashboardViewModel, IDashboard>
+    public class NewsToInformationViewModelBuilder : ViewModelBuilderBase<InformationViewModel, INews>
     {
         #region Methods
 
-        protected override DashboardViewModel Build(IDashboard dashboard)
+        protected override InformationViewModel Build(INews news)
         {
             throw new NotImplementedException();
         }

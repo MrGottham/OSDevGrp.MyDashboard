@@ -4,7 +4,7 @@ using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Models;
 
-namespace OSDevGrp.MyDashboard.Web.Tests.Factories.SystemErrorViewModelBuilder
+namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBuilder
 {
     [TestClass]
     public class BuildAsyncTests
@@ -13,14 +13,14 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.SystemErrorViewModelBuilder
         [ExpectedArgumentNullExceptionAttribute("input")]
         public void BuildAsync_WhenSystemErrorIsNull_ThrowsArgumentNullException()
         {
-            IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
             sut.BuildAsync(null);
         }
 
-        private IViewModelBuilder<SystemErrorViewModel, ISystemError> CreateSut()
+        private IViewModelBuilder<InformationViewModel, INews> CreateSut()
         {
-            return new OSDevGrp.MyDashboard.Web.Factories.SystemErrorViewModelBuilder();
+            return new OSDevGrp.MyDashboard.Web.Factories.NewsToInformationViewModelBuilder();
         }
     } 
 }
