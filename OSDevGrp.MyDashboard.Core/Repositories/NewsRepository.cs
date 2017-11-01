@@ -134,7 +134,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 }
                 catch (Exception ex)
                 {
-                    _exceptionHandler.HandleAsync(new Exception($"Unable to generate and add news for the item '{item.OuterXml}': {ex.Message}", ex)).Wait();
+                    _exceptionHandler.HandleAsync(ex).Wait();
                 }
             }
 
@@ -146,21 +146,28 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             if (newsProvider == null) throw new ArgumentNullException(nameof(newsProvider));
             if (item == null) throw new ArgumentNullException(nameof(item));
 
-            string title = ReadChildNodeValue(item, "title");
-            string description = ReadChildNodeValue(item, "description");
-            string pubDate = ReadChildNodeValue(item, "pubDate");
-            string link = ReadChildNodeValue(item, "link");
-            string guid = ReadChildNodeValue(item, "guid");
-
-            return new News(
-                GenerateIdentifier(guid),
-                GenerateContent(title),
-                GenerateContent(description),
-                GenerateTimestamp(pubDate),
-                newsProvider)
+            try
+            {
+                string title = ReadChildNodeValue(item, "title");
+                string description = ReadChildNodeValue(item, "description");
+                string pubDate = ReadChildNodeValue(item, "pubDate");
+                string link = ReadChildNodeValue(item, "link");
+                string guid = ReadChildNodeValue(item, "guid");
+                
+                return new News(
+                    GenerateIdentifier(guid),
+                    GenerateContent(title),
+                    GenerateContent(description),
+                    GenerateTimestamp(pubDate),
+                    newsProvider)
                 {
                     Link = GenerateUri(link)
                 };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Unable to generate and add news for the item '{item.OuterXml}': {ex.Message}", ex);
+            }
         }
 
         private string ReadChildNodeValue(XmlNode item, string childNodeName)
@@ -187,7 +194,6 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
         {
             return string.IsNullOrWhiteSpace(value) ? Guid.NewGuid().ToString("D") : value;
         }
-
 
         private string GenerateContent(string value)
         {
