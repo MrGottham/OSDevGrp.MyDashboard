@@ -181,10 +181,19 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 return null;
             }
 
-            XmlCDataSection xmlCDataSection = childNode as XmlCDataSection;
-            if (xmlCDataSection != null)
+            if (childNode.HasChildNodes)
             {
-                return xmlCDataSection.Data;
+                XmlCDataSection xmlCDataSection = childNode.FirstChild as XmlCDataSection;
+                if (xmlCDataSection != null)
+                {
+                    return xmlCDataSection.Data;
+                }
+
+                XmlText xmlText = childNode.FirstChild as XmlText;
+                if (xmlText != null)
+                {
+                    return xmlText.Value;
+                }
             }
 
             return childNode.InnerText;
