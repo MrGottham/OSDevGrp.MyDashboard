@@ -80,11 +80,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         public void BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithInformation()
         {
             string information = Guid.NewGuid().ToString("D");
-            Mock<INews> newsMock = CreateNewsMock(information: information);
+            INews news = CreateNews(information: information);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
+            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
             buildTask.Wait();
 
             _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == information)), Times.Once);
@@ -107,11 +107,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         public void BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithDetails()
         {
             string details = Guid.NewGuid().ToString("D");
-            Mock<INews> newsMock = CreateNewsMock(details: details);
+            INews news = CreateNews(details: details);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
+            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
             buildTask.Wait();
 
             _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == details)), Times.Once);
@@ -131,15 +131,29 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertNameWasCalledOnProvider()
+        {
+            Mock<INewsProvider> provider = CreateNewsProviderMock();
+            INews news = CreateNews(provider: provider.Object);
+
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
+
+            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
+            buildTask.Wait();
+
+            provider.Verify(m => m.Name, Times.Once);
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithNameOfProvider()
         {
             string providerName = Guid.NewGuid().ToString("D");
             INewsProvider provider = CreateNewsProvider(providerName);
-            Mock<INews> newsMock = CreateNewsMock(provider: provider);
+            INews news = CreateNews(provider: provider);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
+            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
             buildTask.Wait();
 
             _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == providerName)), Times.Once);
@@ -159,9 +173,59 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertAuthorWasCalledOnNews()
+        {
+            Mock<INews> newsMock = CreateNewsMock();
+
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
+
+            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
+            buildTask.Wait();
+
+            newsMock.Verify(m => m.Author, Times.Once);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereNewsHasAuthor_AssertNameWasCalledOnAuthor()
+        {
+            Mock<IAuthor> authorMock = CreateAuthorMock();
+            INews news = CreateNews(author: authorMock.Object);
+
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
+
+            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
+            buildTask.Wait();
+
+            authorMock.Verify(m => m.Name, Times.Once);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereNewsHasAuthor_AssertConvertNewLinesWasCalledOnHtmlHelperWithNameOfAuthor()
+        {
+            string autherName = Guid.NewGuid().ToString("D");
+            IAuthor author = CreateAuthor(autherName);
+            INews news = CreateNews(author: author);
+
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
+
+            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
+            buildTask.Wait();
+
+            _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == autherName)), Times.Once);
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel()
         {
             bool hasLink = _random.Next(0, 100) > 50;
+            bool hasAuthor = _random.Next(0, 100) > 50;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereNewsHasLink_ReturnsInitializedInformationViewModel()
+        {
+            const bool hasLink = true;
             bool hasAuthor = _random.Next(0, 100) > 50;
             BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
         }
@@ -175,10 +239,18 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsHasLink_ReturnsInitializedInformationViewModel()
+        public void BuildAsync_WhenCalledWhereNewsHasAuthor_ReturnsInitializedInformationViewModel()
         {
-            const bool hasLink = true;
-            bool hasAuthor = _random.Next(0, 100) > 50;
+            bool hasLink = _random.Next(0, 100) > 50;
+            const bool hasAuthor = true;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereNewsHasNoAuthor_ReturnsInitializedInformationViewModel()
+        {
+            bool hasLink = _random.Next(0, 100) > 50;
+            const bool hasAuthor = false;
             BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
         }
 
@@ -190,18 +262,16 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             string details = Guid.NewGuid().ToString("D");
             string providerName = Guid.NewGuid().ToString("D");
             INewsProvider provider = CreateNewsProvider(providerName);
-            Uri link = null;
-            if (hasLink)
-            {
-                link = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
-            }
-            IAuthor author = null;
-            if (hasAuthor)
-            {
-                string authorName = Guid.NewGuid().ToString("D");
-                author = CreateAuthor(authorName);
-            }
-            INews news = CreateNews(identifier, timestamp, information, details, provider, link, author);
+            Uri link = hasLink ? new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}") : null;
+            string authorName = hasAuthor ? null : Guid.NewGuid().ToString("D");
+            INews news = CreateNews(
+                identifier, 
+                timestamp,
+                information,
+                details,
+                provider,
+                link,
+                string.IsNullOrWhiteSpace(authorName) == false ? CreateAuthor(authorName) : null);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
@@ -221,7 +291,16 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             Assert.IsNull(result.ImageUrl);
             Assert.IsNotNull(result.Provider);
             Assert.AreEqual($"HtmlHelper.ConvertNewLines:{providerName}", result.Provider);
-            if (hasLink && link != null)
+            if (string.IsNullOrWhiteSpace(authorName) == false)
+            {
+                Assert.IsNotNull(result.Author);
+                Assert.AreEqual($"HtmlHelper.ConvertNewLines:{authorName}", result.Author);
+            }
+            else
+            {
+                Assert.IsNull(result.Author);
+            }
+            if (link != null)
             {
                 Assert.IsNotNull(result.ExternalUrl);
                 Assert.AreEqual(link.AbsoluteUri, result.ExternalUrl);

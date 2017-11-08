@@ -31,6 +31,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
 
         protected override InformationViewModel Build(INews news)
         {
+            IAuthor author = news.Author;
             Uri link = news.Link;
 
             return new InformationViewModel
@@ -40,7 +41,8 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 Header = _htmlHelper.ConvertNewLines(news.Information),
                 Details = _htmlHelper.ConvertNewLines(news.Details),
                 Provider = _htmlHelper.ConvertNewLines(news.Provider.Name),
-                ExternalUrl = link == null ? null : link.AbsoluteUri
+                Author = author != null ? _htmlHelper.ConvertNewLines(author.Name) : null,
+                ExternalUrl = link != null ? link.AbsoluteUri : null
             };
         }
 
