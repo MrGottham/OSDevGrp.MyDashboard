@@ -118,7 +118,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.SystemErrorViewModelBuilder
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_ReturnsInitializedSystemError()
+        public void BuildAsync_WhenCalled_ReturnsInitializedSystemErrorViewModel()
         {
             string identifier = Guid.NewGuid().ToString("D");
             DateTime timestamp = DateTime.Now.AddTicks(_random.Next(-5000, 5000));

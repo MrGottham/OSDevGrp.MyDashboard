@@ -1,16 +1,47 @@
 using System;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Factories
 {
     public class NewsToInformationViewModelBuilder : ViewModelBuilderBase<InformationViewModel, INews>
     {
+        #region Private variables
+
+        private readonly IHtmlHelper _htmlHelper;
+
+        #endregion
+
+        #region Constructor
+
+        public NewsToInformationViewModelBuilder(IHtmlHelper htmlHelper)
+        {
+            if (htmlHelper == null)
+            {
+                throw new ArgumentNullException(nameof(htmlHelper));
+            }
+            
+            _htmlHelper = htmlHelper;
+        }
+
+        #endregion
+
         #region Methods
 
         protected override InformationViewModel Build(INews news)
         {
-            throw new NotImplementedException();
+            Uri link = news.Link;
+
+            return new InformationViewModel
+            {
+                InformationIdentifier = news.Identifier,
+                Timestamp = news.Timestamp,
+                Header = _htmlHelper.ConvertNewLines(news.Information),
+                Details = _htmlHelper.ConvertNewLines(news.Details),
+                Provider = _htmlHelper.ConvertNewLines(news.Provider.Name),
+                ExternalUrl = link == null ? null : link.AbsoluteUri
+            };
         }
 
         #endregion
