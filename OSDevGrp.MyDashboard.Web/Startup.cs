@@ -9,11 +9,17 @@ using Microsoft.Extensions.DependencyInjection;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
+using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
 using OSDevGrp.MyDashboard.Core.Factories;
 using OSDevGrp.MyDashboard.Core.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Logic;
 using OSDevGrp.MyDashboard.Core.Repositories;
+using OSDevGrp.MyDashboard.Web.Contracts.Factories;
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
+using OSDevGrp.MyDashboard.Web.Factories;
+using OSDevGrp.MyDashboard.Web.Helpers;
+using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web
 {
@@ -42,6 +48,11 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddTransient<IDashboardContentBuilder, DashboardNewsBuilder>();
             // Adds dependencies for the dashboard factory.
             services.AddTransient<IDashboardFactory, DashboardFactory>();
+            // Adds dependencies for the view model builders.
+            services.AddSingleton<IHtmlHelper, HtmlHelper>();
+            services.AddTransient<IViewModelBuilder<InformationViewModel, INews>, NewsToInformationViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder<SystemErrorViewModel, ISystemError>, SystemErrorViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder<DashboardViewModel, IDashboard>, DashboardViewModelBuilder>();
             
             // Adds other services.
             services.AddMvc();

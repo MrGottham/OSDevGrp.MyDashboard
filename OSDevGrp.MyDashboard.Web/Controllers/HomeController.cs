@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
+using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Controllers
@@ -16,19 +17,25 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
         #region Private variables
 
         private readonly IDashboardFactory _dashboardFactory;
+        private readonly IViewModelBuilder<DashboardViewModel, IDashboard> _dashboardViewModelBuilder;
 
         #endregion
 
         #region Constructor
 
-        public HomeController(IDashboardFactory dashboardFactory)
+        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder)
         {
             if (dashboardFactory == null)
             {
                 throw new ArgumentNullException(nameof(dashboardFactory));
             }
+            if (dashboardViewModelBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardViewModelBuilder));
+            }
 
             _dashboardFactory = dashboardFactory;
+            _dashboardViewModelBuilder = dashboardViewModelBuilder;
         }
 
         #endregion
@@ -46,6 +53,8 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
                 Task<IDashboard> buildDashboardTask = _dashboardFactory.BuildAsync(dashboardSettings);
                 buildDashboardTask.Wait();
 
+                Task<DashboardViewModel> buildDashboardViewModelTask = _dashboardViewModelBuilder.BuildAsync(buildDashboardTask.Result);
+                buildDashboardViewModelTask.Wait();
             }
             catch (AggregateException aggregateException)
             {

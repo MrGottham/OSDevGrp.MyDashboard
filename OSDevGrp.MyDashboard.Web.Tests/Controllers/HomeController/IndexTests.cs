@@ -3,6 +3,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using OSDevGrp.MyDashboard.Web.Contracts.Factories;
+using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 {
@@ -12,6 +14,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         #region Private variables
 
         private Mock<IDashboardFactory> _dashboardFactoryMock;
+        private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
 
         #endregion
 
@@ -19,6 +22,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         public void TestInitialize()
         {
             _dashboardFactoryMock = new Mock<IDashboardFactory>();
+            _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
         }
 
         [TestMethod]
@@ -34,13 +38,28 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 Times.Once);
         }
 
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null)
+        [TestMethod]
+        public void Index_WhenCalled_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        {
+            IDashboard dashboard = BuildDashboard();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
+
+            sut.Index();
+
+            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+        }
+
+        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null)
         {
             _dashboardFactoryMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
                 .Returns(Task.Run<IDashboard>(() => dashboard ?? BuildDashboard()));
+
+            _dashboardViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IDashboard>()))
+                .Returns(Task.Run<DashboardViewModel>(() => dashboardViewModel ?? new DashboardViewModel()));
             
             return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
-                _dashboardFactoryMock.Object
+                _dashboardFactoryMock.Object,
+                _dashboardViewModelBuilderMock.Object
             );
         }
 
