@@ -11,6 +11,7 @@ using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
 using OSDevGrp.MyDashboard.Core.Models;
+using OSDevGrp.MyDashboard.Core.Utilities;
 
 namespace OSDevGrp.MyDashboard.Core.Repositories
 {
@@ -216,12 +217,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return DateTimeOffset.ParseExact(
-                    value, 
-                    "ddd, dd MMM yyyy HH:mm:ss zzz", 
-                    CultureInfo.InvariantCulture, 
-                    DateTimeStyles.None)
-                .DateTime;
+            return Rfc822DateTimeParser.Parse(value);
         }
 
         private Uri GenerateUri(string value)
