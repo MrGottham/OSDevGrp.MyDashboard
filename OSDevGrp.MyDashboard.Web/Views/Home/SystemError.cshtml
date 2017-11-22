@@ -1,0 +1,15 @@
+@using OSDevGrp.MyDashboard.Web.Models;
+@model SystemErrorViewModel
+
+@{
+    ViewData["Title"] = "System error";
+}
+
+<div class="row">
+    <h2>System error</h2>
+    <div class="panel panel-danger">
+        <div class="panel-heading">@Model.Message</div>
+        <div class="panel-body">@Model.Details</div>
+        <div class="panel-footer"><p class="text-right">Occurred at @Model.Timestamp.ToShortTimeString()</p></div>
+    </div>
+</div>

@@ -13,6 +13,19 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         public string Message { get; set; }
 
+        public string TruncatedMessage
+        {
+            get
+            {
+                string message = Message == null ? null : Message.Trim();
+                if (message == null || message.Length < 100)
+                {
+                    return message;
+                }
+                return $"{message.Substring(0, 98).Trim()}..";
+            }
+        }
+
         public string Details { get; set; }
 
         #endregion

@@ -55,6 +55,8 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
                 Task<DashboardViewModel> buildDashboardViewModelTask = _dashboardViewModelBuilder.BuildAsync(buildDashboardTask.Result);
                 buildDashboardViewModelTask.Wait();
+
+                return View("Index", buildDashboardViewModelTask.Result);
             }
             catch (AggregateException aggregateException)
             {
@@ -65,8 +67,19 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 throw;
             }
+        }
 
-            return View();
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SystemError(SystemErrorViewModel systemErrorViewModel)
+        {
+            if (systemErrorViewModel == null)
+            {
+                throw new ArgumentNullException(nameof(systemErrorViewModel));
+
+            }
+
+            return View("SystemError", systemErrorViewModel);
         }
 
         public IActionResult Error()

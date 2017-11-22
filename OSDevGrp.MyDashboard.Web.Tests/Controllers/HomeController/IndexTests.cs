@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
@@ -47,6 +48,24 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             sut.Index();
 
             _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+        }
+
+        [TestMethod]
+        public void Index_WhenCalled_ReturnsViewWithDashboardViewModel()
+        {
+            DashboardViewModel dashboardViewModel = new DashboardViewModel();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
+
+            IActionResult result = sut.Index();
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+
+            ViewResult viewResult = (ViewResult) result;
+            Assert.IsNotNull(viewResult);
+            Assert.IsNotNull(viewResult.ViewName);
+            Assert.AreEqual("Index", viewResult.ViewName);
+            Assert.IsNotNull(viewResult.Model);
+            Assert.AreEqual(dashboardViewModel, viewResult.Model);
         }
 
         private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null)
