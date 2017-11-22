@@ -71,6 +71,32 @@
 <div class="row">
     <div class="col-md-9">
         <h2>My Dashboard</h2>
+        @if (Model.Informations != null && Model.Informations.Any())
+        {
+            @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
+            {
+                <div class="row">
+                    <div class="col-md-4">
+                        @if (elementNo < Model.Informations.Count())
+                        {
+                            <p>@Model.Informations.ElementAt(elementNo).Header</p>
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        @if (elementNo + 1 < Model.Informations.Count())
+                        {
+                            <p>@Model.Informations.ElementAt(elementNo + 1).Header</p>
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        @if (elementNo + 2 < Model.Informations.Count())
+                        {
+                            <p>@Model.Informations.ElementAt(elementNo + 2).Header</p>
+                        }
+                    </div>
+                </div>
+            }
+        }
     </div>
     <div class="col-md-3">
         <h2>My Dashboard</h2>
