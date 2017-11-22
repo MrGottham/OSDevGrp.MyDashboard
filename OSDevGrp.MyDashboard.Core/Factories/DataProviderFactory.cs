@@ -17,7 +17,9 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             {
                 new NewsProvider("DR", new Uri("http://www.dr.dk/nyheder/service/feeds/allenyheder")),
                 new NewsProvider("TV 2", new Uri("http://feeds.tv2.dk/nyheder/rss")),
-                new NewsProvider("Børsen", new Uri("http://borsen.dk/rss"))
+                new NewsProvider("Børsen", new Uri("http://borsen.dk/rss")),
+                new NewsProvider("Computerworld", new Uri("https://www.computerworld.dk/rss/all")),
+                new NewsProvider("Version2", new Uri("https://www.version2.dk/it-nyheder/rss"))
             };
 
             return Task.Run(() => newsProviders);

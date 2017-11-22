@@ -20,11 +20,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
             newsProvidersTask.Wait();
 
             Assert.IsNotNull(newsProvidersTask.Result);
-            Assert.AreEqual(3, newsProvidersTask.Result.Count());
+            Assert.AreEqual(5, newsProvidersTask.Result.Count());
             
             AssertNewsProvider(newsProvidersTask.Result.ElementAt(0), "DR", "http://www.dr.dk/nyheder/service/feeds/allenyheder");
             AssertNewsProvider(newsProvidersTask.Result.ElementAt(1), "TV 2", "http://feeds.tv2.dk/nyheder/rss");
             AssertNewsProvider(newsProvidersTask.Result.ElementAt(2), "Børsen", "http://borsen.dk/rss");
+            AssertNewsProvider(newsProvidersTask.Result.ElementAt(3), "Computerworld", "https://www.computerworld.dk/rss/all");
+            AssertNewsProvider(newsProvidersTask.Result.ElementAt(4), "Version2", "https://www.version2.dk/it-nyheder/rss");
         }
 
         private IDataProviderFactory CreateSut()
