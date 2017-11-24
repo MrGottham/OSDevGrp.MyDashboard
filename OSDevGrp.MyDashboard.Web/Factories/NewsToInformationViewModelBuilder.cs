@@ -42,7 +42,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 Details = _htmlHelper.ConvertNewLines(news.Details),
                 Provider = _htmlHelper.ConvertNewLines(news.Provider.Name),
                 Author = author != null ? _htmlHelper.ConvertNewLines(author.Name) : null,
-                ExternalUrl = link != null ? link.AbsoluteUri : null
+                ExternalUrl = link != null ? link.AbsoluteUri : "#"
             };
         }
 

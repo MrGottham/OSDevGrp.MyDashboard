@@ -307,7 +307,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             }
             else
             {
-                Assert.IsNull(result.ExternalUrl);
+                Assert.IsNotNull(result.ExternalUrl);
+                Assert.AreEqual("#", result.ExternalUrl);
             }
         }
 

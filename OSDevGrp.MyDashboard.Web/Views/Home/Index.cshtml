@@ -79,19 +79,19 @@
                     <div class="col-md-4">
                         @if (elementNo < Model.Informations.Count())
                         {
-                            <p>@Model.Informations.ElementAt(elementNo).Header</p>
+                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo))
                         }
                     </div>
                     <div class="col-md-4">
                         @if (elementNo + 1 < Model.Informations.Count())
                         {
-                            <p>@Model.Informations.ElementAt(elementNo + 1).Header</p>
+                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo + 1))
                         }
                     </div>
                     <div class="col-md-4">
                         @if (elementNo + 2 < Model.Informations.Count())
                         {
-                            <p>@Model.Informations.ElementAt(elementNo + 2).Header</p>
+                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo + 2))
                         }
                     </div>
                 </div>
