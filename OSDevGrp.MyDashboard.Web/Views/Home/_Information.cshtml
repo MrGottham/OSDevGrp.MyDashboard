@@ -1,24 +1,22 @@
 @using OSDevGrp.MyDashboard.Web.Models;
 @model InformationViewModel
 
-<a href="@Model.ExternalUrl">
-    <div class="panel panel-info">
-        @if (string.IsNullOrWhiteSpace(@Model.Header) == false)
-        {
-            <div class="panel-heading">@Model.Header</div>
-        }
-        @if (string.IsNullOrWhiteSpace(@Model.Summary) == false || string.IsNullOrWhiteSpace(@Model.Details) == false || string.IsNullOrWhiteSpace(@Model.ImageUrl) == false)
-        {
-            <div class="panel-body">
-                @if (string.IsNullOrWhiteSpace(@Model.Summary) == false)
-                {
-                    @Html.Raw(Model.Summary)
-                }
-                else if (string.IsNullOrWhiteSpace(@Model.Details) == false)
-                {
-                    @Html.Raw(Model.Details)
-                }
-            </div>
+<div class="panel panel-info">
+    @if (string.IsNullOrWhiteSpace(@Model.Header) == false)
+    {
+        <div class="panel-heading">@Html.Raw(Model.Header)</div>
+    }
+    @if (string.IsNullOrWhiteSpace(@Model.Summary) == false || string.IsNullOrWhiteSpace(@Model.Details) == false || string.IsNullOrWhiteSpace(@Model.ImageUrl) == false)
+    {
+        <div class="panel-body">
+            @if (string.IsNullOrWhiteSpace(@Model.Summary) == false)
+            {
+                <a href="@Model.ExternalUrl">@Html.Raw(Model.Summary)</a>
+            }
+            else if (string.IsNullOrWhiteSpace(@Model.Details) == false)
+            {
+                <a href="@Model.ExternalUrl">@Html.Raw(Model.Details)</a>
+            }
+        </div>
         }
     </div>
-</a>

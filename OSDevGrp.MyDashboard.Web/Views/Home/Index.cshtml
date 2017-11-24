@@ -73,29 +73,32 @@
         <h2>My Dashboard</h2>
         @if (Model.Informations != null && Model.Informations.Any())
         {
-            @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
-            {
-                <div class="row">
-                    <div class="col-md-4">
-                        @if (elementNo < Model.Informations.Count())
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="panel-group">
+                        @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
                         {
                             @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo))
                         }
                     </div>
-                    <div class="col-md-4">
-                        @if (elementNo + 1 < Model.Informations.Count())
+                </div>
+                <div class="col-md-4">
+                    <div class="panel-group">
+                        @for (int elementNo = 1; elementNo < Model.Informations.Count(); elementNo += 3)
                         {
-                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo + 1))
-                        }
-                    </div>
-                    <div class="col-md-4">
-                        @if (elementNo + 2 < Model.Informations.Count())
-                        {
-                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo + 2))
+                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo))
                         }
                     </div>
                 </div>
-            }
+                <div class="col-md-4">
+                    <div class="panel-group">
+                        @for (int elementNo = 2; elementNo < Model.Informations.Count(); elementNo += 3)
+                        {
+                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo))
+                        }
+                    </div>
+                </div>
+            </div>
         }
     </div>
     <div class="col-md-3">
