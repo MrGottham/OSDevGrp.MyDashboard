@@ -4,7 +4,7 @@
 <div class="panel panel-info">
     @if (string.IsNullOrWhiteSpace(@Model.Header) == false)
     {
-        <div class="panel-heading">@Html.Raw(Model.Header)</div>
+        <div class="panel-heading"><a href="@Model.ExternalUrl">@Html.Raw(Model.Header)</a></div>
     }
     @if (string.IsNullOrWhiteSpace(@Model.Summary) == false || string.IsNullOrWhiteSpace(@Model.Details) == false || string.IsNullOrWhiteSpace(@Model.ImageUrl) == false)
     {
