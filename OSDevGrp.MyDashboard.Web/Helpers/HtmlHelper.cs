@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 
 namespace OSDevGrp.MyDashboard.Web.Helpers
@@ -24,8 +25,14 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
             {
                 return value;
             }
-            
-            throw new NotImplementedException();
+
+            Regex extractImageRegex = new Regex(@"<img[^>]*?src\s*=\s*[""']?([^'"" >]+?)[ '""][^>]*?>", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+            MatchCollection matchCollection = extractImageRegex.Matches(value);
+            foreach (Match match in matchCollection)
+            {
+                imageUrlCollection.Add(new Uri(match.Groups[1].Value));
+            }
+            return extractImageRegex.Replace(value, string.Empty);
         }
 
         #endregion
