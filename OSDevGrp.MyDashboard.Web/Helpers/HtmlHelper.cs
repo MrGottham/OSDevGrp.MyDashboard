@@ -15,7 +15,9 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
             {
                 return value;
             }
-            return value.Replace(Environment.NewLine, "<br />");
+
+            Regex regex = new Regex($"({Environment.NewLine}|\n)");
+            return regex.Replace(value, "<br />");
         }
         
         public string ExtractImages(string value, out IList<Uri> imageUrlCollection)

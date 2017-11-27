@@ -78,6 +78,30 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.HtmlHelper
             Assert.AreEqual(input.Replace(Environment.NewLine, "<br />"), result);
         }
 
+        [TestMethod]
+        public void ConvertNewLines_WhenCalledWithoutBackspaceN_ReturnsUnconvertedValue()
+        {
+            string input = Guid.NewGuid().ToString("D").Replace("\n", null);
+
+            IHtmlHelper sut = CreateSut();
+
+            string result = sut.ConvertNewLines(input);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(input, result);
+        }
+
+        [TestMethod]
+        public void ConvertNewLines_WhenCalledWithBackspaceN_ReturnsConvertedValue()
+        {
+            string input = $"{Guid.NewGuid().ToString("D")}\n{Guid.NewGuid().ToString("D")}\n{Guid.NewGuid().ToString("D")}";
+
+            IHtmlHelper sut = CreateSut();
+
+            string result = sut.ConvertNewLines(input);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(input.Replace("\n", "<br />"), result);
+        }
+
         private IHtmlHelper CreateSut()
         {
             return new OSDevGrp.MyDashboard.Web.Helpers.HtmlHelper();
