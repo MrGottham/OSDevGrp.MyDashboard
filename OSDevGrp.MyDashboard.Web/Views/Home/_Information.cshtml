@@ -12,7 +12,7 @@
         <div class="panel-body">
             @if (string.IsNullOrWhiteSpace(@Model.ImageUrl) == false)
             {
-                <img src="@Model.ImageUrl" class="img-responsive" src="img_chania.jpg" alt="Chania" />
+                <img src="@Model.ImageUrl" class="img-responsive" />
             }
             @if (string.IsNullOrWhiteSpace(@Model.Summary) == false)
             {
@@ -27,10 +27,14 @@
     @if (string.Compare(@Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
     {
         <div class="panel-body">
-            <p class="text-center"><a href="@Model.ExternalUrl">View</a></p>
+            <div class="text-center">
+                <div class="btn-group">
+                    <a class="btn btn-primary" href="@Model.ExternalUrl">View</a>
+                </div>
+            </div>
         </div>
     }
     <div class="panel-footer">
-        <p class="text-left">@Model.Timestamp.ToString("dddd") @Model.Timestamp.ToShortTimeString() - @Model.AuthorOrProvider</p>
+        <p class="text-left">@Model.Timestamp.ToString("dddd") @Model.Timestamp.ToShortTimeString() - @Html.Raw(Model.AuthorOrProvider)</p>
     </div>
 </div>

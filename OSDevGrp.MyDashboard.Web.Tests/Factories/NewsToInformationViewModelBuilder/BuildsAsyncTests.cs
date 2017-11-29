@@ -78,20 +78,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithInformation()
-        {
-            string information = Guid.NewGuid().ToString("D");
-            INews news = CreateNews(information: information);
-
-            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
-
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
-
-            _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == information)), Times.Once);
-        }
-
-        [TestMethod]
         public void BuildAsync_WhenCalled_AssertExtractImagesWasCalledOnHtmlHelperWithInformation()
         {
             IList<Uri> imageUrlCollection = null;
@@ -104,7 +90,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             Task<InformationViewModel> buildTask = sut.BuildAsync(news);
             buildTask.Wait();
 
-            _htmlHelperMock.Verify(m => m.ExtractImages(It.Is<string>(value => value == $"HtmlHelper.ConvertNewLines:{information}"), out imageUrlCollection), Times.Once);
+            _htmlHelperMock.Verify(m => m.ExtractImages(It.Is<string>(value => value == information), out imageUrlCollection), Times.Once);
         }
 
         [TestMethod]
@@ -121,20 +107,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithDetails()
-        {
-            string details = Guid.NewGuid().ToString("D");
-            INews news = CreateNews(details: details);
-
-            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
-
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
-
-            _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == details)), Times.Once);
-        }
-
-        [TestMethod]
         public void BuildAsync_WhenCalled_AssertExtractImagesWasCalledOnHtmlHelperWithDetails()
         {
             IList<Uri> imageUrlCollection = null;
@@ -147,7 +119,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             Task<InformationViewModel> buildTask = sut.BuildAsync(news);
             buildTask.Wait();
 
-            _htmlHelperMock.Verify(m => m.ExtractImages(It.Is<string>(value => value == $"HtmlHelper.ConvertNewLines:{details}"), out imageUrlCollection), Times.Once);
+            _htmlHelperMock.Verify(m => m.ExtractImages(It.Is<string>(value => value == details), out imageUrlCollection), Times.Once);
         }
 
         [TestMethod]
@@ -345,10 +317,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             Assert.AreEqual(identifier, result.InformationIdentifier);
             Assert.AreEqual(timestamp, result.Timestamp);
             Assert.IsNotNull(result.Header);
-            Assert.AreEqual($"HtmlHelper.ExtractImages:HtmlHelper.ConvertNewLines:{information}", result.Header);
+            Assert.AreEqual($"HtmlHelper.ExtractImages:{information}", result.Header);
             Assert.IsNull(result.Summary);
             Assert.IsNotNull(result.Details);
-            Assert.AreEqual($"HtmlHelper.ExtractImages:HtmlHelper.ConvertNewLines:{details}", result.Details);
+            Assert.AreEqual($"HtmlHelper.ExtractImages:{details}", result.Details);
             Assert.IsNotNull(result.Provider);
             Assert.AreEqual($"HtmlHelper.ConvertNewLines:{providerName}", result.Provider);
             if (string.IsNullOrWhiteSpace(authorName) == false)
