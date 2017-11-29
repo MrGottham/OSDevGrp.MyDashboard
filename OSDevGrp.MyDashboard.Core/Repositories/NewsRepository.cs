@@ -162,7 +162,8 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                     GenerateTimestamp(pubDate),
                     newsProvider)
                 {
-                    Link = GenerateUri(link)
+                    Link = GenerateUri(link),
+                    Author = ExtractAuthor(item)
                 };
             }
             catch (Exception ex)

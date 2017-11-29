@@ -23,6 +23,14 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         public string Author { get; set; }
 
+        public string AuthorOrProvider
+        {
+            get
+            {
+                return string.IsNullOrWhiteSpace(Author) == false ? Author : Provider;
+            }
+        }
+
         public string ExternalUrl { get; set; }
 
         #endregion

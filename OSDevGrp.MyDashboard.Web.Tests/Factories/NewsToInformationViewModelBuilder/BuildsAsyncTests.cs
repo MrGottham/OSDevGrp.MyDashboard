@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -91,6 +92,22 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertExtractImagesWasCalledOnHtmlHelperWithInformation()
+        {
+            IList<Uri> imageUrlCollection = null;
+
+            string information = Guid.NewGuid().ToString("D");
+            INews news = CreateNews(information: information);
+
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
+
+            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
+            buildTask.Wait();
+
+            _htmlHelperMock.Verify(m => m.ExtractImages(It.Is<string>(value => value == $"HtmlHelper.ConvertNewLines:{information}"), out imageUrlCollection), Times.Once);
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_AssertDetailsWasCalledOnNews()
         {
             Mock<INews> newsMock = CreateNewsMock();
@@ -115,6 +132,22 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             buildTask.Wait();
 
             _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == details)), Times.Once);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalled_AssertExtractImagesWasCalledOnHtmlHelperWithDetails()
+        {
+            IList<Uri> imageUrlCollection = null;
+
+            string details = Guid.NewGuid().ToString("D");
+            INews news = CreateNews(details: details);
+
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
+
+            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
+            buildTask.Wait();
+
+            _htmlHelperMock.Verify(m => m.ExtractImages(It.Is<string>(value => value == $"HtmlHelper.ConvertNewLines:{details}"), out imageUrlCollection), Times.Once);
         }
 
         [TestMethod]
@@ -219,7 +252,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             bool hasLink = _random.Next(0, 100) > 50;
             bool hasAuthor = _random.Next(0, 100) > 50;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
+            bool hasImage = _random.Next(0, 100) > 50;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
@@ -227,7 +261,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             const bool hasLink = true;
             bool hasAuthor = _random.Next(0, 100) > 50;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
+            bool hasImage = _random.Next(0, 100) > 50;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
@@ -235,7 +270,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             const bool hasLink = false;
             bool hasAuthor = _random.Next(0, 100) > 50;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
+            bool hasImage = _random.Next(0, 100) > 50;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
@@ -243,7 +279,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             bool hasLink = _random.Next(0, 100) > 50;
             const bool hasAuthor = true;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
+            bool hasImage = _random.Next(0, 100) > 50;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
@@ -251,10 +288,29 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             bool hasLink = _random.Next(0, 100) > 50;
             const bool hasAuthor = false;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor);
+            bool hasImage = _random.Next(0, 100) > 50;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
-        private void BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(bool hasLink, bool hasAuthor)
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereNewsIncludesImage_ReturnsInitializedInformationViewModel()
+        {
+            bool hasLink = _random.Next(0, 100) > 50;
+            bool hasAuthor = _random.Next(0, 100) > 50;
+            const bool hasImage = true;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereNewsDoesNotIncludeImage_ReturnsInitializedInformationViewModel()
+        {
+            bool hasLink = _random.Next(0, 100) > 50;
+            bool hasAuthor = _random.Next(0, 100) > 50;
+            const bool hasImage = false;
+            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+        }
+
+        private void BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(bool hasLink, bool hasAuthor, bool hasImage)
         {
             string identifier = Guid.NewGuid().ToString("D");
             DateTime timestamp = DateTime.Now.AddTicks(_random.Next(-5000, 5000));
@@ -273,7 +329,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
                 link,
                 string.IsNullOrWhiteSpace(authorName) == false ? CreateAuthor(authorName) : null);
 
-            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
+            Uri imageUrl = null;
+            if (hasImage)
+            {
+                imageUrl = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
+            }
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut(imageUrl: imageUrl);
 
             Task<InformationViewModel> buildTask = sut.BuildAsync(news);
             buildTask.Wait();
@@ -284,11 +345,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             Assert.AreEqual(identifier, result.InformationIdentifier);
             Assert.AreEqual(timestamp, result.Timestamp);
             Assert.IsNotNull(result.Header);
-            Assert.AreEqual($"HtmlHelper.ConvertNewLines:{information}", result.Header);
+            Assert.AreEqual($"HtmlHelper.ExtractImages:HtmlHelper.ConvertNewLines:{information}", result.Header);
             Assert.IsNull(result.Summary);
             Assert.IsNotNull(result.Details);
-            Assert.AreEqual($"HtmlHelper.ConvertNewLines:{details}", result.Details);
-            Assert.IsNull(result.ImageUrl);
+            Assert.AreEqual($"HtmlHelper.ExtractImages:HtmlHelper.ConvertNewLines:{details}", result.Details);
             Assert.IsNotNull(result.Provider);
             Assert.AreEqual($"HtmlHelper.ConvertNewLines:{providerName}", result.Provider);
             if (string.IsNullOrWhiteSpace(authorName) == false)
@@ -310,12 +370,29 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
                 Assert.IsNotNull(result.ExternalUrl);
                 Assert.AreEqual("#", result.ExternalUrl);
             }
+            if (imageUrl != null)
+            {
+                Assert.IsNotNull(result.ImageUrl);
+                Assert.AreEqual(imageUrl.AbsoluteUri, result.ImageUrl);
+            }
+            else
+            {
+                Assert.IsNull(result.ImageUrl);
+            }
         }
 
-        private IViewModelBuilder<InformationViewModel, INews> CreateSut()
+        private IViewModelBuilder<InformationViewModel, INews> CreateSut(Uri imageUrl = null)
         {
+            IList<Uri> imageUrlCollection = new List<Uri>();
+            if (imageUrl != null)
+            {
+                imageUrlCollection.Add(imageUrl);
+            }
+
             _htmlHelperMock.Setup(m => m.ConvertNewLines(It.IsAny<string>()))
                 .Returns<string>(value => $"HtmlHelper.ConvertNewLines:{value}");
+            _htmlHelperMock.Setup(m => m.ExtractImages(It.IsAny<string>(), out imageUrlCollection))
+                .Returns<string, IList<Uri>>((value, urlCollection) => $"HtmlHelper.ExtractImages:{value}");
             
             return new OSDevGrp.MyDashboard.Web.Factories.NewsToInformationViewModelBuilder(_htmlHelperMock.Object);
         }
