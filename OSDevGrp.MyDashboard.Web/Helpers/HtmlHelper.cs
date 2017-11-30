@@ -20,6 +20,31 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
             return regex.Replace(value, "<br />");
         }
         
+        public string RemoveEndingComment(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+
+            Regex regex = new Regex(@"<!--*(.+)$");
+            return regex.Replace(value, string.Empty);
+        }
+
+        public string Convert(string value, bool convertNewLines = true, bool removeEndingComment = true)
+        {
+            string result = value;
+            if (convertNewLines)
+            {
+                result = ConvertNewLines(result);
+            }
+            if (removeEndingComment)
+            {
+                result = RemoveEndingComment(result);
+            }
+            return result;
+        }
+
         public string ExtractImages(string value, out IList<Uri> imageUrlCollection)
         {
             imageUrlCollection = new List<Uri>();

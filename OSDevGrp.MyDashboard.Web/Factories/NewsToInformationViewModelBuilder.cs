@@ -34,8 +34,8 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         {
             List<Uri> imageUrlCollection = new List<Uri>();
 
-            string header = ExtractImages(news.Information, imageUrlCollection);
-            string details = ExtractImages(news.Details, imageUrlCollection);
+            string header = ExtractImages(_htmlHelper.Convert(news.Information, false, true), imageUrlCollection);
+            string details = ExtractImages(_htmlHelper.Convert(news.Details, false, true), imageUrlCollection);
 
             IAuthor author = news.Author;
             Uri link = news.Link;

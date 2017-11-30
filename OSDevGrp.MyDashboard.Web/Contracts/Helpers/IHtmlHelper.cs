@@ -7,6 +7,10 @@ namespace OSDevGrp.MyDashboard.Web.Contracts.Helpers
     {
         string ConvertNewLines(string value);
 
+        string RemoveEndingComment(string value);
+
+        string Convert(string value, bool convertNewLines = true, bool removeEndingComment = true);
+
         string ExtractImages(string value, out IList<Uri> imageUrlCollection);
     }
 }
