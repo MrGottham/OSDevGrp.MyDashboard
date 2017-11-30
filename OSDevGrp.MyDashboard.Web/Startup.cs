@@ -52,6 +52,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddSingleton<IHtmlHelper, HtmlHelper>();
             services.AddTransient<IViewModelBuilder<InformationViewModel, INews>, NewsToInformationViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<SystemErrorViewModel, ISystemError>, SystemErrorViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>, DashboardSettingsViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<DashboardViewModel, IDashboard>, DashboardViewModelBuilder>();
             
             // Adds other services.

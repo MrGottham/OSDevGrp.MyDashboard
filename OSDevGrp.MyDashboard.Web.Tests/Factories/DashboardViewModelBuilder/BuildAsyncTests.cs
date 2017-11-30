@@ -19,6 +19,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
 
         private Mock<IViewModelBuilder<InformationViewModel, INews>> _newsToInformationViewModelBuilderMock;
         private Mock<IViewModelBuilder<SystemErrorViewModel, ISystemError>> _systemErrorViewModelBuilderMock;
+        private Mock<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>> _dashboardSettingsViewModelBuilderMock;
         private Mock<IHtmlHelper> _htmlHelperMock;
         private Random _random;
 
@@ -29,6 +30,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         {
             _newsToInformationViewModelBuilderMock = new Mock<IViewModelBuilder<InformationViewModel, INews>>();
             _systemErrorViewModelBuilderMock = new Mock<IViewModelBuilder<SystemErrorViewModel, ISystemError>>();
+            _dashboardSettingsViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>>();
             _htmlHelperMock = new Mock<IHtmlHelper>();
             _random = new Random(DateTime.Now.Millisecond);
         }
@@ -69,6 +71,20 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertSettingsWasCalledOnDashboardTwice()
+        {
+            IDashboardSettings dashboardSettings = CreateDashboardSettings();
+            Mock<IDashboard> dashboardMock = CreateDashboardMock(dashboardSettings: dashboardSettings);
+
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut();
+
+            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboardMock.Object);
+            buildTask.Wait();
+
+            dashboardMock.Verify(m => m.Settings, Times.Exactly(2));
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_AssertBuildAsyncWasCalledOnNewsToInformationViewModelBuilderForEachNewsInDashboard()
         {
             List<INews> newsCollection = CreateNewsCollection(_random.Next(50, 75)).ToList();
@@ -97,13 +113,29 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertBuildAsyncWasCalledOnDashboardSettingsViewModelBuilderWithSettingsInDashboard()
+        {
+            IDashboardSettings dashboardSettings = CreateDashboardSettings();
+            IDashboard dashboard = CreateDashboard(dashboardSettings: dashboardSettings);
+
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut();
+
+            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
+            buildTask.Wait();
+
+            _dashboardSettingsViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(value => value == dashboardSettings)), Times.Once);
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_ReturnsInitializedDashboardViewModel()
         {
             List<INews> newsCollection = CreateNewsCollection(_random.Next(50, 75)).ToList();
             List<ISystemError> systemErrorCollection = CreateSystemErrorCollection(_random.Next(10, 15)).ToList();
-            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection);
+            IDashboardSettings dashboardSettings = CreateDashboardSettings();
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, dashboardSettings: dashboardSettings);
 
-            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut();
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel();
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(dashboardSettingsViewModel: dashboardSettingsViewModel);
 
             Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
             buildTask.Wait();
@@ -114,6 +146,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.AreEqual(newsCollection.Count, result.Informations.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(systemErrorCollection.Count, result.SystemErrors.Count());
+            Assert.IsNotNull(result.Settings);
+            Assert.AreEqual(dashboardSettingsViewModel, result.Settings);
         }
 
         [TestMethod]
@@ -135,6 +169,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.AreEqual(0, result.Informations.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(1, result.SystemErrors.Count());
+            Assert.IsNull(result.Settings);
             
             SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
             Assert.IsNotNull(systemErrorViewModel);
@@ -164,6 +199,38 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.AreEqual(0, result.Informations.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(1, result.SystemErrors.Count());
+            Assert.IsNull(result.Settings);
+            
+            SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
+            Assert.IsNotNull(systemErrorViewModel);
+            Assert.IsNotNull(systemErrorViewModel.SystemErrorIdentifier);
+            Assert.IsTrue(systemErrorViewModel.Timestamp >= DateTime.Now.AddSeconds(-3) && systemErrorViewModel.Timestamp <= DateTime.Now);
+            Assert.IsNotNull(systemErrorViewModel.Message);
+            Assert.AreEqual($"HtmlHelper.ConvertNewLines:{aggregateExceptionMessage}", systemErrorViewModel.Message);
+            Assert.IsNotNull(systemErrorViewModel.Details);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledAndDashboardSettingsViewModelBuilderThrowsAggregateException_AddsExceptionToSystemViewModelsInDashboardViewModel()
+        {
+            IEnumerable<INews> newsCollection = CreateNewsCollection(0);
+            IEnumerable<ISystemError> systemErrorCollection = CreateSystemErrorCollection(0);
+            IDashboardSettings dashboardSettings = CreateDashboardSettings();
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, dashboardSettings: dashboardSettings);
+
+            string aggregateExceptionMessage = Guid.NewGuid().ToString();
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(aggregateExceptionMessage: aggregateExceptionMessage);
+
+            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
+            buildTask.Wait();
+
+            DashboardViewModel result = buildTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Informations);
+            Assert.AreEqual(0, result.Informations.Count());
+            Assert.IsNotNull(result.SystemErrors);
+            Assert.AreEqual(1, result.SystemErrors.Count());
+            Assert.IsNull(result.Settings);
             
             SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
             Assert.IsNotNull(systemErrorViewModel);
@@ -190,7 +257,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             _htmlHelperMock.Verify(m => m.ConvertNewLines(It.IsAny<string>()), Times.Exactly(2));
         }
 
-        private IViewModelBuilder<DashboardViewModel, IDashboard> CreateSut(string aggregateExceptionMessage = null)
+        private IViewModelBuilder<DashboardViewModel, IDashboard> CreateSut(DashboardSettingsViewModel dashboardSettingsViewModel = null, string aggregateExceptionMessage = null)
         {
             _newsToInformationViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<INews>()))
                 .Returns(Task.Run<InformationViewModel>(() => 
@@ -212,27 +279,40 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                     return CreateSystemErrorViewModel(DateTime.Now.AddMinutes(_random.Next(1, 30) * -1));
                 }));
 
+            _dashboardSettingsViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
+                .Returns(Task.Run<DashboardSettingsViewModel>(() => 
+                {
+                    if (string.IsNullOrWhiteSpace(aggregateExceptionMessage) == false)
+                    {
+                        throw new Exception(aggregateExceptionMessage);
+                    }
+                    return dashboardSettingsViewModel ?? CreateDashboardSettingsViewModel();
+                }));
+
             _htmlHelperMock.Setup(m => m.ConvertNewLines(It.IsAny<string>()))
                 .Returns<string>(value => $"HtmlHelper.ConvertNewLines:{value}");
 
             return new OSDevGrp.MyDashboard.Web.Factories.DashboardViewModelBuilder(
                 _newsToInformationViewModelBuilderMock.Object,
                 _systemErrorViewModelBuilderMock.Object,
+                _dashboardSettingsViewModelBuilderMock.Object,
                 _htmlHelperMock.Object);
         }
 
-        private IDashboard CreateDashboard(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null)
+        private IDashboard CreateDashboard(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null)
         {
-            return CreateDashboardMock(newsCollection, systemErrorCollection).Object;
+            return CreateDashboardMock(newsCollection, systemErrorCollection, dashboardSettings).Object;
         }
 
-        private Mock<IDashboard> CreateDashboardMock(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null)
+        private Mock<IDashboard> CreateDashboardMock(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null)
         {
             Mock<IDashboard> dashboardMock = new Mock<IDashboard>();
             dashboardMock.Setup(m => m.News)
                 .Returns(newsCollection ?? CreateNewsCollection(_random.Next(50, 100)));
             dashboardMock.Setup(m => m.SystemErrors)
                 .Returns(systemErrorCollection ?? CreateSystemErrorCollection(_random.Next(5, 10)));
+            dashboardMock.Setup(m => m.Settings)
+                .Returns(dashboardSettings);
             return dashboardMock;
         }
 
@@ -258,6 +338,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             return systemErrorCollection;
         }
 
+        private IDashboardSettings CreateDashboardSettings()
+        {
+            Mock<IDashboardSettings> dashboardSettingsMock = new Mock<IDashboardSettings>();
+            return dashboardSettingsMock.Object;
+        }
+
         private InformationViewModel CreateInformationViewModel(DateTime timestamp)
         {
             return new InformationViewModel
@@ -272,6 +358,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             {
                 Timestamp = timestamp
             };
+        }
+
+        private DashboardSettingsViewModel CreateDashboardSettingsViewModel()
+        {
+            return new DashboardSettingsViewModel();
         }
     } 
 }

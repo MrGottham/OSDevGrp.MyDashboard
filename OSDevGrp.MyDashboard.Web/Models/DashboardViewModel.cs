@@ -23,5 +23,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
         }
 
         public IEnumerable<SystemErrorViewModel> SystemErrors { get; set; }
+
+        public DashboardSettingsViewModel Settings { get; set; }
     }
 }

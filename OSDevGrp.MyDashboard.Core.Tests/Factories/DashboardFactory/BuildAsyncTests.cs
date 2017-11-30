@@ -161,6 +161,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             Assert.IsNotNull(dashboard);
             Assert.IsNotNull(dashboard.SystemErrors);
             Assert.AreEqual(systemErrors.Count, dashboard.SystemErrors.Count());
+            Assert.IsNotNull(dashboard.Settings);
+            Assert.AreEqual(dashboardSettings, dashboard.Settings);
 
             systemErrors.ForEach(systemError => Assert.IsTrue(dashboard.SystemErrors.Contains(systemError)));
         }
@@ -209,6 +211,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             Assert.IsNotNull(dashboard);
             Assert.IsNotNull(dashboard.SystemErrors);
             Assert.AreEqual(systemErrors.Count, dashboard.SystemErrors.Count());
+            Assert.IsNotNull(dashboard.Settings);
+            Assert.AreEqual(dashboardSettings, dashboard.Settings);
 
             systemErrors.ForEach(systemError => Assert.IsTrue(dashboard.SystemErrors.Contains(systemError)));
         }
@@ -257,6 +261,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             Assert.IsNotNull(dashboard);
             Assert.IsNotNull(dashboard.SystemErrors);
             Assert.AreEqual(systemErrors.Count, dashboard.SystemErrors.Count());
+            Assert.IsNotNull(dashboard.Settings);
+            Assert.AreEqual(dashboardSettings, dashboard.Settings);
 
             systemErrors.ForEach(systemError => Assert.IsTrue(dashboard.SystemErrors.Contains(systemError)));
         }

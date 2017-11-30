@@ -25,6 +25,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
             Assert.IsFalse(sut.SystemErrors.Any());
         }
         
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectSettingsEqualToNull()
+        {
+            IDashboard sut = CreateSut();
+
+            Assert.IsNull(sut.Settings);
+        }
+        
         private IDashboard CreateSut()
         {
             return new OSDevGrp.MyDashboard.Core.Models.Dashboard();

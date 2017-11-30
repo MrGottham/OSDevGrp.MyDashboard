@@ -16,20 +16,35 @@ namespace OSDevGrp.MyDashboard.Web.Factories
 
         private readonly IViewModelBuilder<InformationViewModel, INews> _newsToInformationViewModelBuilder;
         private readonly IViewModelBuilder<SystemErrorViewModel, ISystemError> _systemErrorViewModelBuilder;
+        private readonly IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> _dashboardSettingsViewModelBuilder;
         private readonly IHtmlHelper _htmlHelper;
 
         #endregion
 
         #region Constructor
 
-        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IHtmlHelper htmlHelper)
+        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IHtmlHelper htmlHelper)
         {
-            if (newsToInformationViewModelBuilder == null) throw new ArgumentNullException(nameof(newsToInformationViewModelBuilder));
-            if (systemErrorViewModelBuilder == null) throw new ArgumentNullException(nameof(systemErrorViewModelBuilder));
-            if (htmlHelper == null) throw new ArgumentNullException(nameof(htmlHelper));
+            if (newsToInformationViewModelBuilder == null) 
+            {
+                throw new ArgumentNullException(nameof(newsToInformationViewModelBuilder));
+            }
+            if (systemErrorViewModelBuilder == null) 
+            {
+                throw new ArgumentNullException(nameof(systemErrorViewModelBuilder));
+            }
+            if (dashboardSettingsViewModelBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardSettingsViewModelBuilder));
+            }
+            if (htmlHelper == null)
+            {
+                throw new ArgumentNullException(nameof(htmlHelper));
+            }
 
             _newsToInformationViewModelBuilder = newsToInformationViewModelBuilder;
             _systemErrorViewModelBuilder = systemErrorViewModelBuilder;
+            _dashboardSettingsViewModelBuilder = dashboardSettingsViewModelBuilder;
             _htmlHelper = htmlHelper;
         }
 
@@ -41,6 +56,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         {
             IList<InformationViewModel> informationViewModels = new List<InformationViewModel>();
             IList<SystemErrorViewModel> systemErrorViewModels = new List<SystemErrorViewModel>();
+            DashboardSettingsViewModel dashboardSettingsViewModel = null;
             object syncRoot = new object();
 
             try
@@ -55,7 +71,12 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                     GenerateSystemErrorViewModelBuilderTaskArray,
                     systemErrorViewModel => AddSystemErrorViewModel(systemErrorViewModel, systemErrorViewModels, syncRoot),
                     exception => HandleException(exception, systemErrorViewModels, syncRoot));
-                Task.WaitAll(new [] {handleInformationViewModelsTask, handleSystemErrorViewModelsTask});
+                Task handleDashboardSettingsViewModelTask = HandleAsync<DashboardSettingsViewModel>(
+                    dashboard,
+                    GenerateDashboardSettingsViewModelBuilderTaskArray,
+                    viewModel => dashboardSettingsViewModel = viewModel,
+                    exception => HandleException(exception, systemErrorViewModels, syncRoot));
+                Task.WaitAll(new [] {handleInformationViewModelsTask, handleSystemErrorViewModelsTask, handleDashboardSettingsViewModelTask});
             }
             catch (Exception ex)
             {
@@ -65,7 +86,8 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             return new DashboardViewModel
             {
                 Informations = informationViewModels.OrderByDescending(informationViewModel => informationViewModel.Timestamp),
-                SystemErrors = systemErrorViewModels.OrderByDescending(systemErrorViewModel => systemErrorViewModel.Timestamp)
+                SystemErrors = systemErrorViewModels.OrderByDescending(systemErrorViewModel => systemErrorViewModel.Timestamp),
+                Settings = dashboardSettingsViewModel
             };
         }
 
@@ -101,6 +123,21 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             return dashboard.SystemErrors
                 .Select(systemError => _systemErrorViewModelBuilder.BuildAsync(systemError))
                 .ToArray();
+        }
+
+        private Task<DashboardSettingsViewModel>[] GenerateDashboardSettingsViewModelBuilderTaskArray(IDashboard dashboard)
+        {
+            if (dashboard == null)
+            {
+                throw new ArgumentNullException(nameof(dashboard));
+            }
+
+            if (dashboard.Settings == null)
+            {
+                return new Task<DashboardSettingsViewModel>[0];
+            }
+
+            return new[] {_dashboardSettingsViewModelBuilder.BuildAsync(dashboard.Settings)};
         }
 
         private Task HandleAsync<TViewModel>(IDashboard dashboard, Func<IDashboard, Task<TViewModel>[]> taskArrayGenerator, Action<TViewModel> resultHandler, Action<Exception> exceptionHandler) where TViewModel : IViewModel

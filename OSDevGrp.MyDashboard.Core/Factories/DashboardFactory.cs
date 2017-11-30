@@ -74,6 +74,8 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 }
                 finally
                 {
+                    dashboard.Replace(dashboardSettings);
+                    
                     IEnumerable<ISystemError> systemErrors = await _systemErrorLogic.GetSystemErrorsAsync();
                     dashboard.Replace(systemErrors.OrderByDescending(systemError => systemError.Timestamp));
                 }

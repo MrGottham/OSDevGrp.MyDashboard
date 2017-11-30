@@ -70,6 +70,30 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
             Assert.IsTrue(sut.SystemErrors.All(systemError => systemErrors.Contains(systemError)));
         }
         
+        [TestMethod]
+        [ExpectedArgumentNullException("settings")]
+        public void Replace_WhenCalledWithDashboardSettingsEqualToNull_ThrowsArgumentNullExcpetion()
+        {
+            const IDashboardSettings dashboardSettings = null;
+
+            IDashboard sut = CreateSut();
+
+            sut.Replace(dashboardSettings);
+        }
+        
+        [TestMethod]
+        public void Replace_WhenCalledWithDashboardSettingsNotEqualToNull_ExpectedReplacedDashboardSettings()
+        {
+            IDashboardSettings dashboardSettings = new Mock<IDashboardSettings>().Object;
+
+            IDashboard sut = CreateSut();
+
+            sut.Replace(dashboardSettings);
+
+            Assert.IsNotNull(sut.Settings);
+            Assert.AreEqual(dashboardSettings, sut.Settings);
+        }
+        
         private IDashboard CreateSut()
         {
             return new OSDevGrp.MyDashboard.Core.Models.Dashboard();

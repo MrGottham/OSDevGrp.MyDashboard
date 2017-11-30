@@ -11,6 +11,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
 
         private IList<INews> _news = new List<INews>();
         private IList<ISystemError> _systemErrors = new List<ISystemError>();
+        private IDashboardSettings _settings;
 
         #endregion
 
@@ -29,6 +30,14 @@ namespace OSDevGrp.MyDashboard.Core.Models
             get
             {
                 return _systemErrors;
+            }
+        }
+
+        public IDashboardSettings Settings
+        {
+            get
+            {
+                return _settings;
             }
         }
 
@@ -54,6 +63,16 @@ namespace OSDevGrp.MyDashboard.Core.Models
             }
 
             _systemErrors = systemErrors.ToList();
+        }
+
+        public void Replace(IDashboardSettings settings)
+        {
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+            
+            _settings = settings;
         }
 
         #endregion
