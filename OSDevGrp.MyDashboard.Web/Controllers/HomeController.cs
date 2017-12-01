@@ -46,7 +46,8 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
         {
             IDashboardSettings dashboardSettings = new DashboardSettings
             {
-                NumberOfNews = 100
+                NumberOfNews = 100,
+                UseReddit = false
             };
             return GenerateDashboardView(dashboardSettings);
         }

@@ -14,6 +14,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.DashboardSettings
             Assert.AreEqual(50, sut.NumberOfNews);
         }
         
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectUseRedditEqualToFalse()
+        {
+            IDashboardSettings sut = CreateSut();
+
+            Assert.IsFalse(sut.UseReddit);
+        }
+        
         private IDashboardSettings CreateSut()
         {
             return new OSDevGrp.MyDashboard.Core.Models.DashboardSettings();

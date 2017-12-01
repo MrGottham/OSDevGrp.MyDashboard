@@ -13,6 +13,9 @@ namespace OSDevGrp.MyDashboard.Web.Models
         [Range(0, 250)]
         [Display(Name="Number of news", ShortName="News", Description="Number of news to receive")]
         public int NumberOfNews { get; set; }
+        
+        [Display(Name="Use Reddit", ShortName="Reddit", Description="Collection data from Reddit")]
+        public bool UseReddit { get; set; }
 
         #endregion
 
@@ -22,7 +25,8 @@ namespace OSDevGrp.MyDashboard.Web.Models
         {
             return new DashboardSettings()
             {
-                NumberOfNews = NumberOfNews
+                NumberOfNews = NumberOfNews,
+                UseReddit = UseReddit
             };
         }
 

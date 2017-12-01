@@ -9,6 +9,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
         public DashboardSettings()
         {
             NumberOfNews = 50;
+            UseReddit = false;
         }
 
         #endregion
@@ -16,6 +17,8 @@ namespace OSDevGrp.MyDashboard.Core.Models
         #region Properties
 
         public int NumberOfNews { get; set; }
+
+        public bool UseReddit { get; set; }
 
         #endregion
     }
