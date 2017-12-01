@@ -107,16 +107,8 @@
     <div class="col-md-3">
         <div class="panel-group">
             <div class="panel panel-primary">
-                <div class="panel-heading">My Dashboard</div>
-                <div class="panel-body"><p>Content information</p></div>
-            </div>
-            <div class="panel panel-primary">
-                <div class="panel-heading">My Dashboard</div>
-                <div class="panel-body"><p>Content information</p></div>
-            </div>
-            <div class="panel panel-primary">
-                <div class="panel-heading">My Dashboard</div>
-                <div class="panel-body"><p>Content information</p></div>
+                <div class="panel-heading">Settings</div>
+                <div class="panel-body">@Html.Partial("_DashboardSettings", Model.Settings)</div>
             </div>
         </div>
         @if (Model.SystemErrors != null && Model.SystemErrors.Any())
@@ -147,3 +139,8 @@
         }
     </div>
 </div>
+
+@section Scripts
+{
+    @Html.Partial("_ValidationScriptsPartial")
+}

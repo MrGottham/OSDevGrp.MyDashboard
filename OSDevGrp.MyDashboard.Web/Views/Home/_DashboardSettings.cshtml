@@ -1,0 +1,10 @@
+@using OSDevGrp.MyDashboard.Web.Models;
+@model DashboardSettingsViewModel;
+
+<form asp-controller="Home" asp-action="Commit" method="post">
+    <div class="form-group">
+        <label asp-for="NumberOfNews" class="control-label"></label>
+        <input asp-for="NumberOfNews" class="form-control" />
+        <span asp-validation-for="NumberOfNews" class="text-danger"></span>
+    </div>
+</form>
