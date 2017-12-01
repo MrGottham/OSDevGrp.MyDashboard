@@ -19,12 +19,12 @@
                 </ol>
                 <div class="carousel-inner" role="listbox">
                     <div class="item active">
-                        @Html.Partial("_CarouselInformation", @Model.InformationsWithImageUrl.ElementAt(0))
+                        @Html.Partial("_CarouselInformationPartial", @Model.InformationsWithImageUrl.ElementAt(0))
                     </div>
                     @for (int elementNo = 1; elementNo < Math.Min(7, Model.InformationsWithImageUrl.Count()); elementNo++)
                     {
                         <div class="item">
-                            @Html.Partial("_CarouselInformation", @Model.InformationsWithImageUrl.ElementAt(elementNo))
+                            @Html.Partial("_CarouselInformationPartial", @Model.InformationsWithImageUrl.ElementAt(elementNo))
                         </div>
                     }
                 </div>
@@ -81,7 +81,7 @@
                     <div class="panel-group">
                         @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
                         {
-                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo))
+                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
                         }
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                     <div class="panel-group">
                         @for (int elementNo = 1; elementNo < Model.Informations.Count(); elementNo += 3)
                         {
-                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo))
+                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
                         }
                     </div>
                 </div>
@@ -97,7 +97,7 @@
                     <div class="panel-group">
                         @for (int elementNo = 2; elementNo < Model.Informations.Count(); elementNo += 3)
                         {
-                            @Html.Partial("_Information", @Model.Informations.ElementAt(elementNo))
+                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
                         }
                     </div>
                 </div>
@@ -108,7 +108,7 @@
         <div class="panel-group">
             <div class="panel panel-primary">
                 <div class="panel-heading">Settings</div>
-                <div class="panel-body">@Html.Partial("_DashboardSettings", Model.Settings)</div>
+                <div class="panel-body">@Html.Partial("_DashboardSettingsPartial", Model.Settings)</div>
             </div>
         </div>
         @if (Model.SystemErrors != null && Model.SystemErrors.Any())

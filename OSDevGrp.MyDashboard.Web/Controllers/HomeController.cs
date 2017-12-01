@@ -44,29 +44,28 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         public IActionResult Index()
         {
-            try
+            IDashboardSettings dashboardSettings = new DashboardSettings
             {
-                IDashboardSettings dashboardSettings = new DashboardSettings
-                {
-                    NumberOfNews = 100
-                };
-                Task<IDashboard> buildDashboardTask = _dashboardFactory.BuildAsync(dashboardSettings);
-                buildDashboardTask.Wait();
+                NumberOfNews = 100
+            };
+            return GenerateDashboardView(dashboardSettings);
+        }
 
-                Task<DashboardViewModel> buildDashboardViewModelTask = _dashboardViewModelBuilder.BuildAsync(buildDashboardTask.Result);
-                buildDashboardViewModelTask.Wait();
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Commit(DashboardSettingsViewModel dashboardSettingsViewModel)
+        {
+            if (dashboardSettingsViewModel == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardSettingsViewModel));
+            }
 
-                return View("Index", buildDashboardViewModelTask.Result);
-            }
-            catch (AggregateException aggregateException)
+            if (ModelState.IsValid == false)
             {
-                aggregateException.Handle(ex => true);
-                throw;
+                return RedirectToAction("Index", "HomeController");
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            
+            return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
         }
 
         [HttpPost]
@@ -85,6 +84,34 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private IActionResult GenerateDashboardView(IDashboardSettings dashboardSettings)
+        {
+            if (dashboardSettings == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardSettings));
+            }
+
+            try
+            {
+                Task<IDashboard> buildDashboardTask = _dashboardFactory.BuildAsync(dashboardSettings);
+                buildDashboardTask.Wait();
+
+                Task<DashboardViewModel> buildDashboardViewModelTask = _dashboardViewModelBuilder.BuildAsync(buildDashboardTask.Result);
+                buildDashboardViewModelTask.Wait();
+
+                return View("Index", buildDashboardViewModelTask.Result);
+            }
+            catch (AggregateException aggregateException)
+            {
+                aggregateException.Handle(ex => true);
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         #endregion
