@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
@@ -16,6 +17,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
         private Mock<IDashboardFactory> _dashboardFactoryMock;
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
+        private Mock<IConfiguration> _configurationMock;
 
         #endregion
 
@@ -24,6 +26,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             _dashboardFactoryMock = new Mock<IDashboardFactory>();
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
+            _configurationMock = new Mock<IConfiguration>();
         }
 
         [TestMethod]
@@ -79,7 +82,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             
             return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
-                _dashboardViewModelBuilderMock.Object
+                _dashboardViewModelBuilderMock.Object,
+                _configurationMock.Object
             );
         }
 

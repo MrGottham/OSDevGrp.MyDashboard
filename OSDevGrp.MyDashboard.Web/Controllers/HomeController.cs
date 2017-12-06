@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
@@ -18,12 +19,13 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         private readonly IDashboardFactory _dashboardFactory;
         private readonly IViewModelBuilder<DashboardViewModel, IDashboard> _dashboardViewModelBuilder;
+        private readonly IConfiguration _configuration;
 
         #endregion
 
         #region Constructor
 
-        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder)
+        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IConfiguration configuration)
         {
             if (dashboardFactory == null)
             {
@@ -33,9 +35,14 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 throw new ArgumentNullException(nameof(dashboardViewModelBuilder));
             }
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
 
             _dashboardFactory = dashboardFactory;
             _dashboardViewModelBuilder = dashboardViewModelBuilder;
+            _configuration = configuration;
         }
 
         #endregion
