@@ -2,11 +2,16 @@
 @model DashboardSettingsViewModel;
 
 <form asp-controller="Home" asp-action="Commit" method="post">
-    <div class="form-group">
+    <fieldset class="form-group">
         <label asp-for="NumberOfNews" class="control-label"></label>
         <input asp-for="NumberOfNews" class="form-control" />
         <span asp-validation-for="NumberOfNews" class="text-danger"></span>
-    </div>
+    </fieldset>
+    <fieldset class="form-group">
+        <div class="checkbox">
+            <label class="control-label"><input asp-for="UseReddit" />@Html.NameFor(m => m.UseReddit)</label>
+        </div>
+    </fieldset>
     <div class="text-center">
         <div class="btn-group">
             <button type="submit" class="btn btn-primary">Commit</button>

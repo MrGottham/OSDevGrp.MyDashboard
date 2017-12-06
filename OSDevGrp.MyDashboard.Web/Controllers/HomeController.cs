@@ -65,6 +65,11 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 return RedirectToAction("Index", "HomeController");
             }
+
+            if (dashboardSettingsViewModel.UseReddit)
+            {
+                return null;
+            }
             
             return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
         }

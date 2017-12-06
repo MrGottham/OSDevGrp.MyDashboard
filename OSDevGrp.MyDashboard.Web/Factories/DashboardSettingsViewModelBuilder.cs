@@ -12,7 +12,8 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         {
             return new DashboardSettingsViewModel
             {
-                NumberOfNews = dashboardSettings.NumberOfNews
+                NumberOfNews = dashboardSettings.NumberOfNews,
+                UseReddit = dashboardSettings.UseReddit
             };
         }
 

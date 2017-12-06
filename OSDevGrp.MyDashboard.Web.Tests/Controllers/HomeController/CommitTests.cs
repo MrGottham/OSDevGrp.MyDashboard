@@ -40,10 +40,49 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalled_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public void Commit_WhenCalledWithUseOfReddit_AssertBuildAsyncWasNotCalledOnDashboardFactory()
+        {
+            const bool useReddit = true;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.IsAny<IDashboardSettings>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithUseOfReddit_AssertBuildAsyncWasNotCalledOnDashboardViewModelBuilder()
+        {
+            const bool useReddit = true;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.IsAny<IDashboard>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void Called_WhenCalledWithUseOfReddit_ReturnsNull()
+        {
+            const bool useReddit = true;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            IActionResult result = sut.Commit(dashboardSettingsViewModel);
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithoutUseOfReddit_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews);
+            const bool useReddit = false;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
@@ -57,9 +96,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalled_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public void Commit_WhenCalledWithoutUseOfReddit_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
         {
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel();
+            const bool useReddit = false;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
 
             IDashboard dashboard = CreateDashboard();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
@@ -70,9 +110,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Called_WhenCalled_ReturnsViewWithDashboardViewModel()
+        public void Called_WhenCalledWithoutUseOfReddit_ReturnsViewWithDashboardViewModel()
         {
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel();
+            const bool useReddit = false;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
 
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
@@ -103,11 +144,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             );
         }
 
-        private DashboardSettingsViewModel CreateDashboardSettingsViewModel(int? numberOfNews = null)
+        private DashboardSettingsViewModel CreateDashboardSettingsViewModel(int? numberOfNews = null, bool? useReddit = null)
         {
             return new DashboardSettingsViewModel
             {
-                NumberOfNews = numberOfNews ?? _random.Next(25, 50)
+                NumberOfNews = numberOfNews ?? _random.Next(25, 50),
+                UseReddit = useReddit ?? _random.Next(100) > 50
             };
         }
  

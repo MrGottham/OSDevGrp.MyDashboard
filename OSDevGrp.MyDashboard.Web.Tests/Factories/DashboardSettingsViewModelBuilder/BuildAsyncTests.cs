@@ -47,10 +47,24 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertUseRedditWasCalledOnDashboardSettings()
+        {
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
+            buildTask.Wait();
+
+            dashboardSettingsMock.Verify(m => m.UseReddit, Times.Once());
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_ReturnsInitializedDashboardSettingsViewModel()
         {
             int numberOfNews = _random.Next(25, 50);
-            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews);
+            bool useReddit = _random.Next(100) > 50;
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews, useReddit);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
@@ -60,6 +74,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
             DashboardSettingsViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
+            Assert.AreEqual(useReddit, result.UseReddit);
         }
 
         private IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> CreateSut()
@@ -67,16 +82,18 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
             return new OSDevGrp.MyDashboard.Web.Factories.DashboardSettingsViewModelBuilder();
         }
 
-        private IDashboardSettings CreateDashboardSettings(int? numberOfNews = null)
+        private IDashboardSettings CreateDashboardSettings(int? numberOfNews = null, bool? useReddit = null)
         {
-            return CreateDashboardSettingsMock(numberOfNews).Object;
+            return CreateDashboardSettingsMock(numberOfNews, useReddit).Object;
         }
 
-        private Mock<IDashboardSettings> CreateDashboardSettingsMock(int? numberOfNews = null)
+        private Mock<IDashboardSettings> CreateDashboardSettingsMock(int? numberOfNews = null, bool? useReddit = null)
         {
             Mock<IDashboardSettings> dashboardSettingsMock = new Mock<IDashboardSettings>();
             dashboardSettingsMock.Setup(m => m.NumberOfNews)
                 .Returns(numberOfNews ?? _random.Next(25, 50));
+            dashboardSettingsMock.Setup(m => m.UseReddit)
+                .Returns(useReddit ?? _random.Next(100) > 50);
             return dashboardSettingsMock;
         }
     }
