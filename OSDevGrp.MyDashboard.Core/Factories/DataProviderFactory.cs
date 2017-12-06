@@ -25,6 +25,16 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             return Task.Run(() => newsProviders);
         }
 
+        public Task<Uri> AcquireRedditAccessTokenAsync(string clientId, string state, Uri redirectUri)
+        {
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new ArgumentNullException(nameof(clientId));
+            }
+
+            throw new NotImplementedException();
+        }
+
         #endregion 
     }
 }
