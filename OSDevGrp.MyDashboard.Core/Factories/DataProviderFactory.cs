@@ -31,8 +31,16 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             {
                 throw new ArgumentNullException(nameof(clientId));
             }
+            if (string.IsNullOrWhiteSpace(state))
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+            if (redirectUri == null)
+            {
+                throw new ArgumentNullException(nameof(redirectUri));
+            }
 
-            throw new NotImplementedException();
+            return Task.Run(() => new Uri($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsolutePath}&duration=permanent&scope=identity"));
         }
 
         #endregion 

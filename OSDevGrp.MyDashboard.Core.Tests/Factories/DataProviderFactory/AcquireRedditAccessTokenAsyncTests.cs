@@ -62,6 +62,87 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
             sut.AcquireRedditAccessTokenAsync(clientId, state, redirectUri);
         }
 
+        [TestMethod]
+        [ExpectedArgumentNullException("state")]
+        public void AcquireRedditAccessTokenAsync_WhenStateIsNull_ThrowsArgumentNullException()
+        {
+            string clientId = Guid.NewGuid().ToString("D");
+            const string state = null;
+            Uri redirectUri = new Uri($"http://localhost/{clientId}");
+
+            IDataProviderFactory sut = CreateSut();
+
+            sut.AcquireRedditAccessTokenAsync(clientId, state, redirectUri);
+        }
+
+        [TestMethod]
+        [ExpectedArgumentNullException("state")]
+        public void AcquireRedditAccessTokenAsync_WhenStateIsEmpty_ThrowsArgumentNullException()
+        {
+            string clientId = Guid.NewGuid().ToString("D");
+            string state = string.Empty;
+            Uri redirectUri = new Uri($"http://localhost/{clientId}");
+
+            IDataProviderFactory sut = CreateSut();
+
+            sut.AcquireRedditAccessTokenAsync(clientId, state, redirectUri);
+        }
+
+        [TestMethod]
+        [ExpectedArgumentNullException("state")]
+        public void AcquireRedditAccessTokenAsync_WhenStateIsWhitespace_ThrowsArgumentNullException()
+        {
+            string clientId = Guid.NewGuid().ToString("D");
+            const string state = " ";
+            Uri redirectUri = new Uri($"http://localhost/{clientId}");
+
+            IDataProviderFactory sut = CreateSut();
+
+            sut.AcquireRedditAccessTokenAsync(clientId, state, redirectUri);
+        }
+
+        [TestMethod]
+        [ExpectedArgumentNullException("state")]
+        public void AcquireRedditAccessTokenAsync_WhenStateIsWhitespaces_ThrowsArgumentNullException()
+        {
+            string clientId = Guid.NewGuid().ToString("D");
+            const string state = "  ";
+            Uri redirectUri = new Uri($"http://localhost/{clientId}");
+
+            IDataProviderFactory sut = CreateSut();
+
+            sut.AcquireRedditAccessTokenAsync(clientId, state, redirectUri);
+        }
+
+        [TestMethod]
+        [ExpectedArgumentNullException("redirectUri")]
+        public void AcquireRedditAccessTokenAsync_WhenRedirectUrlIsNull_ThrowsArgumentNullException()
+        {
+            string clientId = Guid.NewGuid().ToString("D");
+            string state = Guid.NewGuid().ToString("D");
+            const Uri redirectUri = null;
+
+            IDataProviderFactory sut = CreateSut();
+
+            sut.AcquireRedditAccessTokenAsync(clientId, state, redirectUri);
+        }
+
+        [TestMethod]
+        public void AcquireRedditAccessTokenAsync_WhenCalled_ReturnsUriForAcquiringRedditAccessToken()
+        {
+            string clientId = Guid.NewGuid().ToString("D");
+            string state = Guid.NewGuid().ToString("D");
+            Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
+
+            IDataProviderFactory sut = CreateSut();
+
+            Task<Uri> acquireRedditAccessTokenTask = sut.AcquireRedditAccessTokenAsync(clientId, state, redirectUri);
+            acquireRedditAccessTokenTask.Wait();
+
+            Assert.IsNotNull(acquireRedditAccessTokenTask.Result);
+            Assert.AreEqual($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsolutePath}&duration=permanent&scope=identity", acquireRedditAccessTokenTask.Result.AbsoluteUri);
+        }
+
         private IDataProviderFactory CreateSut()
         {
             return new OSDevGrp.MyDashboard.Core.Factories.DataProviderFactory();
