@@ -43,6 +43,19 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
+        public void Commit_WhenCalledWithUseOfReddit_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
+        {
+            const bool useReddit = true;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Once);
+        }
+
+        [TestMethod]
         public void Commit_WhenCalledWithUseOfReddit_AssertBuildAsyncWasNotCalledOnDashboardFactory()
         {
             const bool useReddit = true;
@@ -78,6 +91,19 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             IActionResult result = sut.Commit(dashboardSettingsViewModel);
             Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithoutUseOfReddit_AssertAuthenticationRedditClientIdWasNotCalledOnConfiguration()
+        {
+            const bool useReddit = false;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Never);
         }
 
         [TestMethod]
@@ -133,13 +159,16 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.AreEqual(dashboardViewModel, viewResult.Model);
         }
 
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null)
+        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null, string redditClientId = null)
         {
             _dashboardFactoryMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
                 .Returns(Task.Run<IDashboard>(() => dashboard ?? CreateDashboard()));
 
             _dashboardViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IDashboard>()))
                 .Returns(Task.Run<DashboardViewModel>(() => dashboardViewModel ?? new DashboardViewModel()));
+
+            _configurationMock.Setup(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)])
+                .Returns<string>(value => redditClientId ?? Guid.NewGuid().ToString("D"));
             
             return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,

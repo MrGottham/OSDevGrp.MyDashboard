@@ -75,6 +75,8 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             if (dashboardSettingsViewModel.UseReddit)
             {
+                string clientId = _configuration["Authentication:Reddit:ClientId"];
+                
                 return null;
             }
             
