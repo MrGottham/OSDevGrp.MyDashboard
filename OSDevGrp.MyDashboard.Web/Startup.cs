@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
@@ -37,6 +38,7 @@ namespace OSDevGrp.MyDashboard.Web
         {
             // Adds dependencies for the infrastructure. 
             services.AddTransient<IExceptionHandler, ExceptionHandler>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Adds dependencies for the repositories.
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
             services.AddTransient<INewsRepository, NewsRepository>();

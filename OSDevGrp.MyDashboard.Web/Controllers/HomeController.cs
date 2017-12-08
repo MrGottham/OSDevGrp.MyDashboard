@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
@@ -19,13 +20,15 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         private readonly IDashboardFactory _dashboardFactory;
         private readonly IViewModelBuilder<DashboardViewModel, IDashboard> _dashboardViewModelBuilder;
+        private readonly IDataProviderFactory _dataProviderFactory;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         #endregion
 
         #region Constructor
 
-        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IConfiguration configuration)
+        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IDataProviderFactory dataProviderFactory, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             if (dashboardFactory == null)
             {
@@ -35,14 +38,24 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 throw new ArgumentNullException(nameof(dashboardViewModelBuilder));
             }
+            if (dataProviderFactory == null)
+            {
+                throw new ArgumentNullException(nameof(dataProviderFactory));
+            }
             if (configuration == null)
             {
                 throw new ArgumentNullException(nameof(configuration));
             }
+            if (httpContextAccessor == null)
+            {
+                throw new ArgumentNullException(nameof(httpContextAccessor));
+            }
 
             _dashboardFactory = dashboardFactory;
             _dashboardViewModelBuilder = dashboardViewModelBuilder;
+            _dataProviderFactory = dataProviderFactory;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         #endregion
@@ -75,9 +88,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             if (dashboardSettingsViewModel.UseReddit)
             {
-                string clientId = _configuration["Authentication:Reddit:ClientId"];
-                
-                return null;
+                return AcquireRedditAccessToken(dashboardSettingsViewModel, _httpContextAccessor.HttpContext);
             }
             
             return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
@@ -117,6 +128,39 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
                 buildDashboardViewModelTask.Wait();
 
                 return View("Index", buildDashboardViewModelTask.Result);
+            }
+            catch (AggregateException aggregateException)
+            {
+                aggregateException.Handle(ex => true);
+                throw;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private IActionResult AcquireRedditAccessToken(DashboardSettingsViewModel dashboardSettingsViewModel, HttpContext httpContext)
+        {
+            if (dashboardSettingsViewModel == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardSettingsViewModel));
+            }
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
+            try
+            {
+                string clientId = _configuration["Authentication:Reddit:ClientId"];
+                string dashboardSettingsViewModelAsBase64 = dashboardSettingsViewModel.ToBase64();
+                Uri redirectUrl = new Uri($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/Home/RedditCallback");
+
+                Task<Uri> acquireRedditAccessTokenTask = _dataProviderFactory.AcquireRedditAccessTokenAsync(clientId, dashboardSettingsViewModelAsBase64, redirectUrl);
+                acquireRedditAccessTokenTask.Wait();
+                
+                return Redirect(acquireRedditAccessTokenTask.Result.AbsoluteUri);
             }
             catch (AggregateException aggregateException)
             {

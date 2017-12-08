@@ -140,7 +140,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
             acquireRedditAccessTokenTask.Wait();
 
             Assert.IsNotNull(acquireRedditAccessTokenTask.Result);
-            Assert.AreEqual($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsolutePath}&duration=permanent&scope=identity", acquireRedditAccessTokenTask.Result.AbsoluteUri);
+            Assert.AreEqual($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope=identity", acquireRedditAccessTokenTask.Result.AbsoluteUri);
         }
 
         private IDataProviderFactory CreateSut()

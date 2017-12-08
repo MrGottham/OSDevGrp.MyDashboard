@@ -40,7 +40,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 throw new ArgumentNullException(nameof(redirectUri));
             }
 
-            return Task.Run(() => new Uri($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsolutePath}&duration=permanent&scope=identity"));
+            return Task.Run(() => new Uri($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope=identity"));
         }
 
         #endregion 
