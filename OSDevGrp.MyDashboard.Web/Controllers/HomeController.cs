@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
@@ -21,6 +22,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
         private readonly IDashboardFactory _dashboardFactory;
         private readonly IViewModelBuilder<DashboardViewModel, IDashboard> _dashboardViewModelBuilder;
         private readonly IDataProviderFactory _dataProviderFactory;
+        private readonly IExceptionHandler _exceptionHandler;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -28,7 +30,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         #region Constructor
 
-        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IDataProviderFactory dataProviderFactory, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IDataProviderFactory dataProviderFactory, IExceptionHandler exceptionHandler, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             if (dashboardFactory == null)
             {
@@ -42,6 +44,10 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 throw new ArgumentNullException(nameof(dataProviderFactory));
             }
+            if (exceptionHandler == null)
+            {
+                throw new ArgumentNullException(nameof(exceptionHandler));
+            }
             if (configuration == null)
             {
                 throw new ArgumentNullException(nameof(configuration));
@@ -54,6 +60,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             _dashboardFactory = dashboardFactory;
             _dashboardViewModelBuilder = dashboardViewModelBuilder;
             _dataProviderFactory = dataProviderFactory;
+            _exceptionHandler = exceptionHandler;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -152,16 +159,12 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             }
             catch (AggregateException aggregateException)
             {
-                Exception exceptionToThrow = null;
-                aggregateException.Handle(ex => 
-                {
-                    exceptionToThrow = ex;
-                    return true;
-                });
-                throw exceptionToThrow;
+                _exceptionHandler.HandleAsync(aggregateException).Wait();
+                throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _exceptionHandler.HandleAsync(ex).Wait();
                 throw;
             }
         }
@@ -190,17 +193,13 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             }
             catch (AggregateException aggregateException)
             {
-                Exception exceptionToThrow = null;
-                aggregateException.Handle(ex => 
-                {
-                    exceptionToThrow = ex;
-                    return true;
-                });
-                throw exceptionToThrow;
+                _exceptionHandler.HandleAsync(aggregateException).Wait();
+                return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                _exceptionHandler.HandleAsync(ex).Wait();
+                return null;
             }
         }
 

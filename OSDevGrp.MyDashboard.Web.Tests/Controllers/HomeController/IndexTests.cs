@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Models;
@@ -19,6 +21,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         private Mock<IDashboardFactory> _dashboardFactoryMock;
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
         private Mock<IDataProviderFactory> _dataProviderFactoryMock;
+        private Mock<IExceptionHandler> _exceptionHandlerMock;
         private Mock<IConfiguration> _configurationMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
 
@@ -30,6 +33,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardFactoryMock = new Mock<IDashboardFactory>();
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
             _dataProviderFactoryMock = new Mock<IDataProviderFactory>();
+            _exceptionHandlerMock = new Mock<IExceptionHandler>();
             _configurationMock = new Mock<IConfiguration>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
         }
@@ -60,6 +64,17 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
+        public void Index_WhenCalled_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        {
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Index();
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
+        }
+
+        [TestMethod]
         public void Index_WhenCalled_ReturnsViewWithDashboardViewModel()
         {
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
@@ -77,18 +92,86 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.AreEqual(dashboardViewModel, viewResult.Model);
         }
 
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null)
+        [TestMethod]
+        public void Index_WhenCalledAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
-            _dashboardFactoryMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
-                .Returns(Task.Run<IDashboard>(() => dashboard ?? BuildDashboard()));
+            AggregateException aggregateException = new AggregateException();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
+
+            try
+            {
+                sut.Index();
+            }
+            catch (Exception)
+            {
+            }
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(AggregateException), "My AggregateException")]
+        public void Index_WhenCalledAndAggregateExceptionOccurs_ThrowsAggregateException()
+        {
+            AggregateException aggregateException = new AggregateException("My AggregateException");
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
+
+            sut.Index();
+        }
+
+        [TestMethod]
+        public void Index_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        {
+            Exception exception = new Exception();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
+
+            try
+            {
+                sut.Index();
+            }
+            catch (Exception)
+            {
+            }
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception), "My Exception")]
+        public void Index_WhenCalledAndExceptionOccurs_ThrowsException()
+        {
+            Exception exception = new Exception("My Exception");
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
+
+            sut.Index();
+        }
+
+        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null, Exception exception = null)
+        {
+            if (exception != null)
+            {
+                _dashboardFactoryMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
+                    .Throws(exception);
+            }
+            else
+            {
+                _dashboardFactoryMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
+                    .Returns(Task.Run<IDashboard>(() => dashboard ?? BuildDashboard()));
+            }
 
             _dashboardViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IDashboard>()))
                 .Returns(Task.Run<DashboardViewModel>(() => dashboardViewModel ?? new DashboardViewModel()));
+
+            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<AggregateException>()))
+                .Returns(Task.Run(() => { }));
+            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<Exception>()))
+                .Returns(Task.Run(() => { }));
             
             return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
                 _dataProviderFactoryMock.Object,
+                _exceptionHandlerMock.Object,
                 _configurationMock.Object,
                 _httpContextAccessorMock.Object);
         }
