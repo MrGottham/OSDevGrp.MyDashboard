@@ -94,6 +94,27 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
         }
 
+        public IActionResult RedditCallback(string code, string state, string error = null)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentNullException(nameof(code));
+            }
+            if (string.IsNullOrWhiteSpace(state))
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            if (string.IsNullOrWhiteSpace(error) == false)
+            {
+                return null;
+            }
+
+            IRedditAccessToken redditAccessToken = GetRedditAccessToken(code, _httpContextAccessor.HttpContext);
+
+            return null;
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult SystemError(SystemErrorViewModel systemErrorViewModel)
@@ -131,8 +152,13 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             }
             catch (AggregateException aggregateException)
             {
-                aggregateException.Handle(ex => true);
-                throw;
+                Exception exceptionToThrow = null;
+                aggregateException.Handle(ex => 
+                {
+                    exceptionToThrow = ex;
+                    return true;
+                });
+                throw exceptionToThrow;
             }
             catch (Exception)
             {
@@ -155,7 +181,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 string clientId = _configuration["Authentication:Reddit:ClientId"];
                 string dashboardSettingsViewModelAsBase64 = dashboardSettingsViewModel.ToBase64();
-                Uri redirectUrl = new Uri($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/Home/RedditCallback");
+                Uri redirectUrl = GetRedditCallbackUri(httpContext);
 
                 Task<Uri> acquireRedditAccessTokenTask = _dataProviderFactory.AcquireRedditAccessTokenAsync(clientId, dashboardSettingsViewModelAsBase64, redirectUrl);
                 acquireRedditAccessTokenTask.Wait();
@@ -164,13 +190,65 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             }
             catch (AggregateException aggregateException)
             {
-                aggregateException.Handle(ex => true);
-                throw;
+                Exception exceptionToThrow = null;
+                aggregateException.Handle(ex => 
+                {
+                    exceptionToThrow = ex;
+                    return true;
+                });
+                throw exceptionToThrow;
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        private IRedditAccessToken GetRedditAccessToken(string code, HttpContext httpContext)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                throw new ArgumentNullException(nameof(code));
+            }
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+            
+            try
+            {
+                string clientId = _configuration["Authentication:Reddit:ClientId"];
+                string clientSecret = _configuration["Authentication:Reddit:ClientSecret"];
+                Uri redirectUrl = GetRedditCallbackUri(httpContext);
+
+                Task<IRedditAccessToken> getRedditAccessTokenTask = _dataProviderFactory.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUrl);
+                getRedditAccessTokenTask.Wait();
+
+                return getRedditAccessTokenTask.Result;
+            }
+            catch (AggregateException aggregateException)
+            {
+                Exception exceptionToThrow = null;
+                aggregateException.Handle(ex => 
+                {
+                    exceptionToThrow = ex;
+                    return true;
+                });
+                throw exceptionToThrow;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private Uri GetRedditCallbackUri(HttpContext httpContext)
+        {
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+            return new Uri($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/Home/RedditCallback");
         }
 
         #endregion

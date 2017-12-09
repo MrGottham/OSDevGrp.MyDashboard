@@ -243,7 +243,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 .Returns(Task.Run<Uri>(() => acquireRedditAccessTokenUrl ?? new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}")));
 
             _configurationMock.Setup(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)])
-                .Returns<string>(value => redditClientId ?? Guid.NewGuid().ToString("D"));
+                .Returns(redditClientId ?? Guid.NewGuid().ToString("D"));
 
             HttpContext httpContext = new DefaultHttpContext();
             httpContext.Request.Scheme = "http";
