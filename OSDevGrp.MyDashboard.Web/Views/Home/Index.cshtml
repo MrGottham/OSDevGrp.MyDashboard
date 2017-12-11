@@ -119,7 +119,7 @@
                 {
                     <div class="panel panel-danger">
                         <div class="panel-heading">System error</div>
-                        <div class="panel-body"><p>@systemErrorViewModel.TruncatedMessage</p></div>
+                        <div class="panel-body"><p>@Html.Raw(systemErrorViewModel.TruncatedMessage)</p></div>
                         <div class="panel-footer">
                             <form asp-controller="Home" asp-action="SystemError" method="post">
                                 <input asp-for="@systemErrorViewModel.SystemErrorIdentifier" type="hidden" />
