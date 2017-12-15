@@ -31,7 +31,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             return Task.Run(() => newsProviders);
         }
 
-        public Task<Uri> AcquireRedditAccessTokenAsync(string clientId, string state, Uri redirectUri)
+        public Task<Uri> AcquireRedditAuthorizationTokenAsync(string clientId, string state, Uri redirectUri)
         {
             if (string.IsNullOrWhiteSpace(clientId))
             {
@@ -97,7 +97,12 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                         using (Stream stream = await httpResponseMessage.Content.ReadAsStreamAsync())
                         {
                             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RedditAccessToken));
-                            return (IRedditAccessToken) serializer.ReadObject(stream);
+                            RedditAccessToken redditAccessToken = (RedditAccessToken) serializer.ReadObject(stream);
+                            if (string.IsNullOrWhiteSpace(redditAccessToken.Error))
+                            {
+                                return redditAccessToken;
+                            }
+                            throw new Exception($"Unable to get the access token from Reddit: {redditAccessToken.Error}");
                         }
                     }
                 }

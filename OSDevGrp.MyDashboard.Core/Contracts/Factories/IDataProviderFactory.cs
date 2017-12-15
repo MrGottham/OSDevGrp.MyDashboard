@@ -9,7 +9,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Factories
     {
         Task<IEnumerable<INewsProvider>> BuildNewsProvidersAsync();
 
-        Task<Uri> AcquireRedditAccessTokenAsync(string clientId, string state, Uri redirectUri);
+        Task<Uri> AcquireRedditAuthorizationTokenAsync(string clientId, string state, Uri redirectUri);
 
         Task<IRedditAccessToken> GetRedditAccessTokenAsync(string clientId, string clientSecret, string code, Uri redirectUri);
     }

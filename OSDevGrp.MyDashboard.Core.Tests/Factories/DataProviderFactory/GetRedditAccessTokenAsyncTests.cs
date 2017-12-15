@@ -194,7 +194,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         }
 
         [TestMethod]
-        [ExpectedUnauthorizedAccessException("Unable to get the access token from Reddit.")]
+        [ExpectedAggregateException(typeof(UnauthorizedAccessException), "Unable to get the access token from Reddit.")]
         public void GetRedditAccessTokenAsync_WhenCalled_ThrowsUnauthorizedAccessException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -204,21 +204,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            try
-            {
-                Task<IRedditAccessToken> getRedditAccessTokenTask = sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
-                getRedditAccessTokenTask.Wait();
-            }
-            catch (AggregateException aggregateException)
-            {
-                Exception exceptionToThrow = null;
-                aggregateException.Handle(exception => 
-                {
-                    exceptionToThrow = exception;
-                    return true;
-                });
-                throw exceptionToThrow;
-            }
+            Task<IRedditAccessToken> getRedditAccessTokenTask = sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            getRedditAccessTokenTask.Wait();
         }
 
         private IDataProviderFactory CreateSut()

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -198,6 +199,78 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
+        public void RedditCallback_WhenCalledWithError_AssertHandleAsyncWasCalledOnExceptionHandlerMock()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+            string error = Guid.NewGuid().ToString("D");
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.RedditCallback(code, state, error);
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => string.Compare(value.Message, $"Unable to get the access token from Reddit: {error}", StringComparison.Ordinal) == 0)), Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithError_AssertBuildAsyncWasCalledOnDashboardFactory()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            int numberOfNews = _random.Next(25, 50);
+            const bool useReddit = true;
+            string state = CreateDashboardSettingsViewModel(numberOfNews: numberOfNews, useReddit: useReddit).ToBase64();
+            string error = Guid.NewGuid().ToString("D");
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.RedditCallback(code, state, error);
+
+            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
+                    dashboardSettings != null &&
+                    dashboardSettings.NumberOfNews == numberOfNews &&
+                    dashboardSettings.UseReddit == false)),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithError_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+            string error = Guid.NewGuid().ToString("D");
+
+            IDashboard dashboard = CreateDashboard();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
+
+            sut.RedditCallback(code, state, error);
+
+            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithError_ReturnsViewWithDashboardViewModel()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+            string error = Guid.NewGuid().ToString("D");
+
+            DashboardViewModel dashboardViewModel = new DashboardViewModel();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
+
+            IActionResult result = sut.RedditCallback(code, state, error);
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+
+            ViewResult viewResult = (ViewResult) result;
+            Assert.IsNotNull(viewResult);
+            Assert.IsNotNull(viewResult.ViewName);
+            Assert.AreEqual("Index", viewResult.ViewName);
+            Assert.IsNotNull(viewResult.Model);
+            Assert.AreEqual(dashboardViewModel, viewResult.Model);
+        }
+
+        [TestMethod]
         public void RedditCallback_WhenCalledWithoutError_AssertHttpContextWasCalledOnHttpContextAccessor()
         {
             string code = Guid.NewGuid().ToString("D");
@@ -256,11 +329,244 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 Times.Once);
         }
 
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(string redditClientId = null, string redditClientSecret = null, IRedditAccessToken redditAccessToken = null)
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutError_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
-            _dataProviderFactoryMock.Setup(m => m.GetRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>()))
-                .Returns(Task.Run<IRedditAccessToken>(() => redditAccessToken ?? new Mock<IRedditAccessToken>().Object));
+            string code = Guid.NewGuid().ToString("D");
+            int numberOfNews = _random.Next(25, 50);
+            const bool useReddit = true;
+            string state = CreateDashboardSettingsViewModel(numberOfNews: numberOfNews, useReddit: useReddit).ToBase64();
 
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.RedditCallback(code, state);
+
+            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
+                    dashboardSettings != null &&
+                    dashboardSettings.NumberOfNews == numberOfNews &&
+                    dashboardSettings.UseReddit == true)),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutError_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            IDashboard dashboard = CreateDashboard();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
+
+            sut.RedditCallback(code, state);
+
+            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutError_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.RedditCallback(code, state);
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutError_ReturnsViewWithDashboardViewModel()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            DashboardViewModel dashboardViewModel = new DashboardViewModel();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
+
+            IActionResult result = sut.RedditCallback(code, state);
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+
+            ViewResult viewResult = (ViewResult) result;
+            Assert.IsNotNull(viewResult);
+            Assert.IsNotNull(viewResult.ViewName);
+            Assert.AreEqual("Index", viewResult.ViewName);
+            Assert.IsNotNull(viewResult.Model);
+            Assert.AreEqual(dashboardViewModel, viewResult.Model);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutErrorAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            AggregateException aggregateException = new AggregateException();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
+
+            sut.RedditCallback(code, state);
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutErrorAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            int numberOfNews = _random.Next(25, 50);
+            const bool useReddit = true;
+            string state = CreateDashboardSettingsViewModel(numberOfNews: numberOfNews, useReddit: useReddit).ToBase64();
+
+            AggregateException aggregateException = new AggregateException();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
+
+            sut.RedditCallback(code, state);
+
+            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
+                    dashboardSettings != null &&
+                    dashboardSettings.NumberOfNews == numberOfNews &&
+                    dashboardSettings.UseReddit == false)),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutErrorAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            IDashboard dashboard = CreateDashboard();
+            AggregateException aggregateException = new AggregateException();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard, exception: aggregateException);
+
+            sut.RedditCallback(code, state);
+
+            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutErrorAndAggregateExceptionOccurs_ReturnsViewWithDashboardViewModel()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            DashboardViewModel dashboardViewModel = new DashboardViewModel();
+            AggregateException aggregateException = new AggregateException();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel, exception: aggregateException);
+
+            sut.RedditCallback(code, state);
+
+            IActionResult result = sut.RedditCallback(code, state);
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+
+            ViewResult viewResult = (ViewResult) result;
+            Assert.IsNotNull(viewResult);
+            Assert.IsNotNull(viewResult.ViewName);
+            Assert.AreEqual("Index", viewResult.ViewName);
+            Assert.IsNotNull(viewResult.Model);
+            Assert.AreEqual(dashboardViewModel, viewResult.Model);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutErrorAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            Exception exception = new Exception();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
+
+            sut.RedditCallback(code, state);
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutErrorAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            int numberOfNews = _random.Next(25, 50);
+            const bool useReddit = true;
+            string state = CreateDashboardSettingsViewModel(numberOfNews: numberOfNews, useReddit: useReddit).ToBase64();
+
+            Exception exception = new Exception();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
+
+            sut.RedditCallback(code, state);
+
+            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
+                    dashboardSettings != null &&
+                    dashboardSettings.NumberOfNews == numberOfNews &&
+                    dashboardSettings.UseReddit == false)),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutErrorAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            IDashboard dashboard = CreateDashboard();
+            Exception exception = new Exception();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard, exception: exception);
+
+            sut.RedditCallback(code, state);
+
+            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+        }
+
+        [TestMethod]
+        public void RedditCallback_WhenCalledWithoutErrorAndExceptionOccurs_ReturnsViewWithDashboardViewModel()
+        {
+            string code = Guid.NewGuid().ToString("D");
+            string state = CreateDashboardSettingsViewModel().ToBase64();
+
+            DashboardViewModel dashboardViewModel = new DashboardViewModel();
+            Exception exception = new Exception();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel, exception: exception);
+
+            sut.RedditCallback(code, state);
+
+            IActionResult result = sut.RedditCallback(code, state);
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+
+            ViewResult viewResult = (ViewResult) result;
+            Assert.IsNotNull(viewResult);
+            Assert.IsNotNull(viewResult.ViewName);
+            Assert.AreEqual("Index", viewResult.ViewName);
+            Assert.IsNotNull(viewResult.Model);
+            Assert.AreEqual(dashboardViewModel, viewResult.Model);
+        }
+
+        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null, string redditClientId = null, string redditClientSecret = null, IRedditAccessToken redditAccessToken = null, Exception exception = null)
+        {
+            _dashboardFactoryMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
+                .Returns(Task.Run<IDashboard>(() => dashboard ?? CreateDashboard()));
+
+            _dashboardViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IDashboard>()))
+                .Returns(Task.Run<DashboardViewModel>(() => dashboardViewModel ?? new DashboardViewModel()));
+
+            if (exception != null)
+            {
+                _dataProviderFactoryMock.Setup(m => m.GetRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>()))
+                    .Throws(exception);
+            }
+            else
+            {
+                _dataProviderFactoryMock.Setup(m => m.GetRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>()))
+                    .Returns(Task.Run<IRedditAccessToken>(() => redditAccessToken ?? new Mock<IRedditAccessToken>().Object));
+            }
+
+            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<AggregateException>()))
+                .Returns(Task.Run(() => { }));
+            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<Exception>()))
+                .Returns(Task.Run(() => { }));
+            
             _configurationMock.Setup(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)])
                 .Returns(redditClientId ?? Guid.NewGuid().ToString("D"));
             _configurationMock.Setup(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientSecret", value, StringComparison.Ordinal) == 0)])
@@ -288,6 +594,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 NumberOfNews = numberOfNews ?? _random.Next(25, 50),
                 UseReddit = useReddit ?? _random.Next(100) > 50
             };
+        }
+
+        private IDashboard CreateDashboard()
+        {
+            Mock<IDashboard> dashboardMock = new Mock<IDashboard>();
+            return dashboardMock.Object;
         }
     }
 }

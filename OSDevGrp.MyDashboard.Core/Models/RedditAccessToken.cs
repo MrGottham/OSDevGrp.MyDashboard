@@ -30,6 +30,9 @@ namespace OSDevGrp.MyDashboard.Core.Models
         [DataMember(Name = "refresh_token")]
         public string RefreshToken { get; set; }
 
+        [DataMember(Name = "error")]
+        public string Error { get; set; }
+
         #region Methods
 
         [OnDeserialized]
