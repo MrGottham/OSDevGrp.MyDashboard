@@ -1,10 +1,8 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
+using OSDevGrp.MyDashboard.Core.Utilities;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Models
@@ -16,11 +14,11 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         [Range(0, 250)]
         [Display(Name="Number of news", ShortName="News", Description="Number of news to receive")]
-        [DataMember(Name = "NumberOfNews")]
+        [DataMember(Name = "NumberOfNews", IsRequired = true)]
         public int NumberOfNews { get; set; }
         
         [Display(Name="Use Reddit", ShortName="Reddit", Description="Collection data from Reddit")]
-        [DataMember(Name = "UseReddit")]
+        [DataMember(Name = "UseReddit", IsRequired = true)]
         public bool UseReddit { get; set; }
 
         #endregion
@@ -38,28 +36,12 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         public string ToBase64()
         {
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(DashboardSettingsViewModel));
-                serializer.WriteObject(memoryStream, this);
-
-                memoryStream.Seek(0, SeekOrigin.Begin);
-                return Convert.ToBase64String(memoryStream.ToArray(), Base64FormattingOptions.None);
-            }
+            return JsonSerialization.ToBase64(this);
         }
 
         public static DashboardSettingsViewModel Create(string base64)
         {
-            if (string.IsNullOrWhiteSpace(base64))
-            {
-                throw new ArgumentNullException(nameof(base64));
-            }
-
-            using (MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(base64)))
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(DashboardSettingsViewModel));
-                return serializer.ReadObject(memoryStream) as DashboardSettingsViewModel;
-            }
+            return JsonSerialization.FromBase64<DashboardSettingsViewModel>(base64);
         }
 
         #endregion

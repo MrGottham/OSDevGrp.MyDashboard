@@ -13,5 +13,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
         string Scope { get; }
 
         string RefreshToken { get; }
+
+        string ToBase64();
     }
 }

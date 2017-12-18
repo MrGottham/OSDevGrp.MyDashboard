@@ -4,12 +4,12 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Models;
+using OSDevGrp.MyDashboard.Core.Utilities;
 
 namespace OSDevGrp.MyDashboard.Core.Factories
 {
@@ -96,8 +96,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                         }
                         using (Stream stream = await httpResponseMessage.Content.ReadAsStreamAsync())
                         {
-                            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(RedditAccessToken));
-                            RedditAccessToken redditAccessToken = (RedditAccessToken) serializer.ReadObject(stream);
+                            RedditAccessToken redditAccessToken = JsonSerialization.FromStream<RedditAccessToken>(stream);
                             if (string.IsNullOrWhiteSpace(redditAccessToken.Error))
                             {
                                 return redditAccessToken;
