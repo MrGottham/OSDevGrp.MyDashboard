@@ -48,7 +48,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == 100 &&
-                    dashboardSettings.UseReddit == false)),
+                    dashboardSettings.UseReddit == false &&
+                    dashboardSettings.RedditAccessToken == null)),
                 Times.Once);
         }
 

@@ -5,5 +5,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
         int NumberOfNews { get; set; }
 
         bool UseReddit { get; set; }
+
+        IRedditAccessToken RedditAccessToken { get; set; }
     }
 }

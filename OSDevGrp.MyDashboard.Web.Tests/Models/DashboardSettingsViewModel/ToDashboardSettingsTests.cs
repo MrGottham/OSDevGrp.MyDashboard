@@ -32,6 +32,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
             Assert.IsInstanceOfType(result, typeof(DashboardSettings));
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
+            Assert.IsNull(result.RedditAccessToken);
         }
 
         private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null)

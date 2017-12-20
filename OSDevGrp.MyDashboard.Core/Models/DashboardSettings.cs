@@ -10,6 +10,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
         {
             NumberOfNews = 50;
             UseReddit = false;
+            RedditAccessToken = null;
         }
 
         #endregion
@@ -19,6 +20,8 @@ namespace OSDevGrp.MyDashboard.Core.Models
         public int NumberOfNews { get; set; }
 
         public bool UseReddit { get; set; }
+
+        public IRedditAccessToken RedditAccessToken { get; set; }
 
         #endregion
     }

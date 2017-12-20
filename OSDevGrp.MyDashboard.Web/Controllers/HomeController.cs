@@ -74,7 +74,8 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             IDashboardSettings dashboardSettings = new DashboardSettings
             {
                 NumberOfNews = 100,
-                UseReddit = false
+                UseReddit = false,
+                RedditAccessToken = null
             };
             return GenerateDashboardView(dashboardSettings);
         }
@@ -122,6 +123,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             IRedditAccessToken redditAccessToken = GetRedditAccessToken(code, _httpContextAccessor.HttpContext);
             dashboardSettings.UseReddit = redditAccessToken != null;
+            dashboardSettings.RedditAccessToken = redditAccessToken;
 
             return GenerateDashboardView(dashboardSettings);
         }
@@ -259,6 +261,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             }
 
             dashboardSettings.UseReddit = false;
+            dashboardSettings.RedditAccessToken = null;
             return GenerateDashboardView(dashboardSettings);
         }
 

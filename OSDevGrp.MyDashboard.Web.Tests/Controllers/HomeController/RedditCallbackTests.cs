@@ -229,7 +229,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
-                    dashboardSettings.UseReddit == false)),
+                    dashboardSettings.UseReddit == false &&
+                    dashboardSettings.RedditAccessToken == null)),
                 Times.Once);
         }
 
@@ -337,14 +338,16 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             const bool useReddit = true;
             string state = CreateDashboardSettingsViewModel(numberOfNews: numberOfNews, useReddit: useReddit).ToBase64();
 
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(redditAccessToken: redditAccessToken);
 
             sut.RedditCallback(code, state);
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
-                    dashboardSettings.UseReddit == true)),
+                    dashboardSettings.UseReddit == true &&
+                    dashboardSettings.RedditAccessToken == redditAccessToken)),
                 Times.Once);
         }
 
@@ -427,7 +430,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
-                    dashboardSettings.UseReddit == false)),
+                    dashboardSettings.UseReddit == false &&
+                    dashboardSettings.RedditAccessToken == null)),
                 Times.Once);
         }
 
@@ -500,7 +504,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
-                    dashboardSettings.UseReddit == false)),
+                    dashboardSettings.UseReddit == false &&
+                    dashboardSettings.RedditAccessToken == null)),
                 Times.Once);
         }
 
@@ -559,7 +564,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             else
             {
                 _dataProviderFactoryMock.Setup(m => m.GetRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>()))
-                    .Returns(Task.Run<IRedditAccessToken>(() => redditAccessToken ?? new Mock<IRedditAccessToken>().Object));
+                    .Returns(Task.Run<IRedditAccessToken>(() => redditAccessToken ?? CreateRedditAccessToken()));
             }
 
             _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<AggregateException>()))
@@ -600,6 +605,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             Mock<IDashboard> dashboardMock = new Mock<IDashboard>();
             return dashboardMock.Object;
+        }
+
+        private IRedditAccessToken CreateRedditAccessToken()
+        {
+            Mock<IRedditAccessToken> redditAccessTokenMock = new Mock<IRedditAccessToken>();
+            return redditAccessTokenMock.Object;
         }
     }
 }

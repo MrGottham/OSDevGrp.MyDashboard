@@ -22,6 +22,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.DashboardSettings
             Assert.IsFalse(sut.UseReddit);
         }
         
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectRedditAccessTokenEqualToNull()
+        {
+            IDashboardSettings sut = CreateSut();
+
+            Assert.IsNull(sut.RedditAccessToken);
+        }
+        
         private IDashboardSettings CreateSut()
         {
             return new OSDevGrp.MyDashboard.Core.Models.DashboardSettings();

@@ -30,7 +30,8 @@ namespace OSDevGrp.MyDashboard.Web.Models
             return new DashboardSettings()
             {
                 NumberOfNews = NumberOfNews,
-                UseReddit = UseReddit
+                UseReddit = UseReddit,
+                RedditAccessToken = null
             };
         }
 
