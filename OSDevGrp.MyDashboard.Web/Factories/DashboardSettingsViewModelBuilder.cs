@@ -1,4 +1,5 @@
 using System;
+using Microsoft.AspNetCore.Http;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Models;
 
@@ -6,18 +7,52 @@ namespace OSDevGrp.MyDashboard.Web.Factories
 {
     public class DashboardSettingsViewModelBuilder : ViewModelBuilderBase<DashboardSettingsViewModel, IDashboardSettings>
     {
+        #region Private variables
+
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        #endregion
+
+        #region Constructor
+
+        public DashboardSettingsViewModelBuilder(IHttpContextAccessor httpContextAccessor)
+        {
+            if (httpContextAccessor == null)
+            {
+                throw new ArgumentNullException(nameof(httpContextAccessor));
+            }
+
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        #endregion 
+
         #region Methods
 
         protected override DashboardSettingsViewModel Build(IDashboardSettings dashboardSettings)
         {
-            IRedditAccessToken redditAccessToken = dashboardSettings.RedditAccessToken;
+            DateTime cookieExpireTime = DateTime.Now.AddMinutes(15);
 
-            return new DashboardSettingsViewModel
+            IRedditAccessToken redditAccessToken = dashboardSettings.RedditAccessToken;
+            if (redditAccessToken != null)
+            {
+                DateTime redditAccessTokenExpireTime = redditAccessToken.Expires;
+                if (redditAccessTokenExpireTime < cookieExpireTime)
+                {
+                    cookieExpireTime = redditAccessTokenExpireTime;
+                }
+            }
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = new DashboardSettingsViewModel
             {
                 NumberOfNews = dashboardSettings.NumberOfNews,
                 UseReddit = dashboardSettings.UseReddit,
                 RedditAccessToken = redditAccessToken != null ? redditAccessToken.ToBase64() : null
             };
+
+            dashboardSettingsViewModel.ToCookie(_httpContextAccessor.HttpContext, cookieExpireTime);
+
+            return dashboardSettingsViewModel;
         }
 
         #endregion

@@ -1,5 +1,7 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using Microsoft.AspNetCore.Http;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Core.Utilities;
@@ -25,6 +27,16 @@ namespace OSDevGrp.MyDashboard.Web.Models
         [DataMember(Name = "RedditAccessToken", IsRequired = false)]
         public string RedditAccessToken { get; set; }
 
+        [Display(Name="Cookie name", ShortName="Cookie name", Description="Cookie name for the dashboard settings view model")]
+        [IgnoreDataMember]
+        public static string CookieName
+        {
+            get
+            {
+                return "OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel";
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -37,6 +49,32 @@ namespace OSDevGrp.MyDashboard.Web.Models
                 UseReddit = UseReddit,
                 RedditAccessToken = string.IsNullOrWhiteSpace(RedditAccessToken) ? null : OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(RedditAccessToken)
             };
+        }
+
+        public void ToCookie(HttpContext httpContext, DateTime expires)
+        {
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
+            HttpResponse response = httpContext.Response;
+            if (response == null)
+            {
+                return;
+            }
+
+            IResponseCookies responseCookies = response.Cookies;
+            if (responseCookies == null)
+            {
+                return;
+            }
+
+            CookieOptions cookieOptions = new CookieOptions
+            {
+                Expires = expires.ToUniversalTime()
+            };
+            responseCookies.Append(CookieName, ToBase64(), cookieOptions);
         }
 
         public string ToBase64()
