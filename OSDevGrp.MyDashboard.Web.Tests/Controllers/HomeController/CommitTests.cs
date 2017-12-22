@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Models;
@@ -51,10 +53,140 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfReddit_AssertHttpContextWasCalledOnHttpContextAccessor()
+        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertHttpContextWasNotCalledOnHttpContextAccessor()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            string redditAccessToken = CreateReddditAccessTokenAsBase64();
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Never);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertAuthenticationRedditClientIdWasNotCalledOnConfiguration()
+        {
+            const bool useReddit = true;
+            string redditAccessToken = CreateReddditAccessTokenAsBase64();
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Never);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnDataProviderFactory()
+        {
+            const bool useReddit = true;
+            string redditAccessToken = CreateReddditAccessTokenAsBase64();
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _dataProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<Uri>()),
+                Times.Never);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardFactory()
+        {
+            int numberOfNews = _random.Next(25, 50);
+            const bool useReddit = true;
+            string accessToken = Guid.NewGuid().ToString("D");
+            string tokenType = Guid.NewGuid().ToString("D");
+            int expiresIn = _random.Next(60, 300);
+            string scope = Guid.NewGuid().ToString("D");
+            string refreshToken = Guid.NewGuid().ToString("D");
+            DateTime received = DateTime.UtcNow;
+            string redditAccessToken = CreateReddditAccessTokenAsBase64(accessToken, tokenType, expiresIn, scope, refreshToken, received);
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, redditAccessToken);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
+                    dashboardSettings != null &&
+                    dashboardSettings.NumberOfNews == numberOfNews &&
+                    dashboardSettings.UseReddit == true &&
+                    dashboardSettings.RedditAccessToken != null &&
+                    string.Compare(dashboardSettings.RedditAccessToken.AccessToken, accessToken, StringComparison.Ordinal) == 0 &&
+                    string.Compare(dashboardSettings.RedditAccessToken.TokenType, tokenType, StringComparison.Ordinal) == 0 &&
+                    string.Compare(dashboardSettings.RedditAccessToken.Expires.ToString(), received.ToLocalTime().AddSeconds(expiresIn).ToString(), StringComparison.Ordinal) == 0 &&
+                    string.Compare(dashboardSettings.RedditAccessToken.Scope, scope, StringComparison.Ordinal) == 0 &&
+                    string.Compare(dashboardSettings.RedditAccessToken.RefreshToken, refreshToken, StringComparison.Ordinal) == 0)),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        {
+            const bool useReddit = true;
+            string redditAccessToken = CreateReddditAccessTokenAsBase64();
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+
+            IDashboard dashboard = CreateDashboard();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
+        {
+            const bool useReddit = true;
+            string redditAccessToken = CreateReddditAccessTokenAsBase64();
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            sut.Commit(dashboardSettingsViewModel);
+
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void Called_WhenCalledWithUseOfRedditAndWithRedditAccessToken_ReturnsViewWithDashboardViewModel()
+        {
+            const bool useReddit = true;
+            string redditAccessToken = CreateReddditAccessTokenAsBase64();
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+
+            DashboardViewModel dashboardViewModel = new DashboardViewModel();
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
+
+            IActionResult result = sut.Commit(dashboardSettingsViewModel);
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+
+            ViewResult viewResult = (ViewResult) result;
+            Assert.IsNotNull(viewResult);
+            Assert.IsNotNull(viewResult.ViewName);
+            Assert.AreEqual("Index", viewResult.ViewName);
+            Assert.IsNotNull(viewResult.Model);
+            Assert.AreEqual(dashboardViewModel, viewResult.Model);
+        }
+
+        [TestMethod]
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertHttpContextWasCalledOnHttpContextAccessor()
+        {
+            const bool useReddit = true;
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
@@ -64,10 +196,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfReddit_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
@@ -77,10 +210,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfReddit_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnDataProviderFactory()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnDataProviderFactory()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             string redditClientId = Guid.NewGuid().ToString("D");
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(redditClientId: redditClientId);
@@ -95,10 +229,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfReddit_AssertBuildAsyncWasNotCalledOnDashboardFactory()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertBuildAsyncWasNotCalledOnDashboardFactory()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
@@ -108,10 +243,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfReddit_AssertBuildAsyncWasNotCalledOnDashboardViewModelBuilder()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertBuildAsyncWasNotCalledOnDashboardViewModelBuilder()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
@@ -121,10 +257,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfReddit_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
@@ -135,10 +272,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfReddit_ReturnsRedirectResultToAcquireRedditAccessTokenUrl()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_ReturnsRedirectResultToAcquireRedditAccessTokenUrl()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             Uri acquireRedditAuthorizationTokenUrl = new Uri($"https://reddit.com/{Guid.NewGuid().ToString("D")}");
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(acquireRedditAuthorizationTokenUrl: acquireRedditAuthorizationTokenUrl);
@@ -153,10 +291,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             AggregateException aggregateException = new AggregateException();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
@@ -167,11 +306,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, redditAccessToken);
 
             AggregateException aggregateException = new AggregateException();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
@@ -187,10 +327,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             IDashboard dashboard = CreateDashboard();
             AggregateException aggregateException = new AggregateException();
@@ -202,10 +343,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Called_WhenCalledWithUseOfRedditAndAggregateExceptionOccurs_ReturnsViewWithDashboardViewModel()
+        public void Called_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_ReturnsViewWithDashboardViewModel()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
             AggregateException aggregateException = new AggregateException();
@@ -224,10 +366,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             Exception exception = new Exception();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
@@ -238,11 +381,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, redditAccessToken);
+
 
             Exception exception = new Exception();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
@@ -258,10 +403,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             IDashboard dashboard = CreateDashboard();
             Exception exception = new Exception();
@@ -273,10 +419,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Called_WhenCalledWithUseOfRedditAndExceptionOccurs_ReturnsViewWithDashboardViewModel()
+        public void Called_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_ReturnsViewWithDashboardViewModel()
         {
             const bool useReddit = true;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            const string redditAccessToken = null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
 
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
             Exception exception = new Exception();
@@ -447,12 +594,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 _httpContextAccessorMock.Object);
         }
 
-        private DashboardSettingsViewModel CreateDashboardSettingsViewModel(int? numberOfNews = null, bool? useReddit = null)
+        private DashboardSettingsViewModel CreateDashboardSettingsViewModel(int? numberOfNews = null, bool? useReddit = null, string redditAccessToken = null)
         {
             return new DashboardSettingsViewModel
             {
                 NumberOfNews = numberOfNews ?? _random.Next(25, 50),
                 UseReddit = useReddit ?? _random.Next(100) > 50,
+                RedditAccessToken = redditAccessToken
             };
         }
  
@@ -460,6 +608,57 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             Mock<IDashboard> dashboardMock = new Mock<IDashboard>();
             return dashboardMock.Object;
+        }
+
+        private string CreateReddditAccessTokenAsBase64(string accessToken = null, string tokenType = null, int? expiresIn = null, string scope = null, string refreshToken = null, DateTime? received = null)
+        {
+            return CreateReddditAccessToken(accessToken, tokenType, expiresIn, scope, refreshToken, received).ToBase64();
+        }
+ 
+        private IRedditAccessToken CreateReddditAccessToken(string accessToken = null, string tokenType = null, int? expiresIn = null, string scope = null, string refreshToken = null, DateTime? received = null)
+        {
+            return new MyRedditAccessToken(
+                accessToken ?? Guid.NewGuid().ToString("D"),
+                tokenType ?? Guid.NewGuid().ToString("D"),
+                expiresIn ?? _random.Next(60, 300),
+                scope ?? Guid.NewGuid().ToString("D"),
+                refreshToken ?? Guid.NewGuid().ToString("D"),
+                received ?? DateTime.UtcNow);
+        }
+
+        [DataContract]
+        private class MyRedditAccessToken : RedditAccessToken
+        {
+            #region Constructor
+
+            public MyRedditAccessToken(string accessToken, string tokenType, int expiresIn, string scope, string refreshToken, DateTime received)
+            {
+                if (string.IsNullOrWhiteSpace(accessToken))
+                {
+                    throw new ArgumentNullException(nameof(accessToken));
+                }
+                if (string.IsNullOrWhiteSpace(tokenType))
+                {
+                    throw new ArgumentNullException(nameof(tokenType));
+                }
+                if (string.IsNullOrWhiteSpace(scope))
+                {
+                    throw new ArgumentNullException(nameof(scope));
+                }
+                if (string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    throw new ArgumentNullException(nameof(refreshToken));
+                }
+
+                AccessToken = accessToken;
+                TokenType = tokenType;
+                ExpiresIn = expiresIn;
+                Scope = scope;
+                RefreshToken = refreshToken;
+                Received = received;
+            }
+
+            #endregion
         }
     }
 }

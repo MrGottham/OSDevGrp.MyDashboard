@@ -17,9 +17,13 @@ namespace OSDevGrp.MyDashboard.Web.Models
         [DataMember(Name = "NumberOfNews", IsRequired = true)]
         public int NumberOfNews { get; set; }
         
-        [Display(Name="Use Reddit", ShortName="Reddit", Description="Collection data from Reddit")]
+        [Display(Name="Use Reddit", ShortName="Reddit", Description="Collect data from Reddit")]
         [DataMember(Name = "UseReddit", IsRequired = true)]
         public bool UseReddit { get; set; }
+
+        [Display(Name="Reddit Access Token", ShortName="Access Token", Description="Access Token received from Reddit")]
+        [DataMember(Name = "RedditAccessToken", IsRequired = false)]
+        public string RedditAccessToken { get; set; }
 
         #endregion
 
@@ -31,7 +35,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
             {
                 NumberOfNews = NumberOfNews,
                 UseReddit = UseReddit,
-                RedditAccessToken = null
+                RedditAccessToken = string.IsNullOrWhiteSpace(RedditAccessToken) ? null : OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(RedditAccessToken)
             };
         }
 

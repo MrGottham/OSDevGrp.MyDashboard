@@ -54,20 +54,23 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
-            string base64 = CreateSut(numberOfNews, useReddit).ToBase64();
+            string redditAccessToken = _random.Next(100) > 50 ? Guid.NewGuid().ToString("D") : null;
+            string base64 = CreateSut(numberOfNews, useReddit, redditAccessToken).ToBase64();
 
             OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel result = OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel.Create(base64);
             Assert.IsNotNull(result);
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
+            Assert.AreEqual(redditAccessToken, result.RedditAccessToken);
         }
         
-        private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null)
+        private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null, string redditAccessToken = null)
         {
             return new OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel
             {
                 NumberOfNews = numberOfNews ?? _random.Next(25, 50),
-                UseReddit = useReddit ?? _random.Next(100) > 50
+                UseReddit = useReddit ?? _random.Next(100) > 50,
+                RedditAccessToken = redditAccessToken
             };
         }
     }

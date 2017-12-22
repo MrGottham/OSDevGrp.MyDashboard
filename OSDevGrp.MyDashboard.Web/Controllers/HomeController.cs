@@ -94,7 +94,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
                 return RedirectToAction("Index", "HomeController");
             }
 
-            if (dashboardSettingsViewModel.UseReddit)
+            if (dashboardSettingsViewModel.UseReddit && string.IsNullOrWhiteSpace(dashboardSettingsViewModel.RedditAccessToken))
             {
                 return AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModel, _httpContextAccessor.HttpContext);
             }
@@ -204,6 +204,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
                 _exceptionHandler.HandleAsync(ex).Wait();
             }
             dashboardSettingsViewModel.UseReddit = false;
+            dashboardSettingsViewModel.RedditAccessToken = null;
             return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
         }
 

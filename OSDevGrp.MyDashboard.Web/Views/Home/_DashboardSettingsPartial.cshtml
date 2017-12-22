@@ -2,6 +2,10 @@
 @model DashboardSettingsViewModel;
 
 <form asp-controller="Home" asp-action="Commit" method="post">
+    @if (string.IsNullOrWhiteSpace(Model.RedditAccessToken) == false)
+    {
+        <input asp-for="RedditAccessToken" type="hidden" />
+    }
     <fieldset class="form-group">
         <label asp-for="NumberOfNews" class="control-label"></label>
         <input asp-for="NumberOfNews" class="form-control" />

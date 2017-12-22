@@ -60,11 +60,39 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertRedditAccessTokenWasCalledOnDashboardSettings()
+        {
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
+            buildTask.Wait();
+
+            dashboardSettingsMock.Verify(m => m.RedditAccessToken, Times.Once());
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereRedditAccessTokenIsNotNull_AssertToBase64WasCalledOnRedditAccessToken()
+        {
+            Mock<IRedditAccessToken> redditAccessTokenMock = CreateRedditAccessTokenMock();
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessTokenMock.Object);
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
+            buildTask.Wait();
+
+            redditAccessTokenMock.Verify(m => m.ToBase64(), Times.Once());
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_ReturnsInitializedDashboardSettingsViewModel()
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
-            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews, useReddit);
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews, useReddit, redditAccessToken);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
@@ -75,6 +103,40 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
             Assert.IsNotNull(result);
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
+            Assert.IsNotNull(result.RedditAccessToken);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereRedditAccessTokenIsNull_ReturnsInitializedDashboardSettingsViewModel()
+        {
+            const IRedditAccessToken redditAccessToken = null;
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
+            buildTask.Wait();
+
+            DashboardSettingsViewModel result = buildTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsNull(result.RedditAccessToken);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereRedditAccessTokenIsNotNull_ReturnsInitializedDashboardSettingsViewModel()
+        {
+            string redditAccessTokenAsBase64 = Guid.NewGuid().ToString("D");
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken(redditAccessTokenAsBase64);
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
+            buildTask.Wait();
+
+            DashboardSettingsViewModel result = buildTask.Result;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(redditAccessTokenAsBase64, result.RedditAccessToken);
         }
 
         private IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> CreateSut()
@@ -82,19 +144,34 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
             return new OSDevGrp.MyDashboard.Web.Factories.DashboardSettingsViewModelBuilder();
         }
 
-        private IDashboardSettings CreateDashboardSettings(int? numberOfNews = null, bool? useReddit = null)
+        private IDashboardSettings CreateDashboardSettings(int? numberOfNews = null, bool? useReddit = null, IRedditAccessToken redditAccessToken = null)
         {
-            return CreateDashboardSettingsMock(numberOfNews, useReddit).Object;
+            return CreateDashboardSettingsMock(numberOfNews, useReddit, redditAccessToken).Object;
         }
 
-        private Mock<IDashboardSettings> CreateDashboardSettingsMock(int? numberOfNews = null, bool? useReddit = null)
+        private Mock<IDashboardSettings> CreateDashboardSettingsMock(int? numberOfNews = null, bool? useReddit = null, IRedditAccessToken redditAccessToken = null)
         {
             Mock<IDashboardSettings> dashboardSettingsMock = new Mock<IDashboardSettings>();
             dashboardSettingsMock.Setup(m => m.NumberOfNews)
                 .Returns(numberOfNews ?? _random.Next(25, 50));
             dashboardSettingsMock.Setup(m => m.UseReddit)
                 .Returns(useReddit ?? _random.Next(100) > 50);
+            dashboardSettingsMock.Setup(m => m.RedditAccessToken)
+                .Returns(redditAccessToken);
             return dashboardSettingsMock;
+        }
+
+        private IRedditAccessToken CreateRedditAccessToken(string redditAccessTokenAsBase64 = null)
+        {
+            return CreateRedditAccessTokenMock(redditAccessTokenAsBase64).Object;
+        }
+
+        private Mock<IRedditAccessToken> CreateRedditAccessTokenMock(string redditAccessTokenAsBase64 = null)
+        {
+            Mock<IRedditAccessToken> redditAccessTokenMock = new Mock<IRedditAccessToken>();
+            redditAccessTokenMock.Setup(m => m.ToBase64())
+                .Returns(redditAccessTokenAsBase64 ?? Guid.NewGuid().ToString("D"));
+            return redditAccessTokenMock;
         }
     }
 }

@@ -10,10 +10,13 @@ namespace OSDevGrp.MyDashboard.Web.Factories
 
         protected override DashboardSettingsViewModel Build(IDashboardSettings dashboardSettings)
         {
+            IRedditAccessToken redditAccessToken = dashboardSettings.RedditAccessToken;
+
             return new DashboardSettingsViewModel
             {
                 NumberOfNews = dashboardSettings.NumberOfNews,
-                UseReddit = dashboardSettings.UseReddit
+                UseReddit = dashboardSettings.UseReddit,
+                RedditAccessToken = redditAccessToken != null ? redditAccessToken.ToBase64() : null
             };
         }
 

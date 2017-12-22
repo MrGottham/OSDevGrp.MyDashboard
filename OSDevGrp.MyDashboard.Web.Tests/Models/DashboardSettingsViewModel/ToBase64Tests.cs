@@ -36,7 +36,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
             return new OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel
             {
                 NumberOfNews = _random.Next(25, 50),
-                UseReddit = _random.Next(100) > 50
+                UseReddit = _random.Next(100) > 50,
+                RedditAccessToken = _random.Next(100) > 50 ? Guid.NewGuid().ToString("D") : null
             };
         }
     }
