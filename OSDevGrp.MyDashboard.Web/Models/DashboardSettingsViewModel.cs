@@ -87,6 +87,33 @@ namespace OSDevGrp.MyDashboard.Web.Models
             return JsonSerialization.FromBase64<DashboardSettingsViewModel>(base64);
         }
 
+        public static DashboardSettingsViewModel Create(HttpContext httpContext)
+        {
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
+            HttpRequest request = httpContext.Request;
+            if (request == null)
+            {
+                return null;
+            }
+
+            IRequestCookieCollection requestCookieCollection = request.Cookies;
+            if (requestCookieCollection == null)
+            {
+                return null;
+            }
+
+            if (requestCookieCollection.ContainsKey(CookieName) == false)
+            {
+                return null;
+            }
+
+            return Create(requestCookieCollection[CookieName]);
+        }
+
         #endregion
     }
 }

@@ -71,13 +71,16 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         public IActionResult Index()
         {
-            IDashboardSettings dashboardSettings = new DashboardSettings
+            IDashboardSettings defaultDashboardSettings = new DashboardSettings
             {
                 NumberOfNews = 100,
                 UseReddit = false,
                 RedditAccessToken = null
             };
-            return GenerateDashboardView(dashboardSettings);
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = DashboardSettingsViewModel.Create(_httpContextAccessor.HttpContext);
+            
+            return GenerateDashboardView(dashboardSettingsViewModel == null ? defaultDashboardSettings : dashboardSettingsViewModel.ToDashboardSettings());
         }
 
         [HttpPost]

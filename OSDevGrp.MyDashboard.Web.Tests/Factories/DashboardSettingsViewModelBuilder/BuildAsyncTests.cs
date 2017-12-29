@@ -119,7 +119,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertHttpContextWasCalledOnResponseCookies()
+        public void BuildAsync_WhenCalled_AssertAppendWasCalledOnResponseCookies()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
             IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
