@@ -2,7 +2,7 @@ using System;
 
 namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 {
-    public interface IRedditAccessToken
+    public interface IRedditAccessToken : IRedditObject
     {
         string AccessToken { get; }
 

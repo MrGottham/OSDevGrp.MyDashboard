@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Core.Contracts.Repositories
 {
-    public interface INewsRepository
+    public interface IRedditRepository
     {
-        Task<IEnumerable<INews>> GetNewsAsync();
+        Task<IRedditResponse<IRedditAuthenticatedUser>> GetAuthenticatedUserAsync(IRedditAccessToken accessToken);
     }
 }

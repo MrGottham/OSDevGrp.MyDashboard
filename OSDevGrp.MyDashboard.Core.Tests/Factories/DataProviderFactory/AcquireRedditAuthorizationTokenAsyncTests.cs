@@ -133,6 +133,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
             string clientId = Guid.NewGuid().ToString("D");
             string state = Guid.NewGuid().ToString("D");
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
+            
+            const string scope = "identity privatemessages";
+            Uri expectedUri = new Uri($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope={scope}");
 
             IDataProviderFactory sut = CreateSut();
 
@@ -140,7 +143,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
             acquireRedditAuthorizationTokenTask.Wait();
 
             Assert.IsNotNull(acquireRedditAuthorizationTokenTask.Result);
-            Assert.AreEqual($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope=identity", acquireRedditAuthorizationTokenTask.Result.AbsoluteUri);
+            Assert.AreEqual(expectedUri.AbsoluteUri, acquireRedditAuthorizationTokenTask.Result.AbsoluteUri);
         }
 
         private IDataProviderFactory CreateSut()

@@ -7,15 +7,15 @@ using OSDevGrp.MyDashboard.Core.Utilities;
 namespace OSDevGrp.MyDashboard.Core.Models
 {
     [DataContract]
-    public class RedditAccessToken : IRedditAccessToken
+    public class RedditAccessToken : RedditObjectBase, IRedditAccessToken
     {
         #region Properties
 
         [DataMember(Name = "access_token", IsRequired = true)]
-        public string AccessToken { get; set; }
+        public string AccessToken { get; protected set; }
 
         [DataMember(Name = "token_type", IsRequired = true)]
-        public string TokenType { get; set; }
+        public string TokenType { get; protected set; }
 
         [DataMember(Name = "expires_in", IsRequired = true)]
         protected int ExpiresIn { get; set; }
@@ -34,10 +34,10 @@ namespace OSDevGrp.MyDashboard.Core.Models
         }
 
         [DataMember(Name = "scope", IsRequired = true)]
-        public string Scope { get; set; }
+        public string Scope { get; protected set; }
 
         [DataMember(Name = "refresh_token", IsRequired = true)]
-        public string RefreshToken { get; set; }
+        public string RefreshToken { get; protected set; }
 
         [DataMember(Name = "received_at", IsRequired = false)]
         protected DateTime? Received { get; set; }

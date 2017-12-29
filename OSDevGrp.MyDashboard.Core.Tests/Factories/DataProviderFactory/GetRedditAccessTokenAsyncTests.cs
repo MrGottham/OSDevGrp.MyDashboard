@@ -194,7 +194,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         }
 
         [TestMethod]
-        [ExpectedAggregateException(typeof(UnauthorizedAccessException), "Unable to get the access token from Reddit.")]
+        [ExpectedAggregateException(typeof(UnauthorizedAccessException), "You are not authorized to perform this operation against Reddit.")]
         public void GetRedditAccessTokenAsync_WhenCalled_ThrowsUnauthorizedAccessException()
         {
             string clientId = Guid.NewGuid().ToString("D");

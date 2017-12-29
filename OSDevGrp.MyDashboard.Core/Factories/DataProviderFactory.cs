@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Models;
-using OSDevGrp.MyDashboard.Core.Utilities;
+using OSDevGrp.MyDashboard.Core.Repositories;
 
 namespace OSDevGrp.MyDashboard.Core.Factories
 {
@@ -46,7 +42,11 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 throw new ArgumentNullException(nameof(redirectUri));
             }
 
-            return Task.Run(() => new Uri($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope=identity"));
+            return Task.Run(() => 
+            {
+                const string scope = "identity privatemessages";
+                return new Uri($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope={scope}");
+            });
         }
 
         public Task<IRedditAccessToken> GetRedditAccessTokenAsync(string clientId, string clientSecret, string code, Uri redirectUri)
@@ -70,41 +70,25 @@ namespace OSDevGrp.MyDashboard.Core.Factories
 
             return Task.Run<IRedditAccessToken>(async () => 
             {
-                using (HttpClient httpClient = new HttpClient())
+                IDictionary<string, string> formFields = new Dictionary<string, string>
                 {
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{clientId}:{clientSecret}")));
-                    
-                    IDictionary<string, string> formFields = new Dictionary<string, string>
-                    {
-                        {"grant_type", "authorization_code"},
-                        {"code", code},
-                        {"redirect_uri", redirectUri.AbsoluteUri}
-                    };
-                    using (HttpResponseMessage httpResponseMessage = await httpClient.PostAsync("https://www.reddit.com/api/v1/access_token", new FormUrlEncodedContent(formFields)))
-                    {
-                        if (httpResponseMessage.IsSuccessStatusCode == false)
-                        {
-                            switch (httpResponseMessage.StatusCode)
-                            {
-                                case HttpStatusCode.Unauthorized:
-                                    throw new UnauthorizedAccessException("Unable to get the access token from Reddit.");
+                    {"grant_type", "authorization_code"},
+                    {"code", code},
+                    {"redirect_uri", redirectUri.AbsoluteUri}
+                };
 
-                                default:
-                                    string errorMessage = await httpResponseMessage.Content.ReadAsStringAsync();
-                                    throw new Exception($"Unable to get the access token from Reddit: {errorMessage}");
-                            }
-                        }
-                        using (Stream stream = await httpResponseMessage.Content.ReadAsStreamAsync())
-                        {
-                            RedditAccessToken redditAccessToken = JsonSerialization.FromStream<RedditAccessToken>(stream);
-                            if (string.IsNullOrWhiteSpace(redditAccessToken.Error))
-                            {
-                                return redditAccessToken;
-                            }
-                            throw new Exception($"Unable to get the access token from Reddit: {redditAccessToken.Error}");
-                        }
-                    }
+                IRedditResponse<RedditAccessToken> redditResponse = await RedditRepository.PostAsync<RedditAccessToken>(
+                    new Uri("https://www.reddit.com/api/v1/access_token"),
+                    "Basic",
+                    Convert.ToBase64String(Encoding.ASCII.GetBytes($"{clientId}:{clientSecret}")),
+                    formFields);
+
+                RedditAccessToken redditAccessToken = redditResponse.Data;
+                if (string.IsNullOrWhiteSpace(redditAccessToken.Error))
+                {
+                    return redditAccessToken;
                 }
+                throw new Exception($"Unable to get the access token from Reddit: {redditAccessToken.Error}");
             });
         }
 
