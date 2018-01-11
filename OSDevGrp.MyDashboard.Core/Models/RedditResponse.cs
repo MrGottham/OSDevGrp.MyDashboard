@@ -7,7 +7,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
     {
         #region Constructor
 
-        public RedditResponse(int rateLimitUsed, int rateLimitRemaining, DateTime? rateLimitResetTime, TRedditObject data)
+        public RedditResponse(int rateLimitUsed, int rateLimitRemaining, DateTime? rateLimitResetTime, DateTime receivedTime, TRedditObject data)
         {
             if (Equals(data, null))
             {
@@ -17,6 +17,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
             RateLimitUsed = rateLimitUsed;
             RateLimitRemaining = rateLimitRemaining;
             RateLimitResetTime = rateLimitResetTime;
+            ReceivedTime = receivedTime;
             Data = data;
         }
 
@@ -28,7 +29,37 @@ namespace OSDevGrp.MyDashboard.Core.Models
 
         public int RateLimitRemaining { get; private set; }
 
-        public DateTime? RateLimitResetTime { get; private set; }
+        public DateTime? RateLimitResetTime
+        {
+            get
+            {
+                return RateLimitResetUtcTime.HasValue ? RateLimitResetUtcTime.Value.ToLocalTime() : (DateTime?) null;
+            }
+            private set
+            {
+                RateLimitResetUtcTime = value.HasValue ? value.Value.ToUniversalTime() : (DateTime?) null;
+            }
+        }
+
+        public DateTime? RateLimitResetUtcTime { get; private set; }
+
+        public DateTime ReceivedTime
+        {
+            get
+            {
+                return ReceivedUtcTime.ToLocalTime();
+            }
+            private set
+            {
+                ReceivedUtcTime = value.ToUniversalTime();
+            }
+        }
+
+        public DateTime ReceivedUtcTime
+        {
+            get;
+            private set;
+        }
 
         public TRedditObject Data { get; private set; }
 
@@ -42,8 +73,10 @@ namespace OSDevGrp.MyDashboard.Core.Models
                 RateLimitUsed,
                 RateLimitRemaining,
                 RateLimitResetTime,
+                ReceivedTime,
                 Data as TTargetRedditObject);
         }
+        
         #endregion
     }
 }

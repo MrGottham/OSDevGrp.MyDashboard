@@ -10,6 +10,12 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 
         DateTime? RateLimitResetTime { get; }
 
+        DateTime? RateLimitResetUtcTime { get; }
+
+        DateTime ReceivedTime { get; }
+
+        DateTime ReceivedUtcTime { get; }
+
         TRedditObject Data { get; }
 
         IRedditResponse<TTargetRedditObject> As<TTargetRedditObject>() where TTargetRedditObject : class, IRedditObject;

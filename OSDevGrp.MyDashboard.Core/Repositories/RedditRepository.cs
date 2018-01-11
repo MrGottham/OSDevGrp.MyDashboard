@@ -233,6 +233,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                     rateLimitUsed,
                     rateLimitRemaining,
                     rateLimitResetTime,
+                    DateTime.Now,
                     JsonSerialization.FromStream<TRedditObject>(stream));
             }
         }

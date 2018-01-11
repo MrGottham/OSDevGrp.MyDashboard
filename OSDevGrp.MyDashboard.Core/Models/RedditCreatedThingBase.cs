@@ -24,19 +24,19 @@ namespace OSDevGrp.MyDashboard.Core.Models
         { 
             get
             {
-                return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(CreatedUnixUtcTimestamp);
+                return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Convert.ToInt64(CreatedUnixUtcTimestamp));
             }
         }
 
         [DataMember(Name = "created", IsRequired = true)]
-        protected virtual long CreatedUnixTimestamp
+        protected virtual decimal CreatedUnixTimestamp
         {
             get;
             set;
         }
 
         [DataMember(Name = "created_utc", IsRequired = true)]
-        protected virtual long CreatedUnixUtcTimestamp
+        protected virtual decimal CreatedUnixUtcTimestamp
         {
             get;
             set;

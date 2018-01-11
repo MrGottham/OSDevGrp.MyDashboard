@@ -25,14 +25,26 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
             int rateLimitUsed = _random.Next(100);
             int rateLimitRemaining = _random.Next(100);
             DateTime? rateLimitResetTime = _random.Next(100) > 50 ? DateTime.Now.AddSeconds(_random.Next(300)) : (DateTime?) null;
+            DateTime receivedTime = DateTime.Now.AddSeconds(_random.Next(30, 60) * -1);
             MyRedditObject data = new MyRedditObject();
 
-            IRedditResponse<MyRedditObject> sut = CreateSut(rateLimitUsed: rateLimitUsed, rateLimitRemaining: rateLimitRemaining, rateLimitResetTime: rateLimitResetTime, data: data);
+            IRedditResponse<MyRedditObject> sut = CreateSut(rateLimitUsed: rateLimitUsed, rateLimitRemaining: rateLimitRemaining, rateLimitResetTime: rateLimitResetTime, receivedTime: receivedTime, data: data);
 
             IRedditResponse<IRedditObject> result = sut.As<IRedditObject>();
             Assert.AreEqual(rateLimitUsed, result.RateLimitUsed);
             Assert.AreEqual(rateLimitRemaining, result.RateLimitRemaining);
-            Assert.AreEqual(rateLimitResetTime, result.RateLimitResetTime);
+            if (rateLimitResetTime.HasValue)
+            {
+                Assert.AreEqual(rateLimitResetTime.Value, result.RateLimitResetTime);
+                Assert.AreEqual(rateLimitResetTime.Value.ToUniversalTime(), result.RateLimitResetUtcTime);
+            }
+            else
+            {
+                Assert.IsNull(result.RateLimitResetTime);
+                Assert.IsNull(result.RateLimitResetUtcTime);
+            }
+            Assert.AreEqual(receivedTime, result.ReceivedTime);
+            Assert.AreEqual(receivedTime.ToUniversalTime(), result.ReceivedUtcTime);
             Assert.AreEqual(data, result.Data);
         }
 
@@ -54,12 +66,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
             Assert.AreEqual(typeof(IRedditObject), result.GetType().GetProperty("Data").PropertyType);
         }
 
-        private IRedditResponse<MyRedditObject> CreateSut(int? rateLimitUsed = null, int? rateLimitRemaining = null, DateTime? rateLimitResetTime = null, MyRedditObject data = null)
+        private IRedditResponse<MyRedditObject> CreateSut(int? rateLimitUsed = null, int? rateLimitRemaining = null, DateTime? rateLimitResetTime = null, DateTime? receivedTime = null, MyRedditObject data = null)
         {
             return new OSDevGrp.MyDashboard.Core.Models.RedditResponse<MyRedditObject>(
                 rateLimitUsed ?? _random.Next(100),
                 rateLimitRemaining ?? _random.Next(100),
                 rateLimitResetTime,
+                receivedTime ?? DateTime.Now,
                 data ?? new MyRedditObject());
         }
 

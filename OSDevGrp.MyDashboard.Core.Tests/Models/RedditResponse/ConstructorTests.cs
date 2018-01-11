@@ -61,13 +61,53 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
         }
 
         [TestMethod]
+        public void Constructor_WhenCalledWithRateLimitResetTimeEqualToNull_ExpectRateLimitResetUtcTimeEqualToNull()
+        {
+            DateTime? rateLimitResetTime = null;
+
+            IRedditResponse<MyRedditObject> sut = CreateSut(rateLimitResetTime: rateLimitResetTime);
+
+            Assert.IsNull(sut.RateLimitResetUtcTime);
+        }
+
+        [TestMethod]
         public void Constructor_WhenCalledWithRateLimitResetTimeNotEqualToNull_ExpectRateLimitResetTimeEqualToInputValue()
         {
-            DateTime? rateLimitResetTime = DateTime.Now.AddSeconds(300);
+            DateTime rateLimitResetTime = DateTime.Now.AddSeconds(_random.Next(300, 900));
 
             IRedditResponse<MyRedditObject> sut = CreateSut(rateLimitResetTime: rateLimitResetTime);
 
             Assert.AreEqual(rateLimitResetTime, sut.RateLimitResetTime);
+        }
+
+        [TestMethod]
+        public void Constructor_WhenCalledWithRateLimitResetTimeNotEqualToNull_ExpectRateLimitResetUtcTimeEqualToInputValueAsUtcTime()
+        {
+            DateTime rateLimitResetTime = DateTime.Now.AddSeconds(_random.Next(300, 900));
+
+            IRedditResponse<MyRedditObject> sut = CreateSut(rateLimitResetTime: rateLimitResetTime);
+
+            Assert.AreEqual(rateLimitResetTime.ToUniversalTime(), sut.RateLimitResetUtcTime);
+        }
+
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectReceivedTimeEqualToInputValue()
+        {
+            DateTime receivedTime = DateTime.Now.AddSeconds(_random.Next(30, 60) * -1);
+
+            IRedditResponse<MyRedditObject> sut = CreateSut(receivedTime: receivedTime);
+
+            Assert.AreEqual(receivedTime, sut.ReceivedTime);
+        }
+
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectReceivedUtcTimeEqualToInputValueAsUtcTime()
+        {
+            DateTime receivedTime = DateTime.Now.AddSeconds(_random.Next(30, 60) * -1);
+
+            IRedditResponse<MyRedditObject> sut = CreateSut(receivedTime: receivedTime);
+
+            Assert.AreEqual(receivedTime.ToUniversalTime(), sut.ReceivedUtcTime);
         }
 
         [TestMethod]
@@ -80,12 +120,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
             Assert.AreEqual(data, sut.Data);
         }
 
-        private IRedditResponse<MyRedditObject> CreateSut(int? rateLimitUsed = null, int? rateLimitRemaining = null, DateTime? rateLimitResetTime = null, MyRedditObject data = null, bool hasData = true)
+        private IRedditResponse<MyRedditObject> CreateSut(int? rateLimitUsed = null, int? rateLimitRemaining = null, DateTime? rateLimitResetTime = null, DateTime? receivedTime = null, MyRedditObject data = null, bool hasData = true)
         {
             return new OSDevGrp.MyDashboard.Core.Models.RedditResponse<MyRedditObject>(
                 rateLimitUsed ?? _random.Next(100),
                 rateLimitRemaining ?? _random.Next(100),
                 rateLimitResetTime,
+                receivedTime ?? DateTime.Now,
                 data ?? (hasData ? new MyRedditObject() : null));
         }
 

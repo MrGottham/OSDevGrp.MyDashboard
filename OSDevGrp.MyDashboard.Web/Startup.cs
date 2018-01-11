@@ -42,9 +42,12 @@ namespace OSDevGrp.MyDashboard.Web
             // Adds dependencies for the repositories.
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
             services.AddTransient<INewsRepository, NewsRepository>();
+            services.AddTransient<IRedditRepository, RedditRepository>();
             services.AddSingleton<IExceptionRepository, ExceptionRepository>();
             // Adds dependencies for the logic.
             services.AddTransient<INewsLogic, NewsLogic>();
+            services.AddSingleton<IRedditRateLimitLogic, RedditRateLimitLogic>();
+            services.AddTransient<IRedditLogic, RedditLogic>();
             services.AddTransient<ISystemErrorLogic, SystemErrorLogic>();
             // Adds dependencies for the dashboard content builders.
             services.AddTransient<IDashboardContentBuilder, DashboardNewsBuilder>();
