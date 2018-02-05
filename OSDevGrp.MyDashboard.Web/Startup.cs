@@ -51,6 +51,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddTransient<ISystemErrorLogic, SystemErrorLogic>();
             // Adds dependencies for the dashboard content builders.
             services.AddTransient<IDashboardContentBuilder, DashboardNewsBuilder>();
+            services.AddTransient<IDashboardContentBuilder, DashboardRedditContentBuilder>();
             // Adds dependencies for the dashboard factory.
             services.AddTransient<IDashboardFactory, DashboardFactory>();
             // Adds dependencies for the view model builders.

@@ -80,7 +80,7 @@ namespace OSDevGrp.MyDashboard.Core.Logic
         {
             lock (SyncRoot)
             {
-                return DateTime.UtcNow > ResetUtcTime || Remaining >= expectedCalls;
+                return DateTime.UtcNow > ResetUtcTime || expectedCalls > Remaining;
             }
         } 
 

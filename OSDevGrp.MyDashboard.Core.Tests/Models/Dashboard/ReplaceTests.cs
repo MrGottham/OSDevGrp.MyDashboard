@@ -41,6 +41,30 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
         }
         
         [TestMethod]
+        [ExpectedArgumentNullException("redditAuthenticatedUser")]
+        public void Replace_WhenCalledWithRedditAuthenticatedUserEqualToNull_ThrowsArgumentNullExcpetion()
+        {
+            const IRedditAuthenticatedUser redditAuthenticatedUser = null;
+
+            IDashboard sut = CreateSut();
+
+            sut.Replace(redditAuthenticatedUser);
+        }
+        
+        [TestMethod]
+        public void Replace_WhenCalledWithRedditAuthenticatedUserNotEqualToNull_ExpectedReplacedDashboardSettings()
+        {
+            IRedditAuthenticatedUser redditAuthenticatedUser = new Mock<IRedditAuthenticatedUser>().Object;
+
+            IDashboard sut = CreateSut();
+
+            sut.Replace(redditAuthenticatedUser);
+
+            Assert.IsNotNull(sut.RedditAuthenticatedUser);
+            Assert.AreEqual(redditAuthenticatedUser, sut.RedditAuthenticatedUser);
+        }
+        
+        [TestMethod]
         [ExpectedArgumentNullException("systemErrors")]
         public void Replace_WhenCalledWithSystemErrorsEqualToNull_ThrowsArgumentNullExcpetion()
         {

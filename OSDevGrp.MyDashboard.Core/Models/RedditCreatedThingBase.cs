@@ -28,6 +28,15 @@ namespace OSDevGrp.MyDashboard.Core.Models
             }
         }
 
+        [IgnoreDataMember]
+        public virtual DateTime Timestamp
+        {
+            get
+            {
+                return CreatedTime;
+            }
+        }
+
         [DataMember(Name = "created", IsRequired = true)]
         protected virtual decimal CreatedUnixTimestamp
         {

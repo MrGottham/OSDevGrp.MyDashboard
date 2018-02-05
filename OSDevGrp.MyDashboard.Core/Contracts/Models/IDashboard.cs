@@ -6,11 +6,15 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
     {
         IEnumerable<INews> News { get; }
 
+        IRedditAuthenticatedUser RedditAuthenticatedUser { get; }
+
         IEnumerable<ISystemError> SystemErrors { get; }
 
         IDashboardSettings Settings { get; }
 
         void Replace(IEnumerable<INews> news);
+
+        void Replace(IRedditAuthenticatedUser redditAuthenticatedUser);
 
         void Replace(IEnumerable<ISystemError> systemErrors);
 

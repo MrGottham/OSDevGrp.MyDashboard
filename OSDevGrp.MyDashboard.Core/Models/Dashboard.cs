@@ -10,6 +10,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
         #region Private variables
 
         private IList<INews> _news = new List<INews>();
+        private IRedditAuthenticatedUser _redditAuthenticatedUser;
         private IList<ISystemError> _systemErrors = new List<ISystemError>();
         private IDashboardSettings _settings;
 
@@ -23,6 +24,14 @@ namespace OSDevGrp.MyDashboard.Core.Models
             {
                 return _news;
             } 
+        }
+
+        public IRedditAuthenticatedUser RedditAuthenticatedUser
+        {
+            get
+            {
+                return _redditAuthenticatedUser;
+            }
         }
 
         public IEnumerable<ISystemError> SystemErrors 
@@ -53,6 +62,16 @@ namespace OSDevGrp.MyDashboard.Core.Models
             }
 
             _news = news.ToList();
+        }
+
+        public void Replace(IRedditAuthenticatedUser redditAuthenticatedUser)
+        {
+            if (redditAuthenticatedUser == null)
+            {
+                throw new ArgumentNullException(nameof(redditAuthenticatedUser));
+            }
+
+            _redditAuthenticatedUser = redditAuthenticatedUser;
         }
 
         public void Replace(IEnumerable<ISystemError> systemErrors)

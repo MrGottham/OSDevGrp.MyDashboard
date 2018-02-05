@@ -63,7 +63,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
         }
 
         [TestMethod]
-        public void WillExceedRateLimit_WhenExpectedCallsDoesExceedReamingAndResetTimeHasNotPassed_ExpectFalse()
+        public void WillExceedRateLimit_WhenExpectedCallsDoesExceedReamingAndResetTimeHasNotPassed_ExpectTrue()
         {
             int remaining = _random.Next(10, 60);
             DateTime resetTime = DateTime.Now.AddSeconds(_random.Next(5, 30));
@@ -72,11 +72,11 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             bool result = sut.WillExceedRateLimit(remaining + _random.Next(1, 10));
 
-            Assert.IsFalse(result);
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void WillExceedRateLimit_WhenExpectedCallsEqaulToReamingAndResetTimeHasNotPassed_ExpectTrue()
+        public void WillExceedRateLimit_WhenExpectedCallsEqaulToReamingAndResetTimeHasNotPassed_ExpectFalse()
         {
             int remaining = _random.Next(10, 60);
             DateTime resetTime = DateTime.Now.AddSeconds(_random.Next(5, 30));
@@ -85,11 +85,11 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             bool result = sut.WillExceedRateLimit(remaining);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void WillExceedRateLimit_WhenExpectedCallsDoesNotExceedReamingAndResetTimeHasNotPassed_ExpectTrue()
+        public void WillExceedRateLimit_WhenExpectedCallsDoesNotExceedReamingAndResetTimeHasNotPassed_ExpectFalse()
         {
             int remaining = _random.Next(10, 60);
             DateTime resetTime = DateTime.Now.AddSeconds(_random.Next(5, 30));
@@ -98,7 +98,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             bool result = sut.WillExceedRateLimit(remaining - _random.Next(1, 10));
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         private IRedditRateLimitLogic CreateSut(int? used = null, int? remaining = null, DateTime? resetTime = null)
