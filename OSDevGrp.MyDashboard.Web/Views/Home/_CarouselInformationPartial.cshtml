@@ -8,7 +8,7 @@
     <div class="carousel-caption d-none d-md-block">
         @if (string.Compare(Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
         {
-            <h5><a class="" href="@Model.ExternalUrl">@Model.Header</a></h5>
+            <h3><a class="text-primary" href="@Model.ExternalUrl">@Model.Header</a></h3>
         }
         else
         {
