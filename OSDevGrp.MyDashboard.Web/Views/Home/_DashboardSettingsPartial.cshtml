@@ -8,19 +8,23 @@
     {
         <input asp-for="RedditAccessToken" type="hidden" />
     }
-    <div class="form-group">
-        <label asp-for="NumberOfNews"></label>
-        <input asp-for="NumberOfNews" class="form-control" />
-        <span asp-validation-for="NumberOfNews" class="text-danger"></span>
-    </div>
-    <div class="form-check">
-        <label class="form-check-label">
-            <input asp-for="UseReddit" class="form-check-input" /> @Html.LabelFor(m => m.UseReddit)
-        </label>
-    </div>
-    <div class="text-center">
-        <div class="btn-group">
-            <button type="submit" class="btn btn-primary">Commit</button>
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label asp-for="NumberOfNews"></label>
+                <input asp-for="NumberOfNews" class="form-control" />
+                <span asp-validation-for="NumberOfNews" class="text-danger"></span>
+            </div>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input asp-for="UseReddit" class="form-check-input" /> @Html.LabelFor(m => m.UseReddit)
+                </label>
+            </div>
+            <div class="text-center">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Commit</button>
+                </div>
+            </div>
         </div>
     </div>
 </form>
