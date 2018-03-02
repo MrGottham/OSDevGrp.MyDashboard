@@ -36,8 +36,16 @@
     }
 </div>
 <div class="row">
-    <hr>    
+    <div class="col-md-9">
+    </div>
+    <div class="col-md-3">
+        @if (Model.Settings != null)
+        {
+            @Html.Partial("_DashboardSettingsPartial", Model.Settings)                        
+        }
+    </div>
 </div>
+<!--
 <div class="row">
     <div class="col-md-9">
         @if (Model.Informations != null && Model.Informations.Any())
@@ -71,12 +79,6 @@
         }
     </div>
     <div class="col-md-3">
-        <div class="panel-group">
-            <div class="panel panel-primary">
-                <div class="panel-heading">Settings</div>
-                <div class="panel-body">@Html.Partial("_DashboardSettingsPartial", Model.Settings)</div>
-            </div>
-        </div>
         @if (Model.SystemErrors != null && Model.SystemErrors.Any())
         {
             <h2>System errors</h2>
@@ -105,6 +107,7 @@
         }
     </div>
 </div>
+-->
 
 @section Scripts
 {
