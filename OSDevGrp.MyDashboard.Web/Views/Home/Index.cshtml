@@ -37,11 +37,36 @@
 </div>
 <div class="row">
     <div class="col-md-9">
+        <!-- https://codepen.io/techiediaries/pen/RQjNKr -->
     </div>
     <div class="col-md-3">
         @if (Model.Settings != null)
         {
             @Html.Partial("_DashboardSettingsPartial", Model.Settings)                        
+        }
+        @if (Model.SystemErrors != null && Model.SystemErrors.Any())
+        {
+            <h2>System errors</h2>
+            @foreach (SystemErrorViewModel systemErrorViewModel in Model.SystemErrors)
+            {
+                <div class="card mb-md-3">
+                    <div class="card-header text-danger">System error</div>
+                    <div class="card-body">@Html.Raw(systemErrorViewModel.TruncatedMessage)</div> 
+                    <div class="card-footer">
+                        <form asp-controller="Home" asp-action="SystemError" method="post">
+                            <input asp-for="@systemErrorViewModel.SystemErrorIdentifier" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Timestamp" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Message" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Details" type="hidden" />
+                            <div class="text-center">
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-info">View</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
         }
     </div>
 </div>
@@ -79,32 +104,6 @@
         }
     </div>
     <div class="col-md-3">
-        @if (Model.SystemErrors != null && Model.SystemErrors.Any())
-        {
-            <h2>System errors</h2>
-            <div class="panel-group">
-                @foreach (SystemErrorViewModel systemErrorViewModel in Model.SystemErrors)
-                {
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">System error</div>
-                        <div class="panel-body"><p>@Html.Raw(systemErrorViewModel.TruncatedMessage)</p></div>
-                        <div class="panel-footer">
-                            <form asp-controller="Home" asp-action="SystemError" method="post">
-                                <input asp-for="@systemErrorViewModel.SystemErrorIdentifier" type="hidden" />
-                                <input asp-for="@systemErrorViewModel.Timestamp" type="hidden" />
-                                <input asp-for="@systemErrorViewModel.Message" type="hidden" />
-                                <input asp-for="@systemErrorViewModel.Details" type="hidden" />
-                                <div class="text-center">
-                                    <div class="btn-group">
-                                        <button type="submit" class="btn btn-info">View</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
     </div>
 </div>
 -->
