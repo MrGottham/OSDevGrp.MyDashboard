@@ -37,7 +37,23 @@
 </div>
 <div class="row">
     <div class="col-md-9">
-        <!-- https://codepen.io/techiediaries/pen/RQjNKr -->
+        @if (Model.Informations != null && Model.Informations.Any())
+        {
+            @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
+            {
+                <div class="card-deck mb-md-3">
+                    @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo))
+                    @if (elementNo + 1 < Model.Informations.Count())
+                    {
+                        @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo + 1))
+                    }
+                    @if (elementNo + 2 < Model.Informations.Count())
+                    {
+                        @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo + 2))
+                    }
+                </div>
+            }
+        }
     </div>
     <div class="col-md-3">
         @if (Model.Settings != null)
@@ -70,43 +86,6 @@
         }
     </div>
 </div>
-<!--
-<div class="row">
-    <div class="col-md-9">
-        @if (Model.Informations != null && Model.Informations.Any())
-        {
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="panel-group">
-                        @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
-                        {
-                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
-                        }
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="panel-group">
-                        @for (int elementNo = 1; elementNo < Model.Informations.Count(); elementNo += 3)
-                        {
-                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
-                        }
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="panel-group">
-                        @for (int elementNo = 2; elementNo < Model.Informations.Count(); elementNo += 3)
-                        {
-                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
-                        }
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-    <div class="col-md-3">
-    </div>
-</div>
--->
 
 @section Scripts
 {

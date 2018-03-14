@@ -4,7 +4,7 @@
 @using OSDevGrp.MyDashboard.Web.Models;
 @model IEnumerable<InformationViewModel>
 
-<div id="myCarousel" class="carousel slide" data-ride="carousel">
+<div id="myCarousel" class="carousel slide mb-md-3" data-ride="carousel">
     <ol class="carousel-indicators">
         <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
         @for (int elementNo = 1; elementNo < Math.Min(7, Model.Count()); elementNo++)
