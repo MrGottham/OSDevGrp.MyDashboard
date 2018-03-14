@@ -1,40 +1,27 @@
-@using System.Text.RegularExpressions;
+@using System.Globalization;
 @using OSDevGrp.MyDashboard.Web.Models;
 @model InformationViewModel
 
-<div class="panel panel-info">
-    @if (string.IsNullOrWhiteSpace(@Model.Header) == false)
+<div class="card">
+    @if (string.IsNullOrWhiteSpace(Model.ImageUrl) == false)
     {
-        <div class="panel-heading">@Html.Raw(Model.Header)</div>
+        <img class="card-img-top img-fluid" src="@Model.ImageUrl" />
     }
-    @if (string.IsNullOrWhiteSpace(@Model.ImageUrl) == false || string.IsNullOrWhiteSpace(@Model.Summary) == false || string.IsNullOrWhiteSpace(@Model.Details) == false)
-    {
-        <div class="panel-body">
-            @if (string.IsNullOrWhiteSpace(@Model.ImageUrl) == false)
-            {
-                <img src="@Model.ImageUrl" class="img-responsive" />
-            }
-            @if (string.IsNullOrWhiteSpace(@Model.Summary) == false)
-            {
-                @Html.Raw(Model.Summary)
-            }
-            else if (string.IsNullOrWhiteSpace(@Model.Details) == false)
-            {
-                @Html.Raw(Model.Details)
-            }
-        </div>
-    }
-    @if (string.Compare(@Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
-    {
-        <div class="panel-body">
-            <div class="text-center">
-                <div class="btn-group">
-                    <a class="btn btn-primary" href="@Model.ExternalUrl" target="_blank">Read More</a>
-                </div>
-            </div>
-        </div>
-    }
-    <div class="panel-footer">
+    <div class="card-body">
+        @if (string.Compare(@Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0 && string.IsNullOrWhiteSpace(Model.Header) == false)
+        {
+            <h4 class="card-title"><a href="@Model.ExternalUrl">@Model.Header</a></h4>
+        }
+        else if (string.IsNullOrWhiteSpace(Model.Header) == false)
+        {
+            <h4 class="card-title">@Model.Header</h4>
+        }
+        @if (string.IsNullOrWhiteSpace(Model.Summary) == false)
+        {
+            <p class="card-text">@Model.Summary</p>
+        }
+    </div>
+    <div class="card-footer">
         <p class="text-left">@Model.Timestamp.ToString("dddd") @Model.Timestamp.ToShortTimeString() - @Html.Raw(Model.AuthorOrProvider)</p>
     </div>
 </div>

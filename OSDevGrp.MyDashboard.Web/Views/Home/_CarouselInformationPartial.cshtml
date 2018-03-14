@@ -1,17 +1,18 @@
-@using System.Text.RegularExpressions;
+@using System;
 @using OSDevGrp.MyDashboard.Web.Models;
 @model InformationViewModel
 
-<img src="@Model.ImageUrl" class="img-responsive" />
+<img class="d-block w-100" src="@Model.ImageUrl" />
 @if (string.IsNullOrWhiteSpace(@Model.Header) == false)
 {
-    <div class="carousel-caption" role="option">
-        <p>
-            @Model.Header
-            @if (string.Compare(@Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
-            {
-                <a class="btn btn-default" href="@Model.ExternalUrl" target="_blank">Read More</a>
-            }
-        </p>
+    <div class="carousel-caption d-none d-md-block">
+        @if (string.Compare(Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
+        {
+            <h3><a class="text-primary" href="@Model.ExternalUrl">@Model.Header</a></h3>
+        }
+        else
+        {
+            <h5>@Model.Header</h5>
+        }
     </div>
 }

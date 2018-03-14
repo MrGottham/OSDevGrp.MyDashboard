@@ -1,4 +1,5 @@
-﻿@using OSDevGrp.MyDashboard.Web.Models;
+﻿@using System.Linq;
+@using OSDevGrp.MyDashboard.Web.Models;
 @model DashboardViewModel
 
 @{
@@ -6,136 +7,82 @@
 }
 
 <div class="row">
-    <div class="col-md-6">
-        @if (Model.InformationsWithImageUrl != null && Model.InformationsWithImageUrl.Any())
-        {
-            <div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="6000">
-                <ol class="carousel-indicators">
-                    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
-                    @for (int elementNo = 1; elementNo < Math.Min(7, Model.InformationsWithImageUrl.Count()); elementNo++)
-                    {
-                        <li data-target="#myCarousel" data-slide-to="@elementNo"></li>
-                    }
-                </ol>
-                <div class="carousel-inner" role="listbox">
-                    <div class="item active">
-                        @Html.Partial("_CarouselInformationPartial", @Model.InformationsWithImageUrl.ElementAt(0))
-                    </div>
-                    @for (int elementNo = 1; elementNo < Math.Min(7, Model.InformationsWithImageUrl.Count()); elementNo++)
-                    {
-                        <div class="item">
-                            @Html.Partial("_CarouselInformationPartial", @Model.InformationsWithImageUrl.ElementAt(elementNo))
-                        </div>
-                    }
-                </div>
-                <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
-                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                </a>
-                <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
-                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                </a>
-            </div>
-        }
-    </div>
-    <div class="col-md-6">
-        <h2>My Dashboard</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="panel-group">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">My Dashboard</div>
-                        <div class="panel-body"><p>Content information</p></div>
-                    </div>
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">My Dashboard</div>
-                        <div class="panel-body"><p>Content information</p></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="panel-group">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">My Dashboard</div>
-                        <div class="panel-body"><p>Content information</p></div>
-                    </div>
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">My Dashboard</div>
-                        <div class="panel-body"><p>Content information</p></div>
-                    </div>
-                </div>
-            </div>
+    @if (Model.InformationsWithImageUrl != null && Model.InformationsWithImageUrl.Any() && false)
+    {
+        <div class="col-md-8">
+            @Html.Partial("_CarouselPartial", Model.InformationsWithImageUrl)
         </div>
-    </div>
-</div>
-<div class="row">
-    <hr>    
+        <div class="col-md-4">
+            <h1>Reddit Authenticated User</h1>
+        </div>
+    }
+    else if (Model.InformationsWithImageUrl != null && Model.InformationsWithImageUrl.Any())
+    {
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-10">
+            @Html.Partial("_CarouselPartial", Model.InformationsWithImageUrl)
+        </div>
+        <div class="col-md-1">
+        </div>
+    }
+    else if (false)
+    {
+        <div class="col-md-4">
+            <h1>Reddit Authenticated User</h1>
+        </div>
+        <div class="col-md-8">
+        </div>
+    }
 </div>
 <div class="row">
     <div class="col-md-9">
         @if (Model.Informations != null && Model.Informations.Any())
         {
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="panel-group">
-                        @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
-                        {
-                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
-                        }
-                    </div>
+            @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
+            {
+                <div class="card-deck mb-md-3">
+                    @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo))
+                    @if (elementNo + 1 < Model.Informations.Count())
+                    {
+                        @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo + 1))
+                    }
+                    @if (elementNo + 2 < Model.Informations.Count())
+                    {
+                        @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo + 2))
+                    }
                 </div>
-                <div class="col-md-4">
-                    <div class="panel-group">
-                        @for (int elementNo = 1; elementNo < Model.Informations.Count(); elementNo += 3)
-                        {
-                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
-                        }
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="panel-group">
-                        @for (int elementNo = 2; elementNo < Model.Informations.Count(); elementNo += 3)
-                        {
-                            @Html.Partial("_InformationPartial", @Model.Informations.ElementAt(elementNo))
-                        }
-                    </div>
-                </div>
-            </div>
+            }
         }
     </div>
     <div class="col-md-3">
-        <div class="panel-group">
-            <div class="panel panel-primary">
-                <div class="panel-heading">Settings</div>
-                <div class="panel-body">@Html.Partial("_DashboardSettingsPartial", Model.Settings)</div>
-            </div>
-        </div>
+        @if (Model.Settings != null)
+        {
+            @Html.Partial("_DashboardSettingsPartial", Model.Settings)                        
+        }
         @if (Model.SystemErrors != null && Model.SystemErrors.Any())
         {
             <h2>System errors</h2>
-            <div class="panel-group">
-                @foreach (SystemErrorViewModel systemErrorViewModel in Model.SystemErrors)
-                {
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">System error</div>
-                        <div class="panel-body"><p>@Html.Raw(systemErrorViewModel.TruncatedMessage)</p></div>
-                        <div class="panel-footer">
-                            <form asp-controller="Home" asp-action="SystemError" method="post">
-                                <input asp-for="@systemErrorViewModel.SystemErrorIdentifier" type="hidden" />
-                                <input asp-for="@systemErrorViewModel.Timestamp" type="hidden" />
-                                <input asp-for="@systemErrorViewModel.Message" type="hidden" />
-                                <input asp-for="@systemErrorViewModel.Details" type="hidden" />
-                                <div class="text-center">
-                                    <div class="btn-group">
-                                        <button type="submit" class="btn btn-info">View</button>
-                                    </div>
+            @foreach (SystemErrorViewModel systemErrorViewModel in Model.SystemErrors)
+            {
+                <div class="card mb-md-3">
+                    <div class="card-header text-danger">System error</div>
+                    <div class="card-body">@Html.Raw(systemErrorViewModel.TruncatedMessage)</div> 
+                    <div class="card-footer">
+                        <form asp-controller="Home" asp-action="SystemError" method="post">
+                            <input asp-for="@systemErrorViewModel.SystemErrorIdentifier" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Timestamp" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Message" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Details" type="hidden" />
+                            <div class="text-center">
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-info">View</button>
                                 </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
-                }
-            </div>
+                </div>
+            }
         }
     </div>
 </div>

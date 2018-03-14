@@ -1,24 +1,30 @@
+@using System;
 @using OSDevGrp.MyDashboard.Web.Models;
 @model DashboardSettingsViewModel;
 
+<h2>Settings</h2>
 <form asp-controller="Home" asp-action="Commit" method="post">
     @if (string.IsNullOrWhiteSpace(Model.RedditAccessToken) == false)
     {
         <input asp-for="RedditAccessToken" type="hidden" />
     }
-    <fieldset class="form-group">
-        <label asp-for="NumberOfNews" class="control-label"></label>
-        <input asp-for="NumberOfNews" class="form-control" />
-        <span asp-validation-for="NumberOfNews" class="text-danger"></span>
-    </fieldset>
-    <fieldset class="form-group">
-        <div class="checkbox">
-            <label class="control-label"><input asp-for="UseReddit" />@Html.NameFor(m => m.UseReddit)</label>
-        </div>
-    </fieldset>
-    <div class="text-center">
-        <div class="btn-group">
-            <button type="submit" class="btn btn-primary">Commit</button>
+    <div class="card mb-md-3">
+        <div class="card-body">
+            <div class="form-group">
+                <label asp-for="NumberOfNews"></label>
+                <input asp-for="NumberOfNews" class="form-control" />
+                <span asp-validation-for="NumberOfNews" class="text-danger"></span>
+            </div>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input asp-for="UseReddit" class="form-check-input" /> @Html.LabelFor(m => m.UseReddit)
+                </label>
+            </div>
+            <div class="text-center">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Commit</button>
+                </div>
+            </div>
         </div>
     </div>
 </form>
