@@ -2,10 +2,8 @@ using System;
 
 namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 {
-    public interface IDashboardItem
+    public interface IDashboardItem : IIdentifiable
     {
-        string Identifier { get; }
-
         DateTime Timestamp { get; }
     }
 }

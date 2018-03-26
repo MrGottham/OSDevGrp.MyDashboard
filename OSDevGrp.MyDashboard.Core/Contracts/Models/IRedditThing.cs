@@ -1,9 +1,7 @@
 namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 {
-    public interface IRedditThing : IRedditObject
+    public interface IRedditThing : IRedditObject, IIdentifiable
     {
-        string Identifier { get; }
-
         string FullName { get; }
 
         string Kind { get; }

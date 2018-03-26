@@ -7,13 +7,15 @@
 }
 
 <div class="row">
-    @if (Model.InformationsWithImageUrl != null && Model.InformationsWithImageUrl.Any() && false)
+    @if (Model.InformationsWithImageUrl != null && Model.InformationsWithImageUrl.Any() && Model.RedditAuthenticatedUser != null)
     {
         <div class="col-md-8">
             @Html.Partial("_CarouselPartial", Model.InformationsWithImageUrl)
         </div>
         <div class="col-md-4">
-            <h1>Reddit Authenticated User</h1>
+            <div class="card-deck mb-md-3">
+                @Html.Raw(Model.RedditAuthenticatedUser.Html)
+            </div>
         </div>
     }
     else if (Model.InformationsWithImageUrl != null && Model.InformationsWithImageUrl.Any())
@@ -26,10 +28,12 @@
         <div class="col-md-1">
         </div>
     }
-    else if (false)
+    else if (Model.RedditAuthenticatedUser != null)
     {
         <div class="col-md-4">
-            <h1>Reddit Authenticated User</h1>
+            <div class="card-deck mb-md-3">
+                @Html.Raw(Model.RedditAuthenticatedUser.Html)
+            </div>
         </div>
         <div class="col-md-8">
         </div>

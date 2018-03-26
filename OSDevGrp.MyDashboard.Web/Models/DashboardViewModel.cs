@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Models
@@ -25,5 +26,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
         public IEnumerable<SystemErrorViewModel> SystemErrors { get; set; }
 
         public DashboardSettingsViewModel Settings { get; set; }
+
+        public ObjectViewModel<IRedditAuthenticatedUser> RedditAuthenticatedUser { get; set; }
     }
 }

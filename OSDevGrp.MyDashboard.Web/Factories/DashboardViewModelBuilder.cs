@@ -17,13 +17,14 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         private readonly IViewModelBuilder<InformationViewModel, INews> _newsToInformationViewModelBuilder;
         private readonly IViewModelBuilder<SystemErrorViewModel, ISystemError> _systemErrorViewModelBuilder;
         private readonly IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> _dashboardSettingsViewModelBuilder;
+        private readonly IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> _redditAuthenticatedUserToObjectViewModelBuilder;
         private readonly IHtmlHelper _htmlHelper;
 
         #endregion
 
         #region Constructor
 
-        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IHtmlHelper htmlHelper)
+        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IHtmlHelper htmlHelper)
         {
             if (newsToInformationViewModelBuilder == null) 
             {
@@ -37,6 +38,10 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 throw new ArgumentNullException(nameof(dashboardSettingsViewModelBuilder));
             }
+            if (redditAuthenticatedUserToObjectViewModelBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(redditAuthenticatedUserToObjectViewModelBuilder));
+            }
             if (htmlHelper == null)
             {
                 throw new ArgumentNullException(nameof(htmlHelper));
@@ -45,6 +50,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             _newsToInformationViewModelBuilder = newsToInformationViewModelBuilder;
             _systemErrorViewModelBuilder = systemErrorViewModelBuilder;
             _dashboardSettingsViewModelBuilder = dashboardSettingsViewModelBuilder;
+            _redditAuthenticatedUserToObjectViewModelBuilder = redditAuthenticatedUserToObjectViewModelBuilder;
             _htmlHelper = htmlHelper;
         }
 
@@ -57,6 +63,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             IList<InformationViewModel> informationViewModels = new List<InformationViewModel>();
             IList<SystemErrorViewModel> systemErrorViewModels = new List<SystemErrorViewModel>();
             DashboardSettingsViewModel dashboardSettingsViewModel = null;
+            ObjectViewModel<IRedditAuthenticatedUser> objectViewModelForRedditAuthenticatedUser = null;
             object syncRoot = new object();
 
             try
@@ -76,7 +83,12 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                     GenerateDashboardSettingsViewModelBuilderTaskArray,
                     viewModel => dashboardSettingsViewModel = viewModel,
                     exception => HandleException(exception, systemErrorViewModels, syncRoot));
-                Task.WaitAll(new [] {handleInformationViewModelsTask, handleSystemErrorViewModelsTask, handleDashboardSettingsViewModelTask});
+                Task handleObjectViewModelForRedditAuthenticatedUserTask = HandleAsync<ObjectViewModel<IRedditAuthenticatedUser>>(
+                    dashboard,
+                    m => GenerateObjectViewModelBuilderTaskArray<IRedditAuthenticatedUser>(m, n => n.RedditAuthenticatedUser, _redditAuthenticatedUserToObjectViewModelBuilder),
+                    viewModel => objectViewModelForRedditAuthenticatedUser = viewModel,
+                    exception => HandleException(exception, systemErrorViewModels, syncRoot));
+                Task.WaitAll(new [] {handleInformationViewModelsTask, handleSystemErrorViewModelsTask, handleDashboardSettingsViewModelTask, handleObjectViewModelForRedditAuthenticatedUserTask});
             }
             catch (Exception ex)
             {
@@ -87,7 +99,8 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 Informations = informationViewModels.OrderByDescending(informationViewModel => informationViewModel.Timestamp),
                 SystemErrors = systemErrorViewModels.OrderByDescending(systemErrorViewModel => systemErrorViewModel.Timestamp),
-                Settings = dashboardSettingsViewModel
+                Settings = dashboardSettingsViewModel,
+                RedditAuthenticatedUser = objectViewModelForRedditAuthenticatedUser
             };
         }
 
@@ -138,6 +151,30 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             }
 
             return new[] {_dashboardSettingsViewModelBuilder.BuildAsync(dashboard.Settings)};
+        }
+
+        private Task<ObjectViewModel<TObject>>[] GenerateObjectViewModelBuilderTaskArray<TObject>(IDashboard dashboard, Func<IDashboard, TObject> objectGetter, IViewModelBuilder<ObjectViewModel<TObject>, TObject> objectViewModelBuilder) where TObject : class
+        {
+            if (dashboard == null)
+            {
+                throw new ArgumentNullException(nameof(dashboard));
+            }
+            if (objectGetter == null)
+            {
+                throw new ArgumentNullException(nameof(objectGetter));
+            }
+            if (objectViewModelBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(objectViewModelBuilder));
+            }
+
+            TObject obj = objectGetter.Invoke(dashboard);
+            if (obj == null)
+            {
+                return new Task<ObjectViewModel<TObject>>[0];
+            }
+
+            return new[] {objectViewModelBuilder.BuildAsync(obj)};
         }
 
         private Task HandleAsync<TViewModel>(IDashboard dashboard, Func<IDashboard, Task<TViewModel>[]> taskArrayGenerator, Action<TViewModel> resultHandler, Action<Exception> exceptionHandler) where TViewModel : IViewModel
