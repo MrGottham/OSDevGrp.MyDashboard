@@ -19,5 +19,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
         TRedditObject Data { get; }
 
         IRedditResponse<TTargetRedditObject> As<TTargetRedditObject>() where TTargetRedditObject : class, IRedditObject;
+
+        IRedditResponse<TTargetRedditObject> As<TTargetRedditObject>(TTargetRedditObject data) where TTargetRedditObject : class, IRedditObject;
     }
 }

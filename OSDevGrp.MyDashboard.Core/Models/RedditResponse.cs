@@ -69,12 +69,17 @@ namespace OSDevGrp.MyDashboard.Core.Models
 
         public IRedditResponse<TTargetRedditObject> As<TTargetRedditObject>() where TTargetRedditObject : class, IRedditObject
         {
+            return As<TTargetRedditObject>(Data as TTargetRedditObject);
+        }
+        
+        public IRedditResponse<TTargetRedditObject> As<TTargetRedditObject>(TTargetRedditObject data) where TTargetRedditObject : class, IRedditObject
+        {
             return new RedditResponse<TTargetRedditObject>(
                 RateLimitUsed,
                 RateLimitRemaining,
                 RateLimitResetTime,
                 ReceivedTime,
-                Data as TTargetRedditObject);
+                data);
         }
         
         #endregion

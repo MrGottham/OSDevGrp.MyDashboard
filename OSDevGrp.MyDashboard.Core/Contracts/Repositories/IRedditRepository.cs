@@ -6,5 +6,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Repositories
     public interface IRedditRepository
     {
         Task<IRedditResponse<IRedditAuthenticatedUser>> GetAuthenticatedUserAsync(IRedditAccessToken accessToken);
+
+        Task<IRedditResponse<IRedditList<IRedditSubreddit>>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken);
     }
 }

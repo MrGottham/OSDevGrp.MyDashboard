@@ -92,6 +92,36 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             });
         }
 
+        public Task<IRedditResponse<IRedditList<IRedditSubreddit>>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+
+            return Task.Run<IRedditResponse<IRedditList<IRedditSubreddit>>>(() => 
+            {
+                try
+                {
+                    Task<IRedditResponse<RedditList<RedditSubreddit>>> getTask = GetAsync<RedditList<RedditSubreddit>>(new Uri($"{RedditApiUrl}/subreddits/mine/subscriber"), accessToken.TokenType, accessToken.AccessToken);
+                    getTask.Wait();
+
+                    IRedditResponse<RedditList<RedditSubreddit>> response = getTask.Result;
+
+                    return response.As<IRedditList<IRedditSubreddit>>(response.Data.As<IRedditSubreddit>());
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                return null;
+            });
+        }
+
         internal async Task<IRedditResponse<TRedditObject>> GetAsync<TRedditObject>(Uri requestUri, string authenticationHeaderScheme, string authenticationHeaderParameter) where TRedditObject : class, IRedditObject
         {
             if (requestUri == null)
