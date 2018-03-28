@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
@@ -77,7 +78,10 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                     dashboard.Replace(authenticatedUser);
 
                     bool over18 = authenticatedUser.Over18;
-                    IEnumerable<IRedditSubreddit> subreddits = await GetSubredditsAsync(accessToken, over18);
+                    bool includeNsfwContent = dashboardSettings.IncludeNsfwContent;
+                    bool onlyNsfwContent = dashboardSettings.OnlyNsfwContent;
+                    IEnumerable<IRedditSubreddit> subreddits = await GetSubredditsAsync(accessToken, over18, includeNsfwContent, onlyNsfwContent);
+                    dashboard.Replace(subreddits);
                 }
                 catch (Exception ex)
                 {
@@ -86,7 +90,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             });
         }
 
-        private Task<IEnumerable<IRedditSubreddit>> GetSubredditsAsync(IRedditAccessToken accessToken, bool over18)
+        private Task<IEnumerable<IRedditSubreddit>> GetSubredditsAsync(IRedditAccessToken accessToken, bool over18, bool includeNsfwContent, bool onlyNsfwContent)
         {
             if (accessToken == null)
             {
@@ -97,6 +101,17 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             {
                 try
                 {
+                    Task<IEnumerable<IRedditSubreddit>>[] getSubredditCollectionTasks = new[] 
+                    {
+                        _redditLogic.GetSubredditsForAuthenticatedUserAsync(accessToken, over18 && includeNsfwContent, over18 && onlyNsfwContent)
+                    };
+                    Task.WaitAll(getSubredditCollectionTasks);
+
+                    return getSubredditCollectionTasks
+                        .Where(task => task.IsCompleted && task.IsFaulted == false)
+                        .SelectMany(task => task.Result)
+                        .OrderByDescending(subreddit => subreddit.Subscribers)
+                        .ToList();
                 }
                 catch (AggregateException ex)
                 {
