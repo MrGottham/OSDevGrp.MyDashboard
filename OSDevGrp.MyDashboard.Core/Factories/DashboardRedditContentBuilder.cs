@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
@@ -73,13 +74,39 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                     {
                         return;
                     }
-
                     dashboard.Replace(authenticatedUser);
+
+                    bool over18 = authenticatedUser.Over18;
+                    IEnumerable<IRedditSubreddit> subreddits = await GetSubredditsAsync(accessToken, over18);
                 }
                 catch (Exception ex)
                 {
                     _exceptionHandler.HandleAsync(ex).Wait();
                 }
+            });
+        }
+
+        private Task<IEnumerable<IRedditSubreddit>> GetSubredditsAsync(IRedditAccessToken accessToken, bool over18)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+
+            return Task.Run<IEnumerable<IRedditSubreddit>>(() =>
+            {
+                try
+                {
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex);
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex);
+                }
+                return new List<IRedditSubreddit>(0);
             });
         }
 
