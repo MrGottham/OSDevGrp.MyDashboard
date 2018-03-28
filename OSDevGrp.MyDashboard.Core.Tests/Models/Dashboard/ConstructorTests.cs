@@ -25,6 +25,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
         }
         
         [TestMethod]
+        public void Constructor_WhenCalled_ExpectRedditSubredditsEqualToEmptyCollection()
+        {
+            IDashboard sut = CreateSut();
+
+            Assert.IsNotNull(sut.RedditSubreddits);
+            Assert.IsFalse(sut.RedditSubreddits.Any());
+        }
+        
+        [TestMethod]
         public void Constructor_WhenCalled_ExpectSystemErrorsEqualToEmptyCollection()
         {
             IDashboard sut = CreateSut();

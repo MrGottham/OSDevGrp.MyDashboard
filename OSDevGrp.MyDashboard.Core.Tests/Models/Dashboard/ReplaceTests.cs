@@ -65,6 +65,36 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
         }
         
         [TestMethod]
+        [ExpectedArgumentNullException("redditSubreddits")]
+        public void Replace_WhenCalledWithRedditSubredditsEqualToNull_ThrowsArgumentNullExcpetion()
+        {
+            const IEnumerable<IRedditSubreddit> redditSubreddits = null;
+
+            IDashboard sut = CreateSut();
+
+            sut.Replace(redditSubreddits);
+        }
+        
+        [TestMethod]
+        public void Replace_WhenCalledWithIRedditSubredditsNotEqualToNull_ExpectedReplacedCollection()
+        {
+            IEnumerable<IRedditSubreddit> redditSubreddits = new List<IRedditSubreddit>
+            {
+                new Mock<IRedditSubreddit>().Object,
+                new Mock<IRedditSubreddit>().Object,
+                new Mock<IRedditSubreddit>().Object
+            };
+
+            IDashboard sut = CreateSut();
+
+            sut.Replace(redditSubreddits);
+
+            Assert.IsNotNull(sut.RedditSubreddits);
+            Assert.AreEqual(redditSubreddits.Count(), sut.RedditSubreddits.Count());
+            Assert.IsTrue(sut.RedditSubreddits.All(redditSubreddit => redditSubreddits.Contains(redditSubreddit)));
+        }
+        
+        [TestMethod]
         [ExpectedArgumentNullException("systemErrors")]
         public void Replace_WhenCalledWithSystemErrorsEqualToNull_ThrowsArgumentNullExcpetion()
         {

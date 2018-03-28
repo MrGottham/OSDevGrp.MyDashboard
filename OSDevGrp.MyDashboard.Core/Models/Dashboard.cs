@@ -11,6 +11,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
 
         private IList<INews> _news = new List<INews>();
         private IRedditAuthenticatedUser _redditAuthenticatedUser;
+        private IList<IRedditSubreddit> _redditSubreddits = new List<IRedditSubreddit>();
         private IList<ISystemError> _systemErrors = new List<ISystemError>();
         private IDashboardSettings _settings;
 
@@ -31,6 +32,14 @@ namespace OSDevGrp.MyDashboard.Core.Models
             get
             {
                 return _redditAuthenticatedUser;
+            }
+        }
+
+        public IEnumerable<IRedditSubreddit> RedditSubreddits
+        {
+            get
+            {
+                return _redditSubreddits;
             }
         }
 
@@ -72,6 +81,16 @@ namespace OSDevGrp.MyDashboard.Core.Models
             }
 
             _redditAuthenticatedUser = redditAuthenticatedUser;
+        }
+
+        public void Replace(IEnumerable<IRedditSubreddit> redditSubreddits)
+        {
+            if (redditSubreddits == null)
+            {
+                throw new ArgumentNullException(nameof(redditSubreddits));
+            }
+
+            _redditSubreddits = redditSubreddits.ToList();
         }
 
         public void Replace(IEnumerable<ISystemError> systemErrors)
