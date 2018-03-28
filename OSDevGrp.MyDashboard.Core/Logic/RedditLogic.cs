@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
@@ -13,13 +15,14 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
         private readonly IRedditRepository _redditRepository;
         private readonly IRedditRateLimitLogic _redditRateLimitLogic;
+        private readonly IRedditFilterLogic _redditFilterLogic;
         private readonly IExceptionHandler _exceptionHandler;
         
         #endregion
 
         #region Constructor
 
-        public RedditLogic(IRedditRepository redditRepository, IRedditRateLimitLogic redditRateLimitLogic, IExceptionHandler exceptionHandler)
+        public RedditLogic(IRedditRepository redditRepository, IRedditRateLimitLogic redditRateLimitLogic, IRedditFilterLogic redditFilterLogic, IExceptionHandler exceptionHandler)
         {
             if (redditRepository == null)
             {
@@ -29,6 +32,10 @@ namespace OSDevGrp.MyDashboard.Core.Logic
             {
                 throw new ArgumentNullException(nameof(redditRateLimitLogic));
             }
+            if (redditFilterLogic == null)
+            {
+                throw new ArgumentNullException(nameof(redditFilterLogic));
+            }
             if (exceptionHandler == null)
             {
                 throw new ArgumentNullException(nameof(exceptionHandler));
@@ -36,6 +43,7 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
             _redditRepository = redditRepository;
             _redditRateLimitLogic = redditRateLimitLogic;
+            _redditFilterLogic = redditFilterLogic;
             _exceptionHandler = exceptionHandler;
         }
 
@@ -79,6 +87,71 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                 }
                 return null;
             });
+        }
+
+        public Task<IEnumerable<IRedditSubreddit>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken, bool includeNsfwContent, bool onlyNsfwContent)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+
+            return Task.Run<IEnumerable<IRedditSubreddit>>(() =>
+            {
+                try
+                {
+                    if (_redditRateLimitLogic.WillExceedRateLimit(1))
+                    {
+                        return new List<IRedditSubreddit>(0);
+                    }
+
+                    Task<IRedditResponse<IRedditList<IRedditSubreddit>>> getSubredditsForAuthenticatedUserTask = _redditRepository.GetSubredditsForAuthenticatedUserAsync(accessToken);
+                    getSubredditsForAuthenticatedUserTask.Wait();
+
+                    IRedditResponse<IRedditList<IRedditSubreddit>> response = getSubredditsForAuthenticatedUserTask.Result;
+
+                    Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
+                    enforceRateLimitTask.Wait();
+
+                    IEnumerable<IRedditSubreddit> filteredSubredditCollection = ApplyFilter(response.Data, subredditCollection => _redditFilterLogic.RemoveUserBannedContentAsync(subredditCollection));
+                    if (includeNsfwContent == false)
+                    {
+                        filteredSubredditCollection = ApplyFilter(filteredSubredditCollection, subredditCollection => _redditFilterLogic.RemoveNsfwContentAsync(subredditCollection));
+                    }
+                    if (onlyNsfwContent)
+                    {
+                        filteredSubredditCollection = ApplyFilter(filteredSubredditCollection, subredditCollection => _redditFilterLogic.RemoveNoneNsfwContentAsync(subredditCollection));
+                    }
+
+                    return filteredSubredditCollection.OrderByDescending(m => m.Subscribers).ToList();
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                return new List<IRedditSubreddit>(0);
+            });
+        }
+
+        private IEnumerable<IRedditSubreddit> ApplyFilter(IEnumerable<IRedditSubreddit> subredditCollection, Func<IEnumerable<IRedditSubreddit>, Task<IEnumerable<IRedditSubreddit>>> filterTaskGetter)
+        {
+            if (subredditCollection == null)
+            {
+                throw new ArgumentNullException(nameof(subredditCollection));
+            }
+            if (filterTaskGetter == null)
+            {
+                throw new ArgumentNullException(nameof(filterTaskGetter));
+            }
+
+            Task<IEnumerable<IRedditSubreddit>> filterTask = filterTaskGetter(subredditCollection);
+            filterTask.Wait();
+
+            return filterTask.Result;
         }
         
         #endregion

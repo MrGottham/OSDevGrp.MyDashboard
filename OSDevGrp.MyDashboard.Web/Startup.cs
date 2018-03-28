@@ -47,6 +47,7 @@ namespace OSDevGrp.MyDashboard.Web
             // Adds dependencies for the logic.
             services.AddTransient<INewsLogic, NewsLogic>();
             services.AddSingleton<IRedditRateLimitLogic, RedditRateLimitLogic>();
+            services.AddTransient<IRedditFilterLogic, RedditFilterLogic>();
             services.AddTransient<IRedditLogic, RedditLogic>();
             services.AddTransient<ISystemErrorLogic, SystemErrorLogic>();
             // Adds dependencies for the dashboard content builders.

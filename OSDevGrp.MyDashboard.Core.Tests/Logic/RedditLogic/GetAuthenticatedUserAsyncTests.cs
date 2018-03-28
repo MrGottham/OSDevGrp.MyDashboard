@@ -17,6 +17,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
         private Mock<IRedditRepository> _redditRepositoryMock;
         private Mock<IRedditRateLimitLogic> _redditRateLimitLogicMock;
+        private Mock<IRedditFilterLogic> _redditFilterLogicMock;
         private Mock<IExceptionHandler> _exceptionHandlerMock;
         private Random _random;
 
@@ -27,6 +28,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         {
             _redditRepositoryMock = new Mock<IRedditRepository>();
             _redditRateLimitLogicMock = new Mock<IRedditRateLimitLogic>();
+            _redditFilterLogicMock = new Mock<IRedditFilterLogic>();
             _exceptionHandlerMock = new Mock<IExceptionHandler>();
             _random = new Random(DateTime.Now.Millisecond);
         }
@@ -270,6 +272,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             return new OSDevGrp.MyDashboard.Core.Logic.RedditLogic(
                 _redditRepositoryMock.Object,
                 _redditRateLimitLogicMock.Object,
+                _redditFilterLogicMock.Object,
                 _exceptionHandlerMock.Object);
         }
 
