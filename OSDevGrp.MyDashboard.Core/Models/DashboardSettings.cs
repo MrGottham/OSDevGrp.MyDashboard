@@ -11,6 +11,8 @@ namespace OSDevGrp.MyDashboard.Core.Models
             NumberOfNews = 50;
             UseReddit = false;
             RedditAccessToken = null;
+            IncludeNsfwContent = false;
+            OnlyNsfwContent = false;
         }
 
         #endregion
@@ -22,6 +24,10 @@ namespace OSDevGrp.MyDashboard.Core.Models
         public bool UseReddit { get; set; }
 
         public IRedditAccessToken RedditAccessToken { get; set; }
+
+        public bool IncludeNsfwContent { get; set; }
+
+        public bool OnlyNsfwContent { get; set; }
 
         #endregion
     }

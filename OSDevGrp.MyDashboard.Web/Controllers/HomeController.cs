@@ -75,7 +75,9 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 NumberOfNews = 100,
                 UseReddit = false,
-                RedditAccessToken = null
+                RedditAccessToken = null,
+                IncludeNsfwContent = false,
+                OnlyNsfwContent = false
             };
 
             DashboardSettingsViewModel dashboardSettingsViewModel = DashboardSettingsViewModel.Create(_httpContextAccessor.HttpContext);

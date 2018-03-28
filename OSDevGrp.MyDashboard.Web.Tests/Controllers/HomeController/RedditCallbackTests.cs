@@ -230,7 +230,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
                     dashboardSettings.UseReddit == false &&
-                    dashboardSettings.RedditAccessToken == null)),
+                    dashboardSettings.RedditAccessToken == null &&
+                    dashboardSettings.IncludeNsfwContent == false &&
+                    dashboardSettings.OnlyNsfwContent == false)),
                 Times.Once);
         }
 
@@ -347,7 +349,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
                     dashboardSettings.UseReddit == true &&
-                    dashboardSettings.RedditAccessToken == redditAccessToken)),
+                    dashboardSettings.RedditAccessToken == redditAccessToken &&
+                    dashboardSettings.IncludeNsfwContent == false &&
+                    dashboardSettings.OnlyNsfwContent == false)),
                 Times.Once);
         }
 
@@ -431,7 +435,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
                     dashboardSettings.UseReddit == false &&
-                    dashboardSettings.RedditAccessToken == null)),
+                    dashboardSettings.RedditAccessToken == null &&
+                    dashboardSettings.IncludeNsfwContent == false &&
+                    dashboardSettings.OnlyNsfwContent == false)),
                 Times.Once);
         }
 
@@ -505,7 +511,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
                     dashboardSettings.UseReddit == false &&
-                    dashboardSettings.RedditAccessToken == null)),
+                    dashboardSettings.RedditAccessToken == null &&
+                    dashboardSettings.IncludeNsfwContent == false &&
+                    dashboardSettings.OnlyNsfwContent == false)),
                 Times.Once);
         }
 

@@ -30,6 +30,22 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.DashboardSettings
             Assert.IsNull(sut.RedditAccessToken);
         }
         
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectIncludeNsfwContentToFalse()
+        {
+            IDashboardSettings sut = CreateSut();
+
+            Assert.IsFalse(sut.IncludeNsfwContent);
+        }
+
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectOnlyNsfwContentToFalse()
+        {
+            IDashboardSettings sut = CreateSut();
+
+            Assert.IsFalse(sut.OnlyNsfwContent);
+        }
+
         private IDashboardSettings CreateSut()
         {
             return new OSDevGrp.MyDashboard.Core.Models.DashboardSettings();

@@ -35,6 +35,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
             Assert.IsNotNull(result.RedditAccessToken);
+            Assert.IsFalse(result.IncludeNsfwContent);
+            Assert.IsFalse(result.OnlyNsfwContent);
         }
 
         [TestMethod]

@@ -75,7 +75,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == 100 &&
                     dashboardSettings.UseReddit == false &&
-                    dashboardSettings.RedditAccessToken == null)),
+                    dashboardSettings.RedditAccessToken == null &&
+                    dashboardSettings.IncludeNsfwContent == false &&
+                    dashboardSettings.OnlyNsfwContent == false)),
                 Times.Once);
         }
 
@@ -94,7 +96,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings != null &&
                     dashboardSettings.NumberOfNews == numberOfNews &&
                     dashboardSettings.UseReddit == useReddit &&
-                    dashboardSettings.RedditAccessToken == null)),
+                    dashboardSettings.RedditAccessToken == null &&
+                    dashboardSettings.IncludeNsfwContent == false &&
+                    dashboardSettings.OnlyNsfwContent == false)),
                 Times.Once);
         }
 
@@ -130,7 +134,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     string.Compare(dashboardSettings.RedditAccessToken.TokenType, tokenType, StringComparison.Ordinal) == 0 &&
                     dashboardSettings.RedditAccessToken.Expires.ToString() == received.ToLocalTime().AddSeconds(expiresIn).ToString() &&
                     string.Compare(dashboardSettings.RedditAccessToken.Scope, scope, StringComparison.Ordinal) == 0 &&
-                    string.Compare(dashboardSettings.RedditAccessToken.RefreshToken, refreshToken, StringComparison.Ordinal) == 0)),
+                    string.Compare(dashboardSettings.RedditAccessToken.RefreshToken, refreshToken, StringComparison.Ordinal) == 0 &&
+                    dashboardSettings.IncludeNsfwContent == false &&
+                    dashboardSettings.OnlyNsfwContent == false)),
                 Times.Once);
         }
 

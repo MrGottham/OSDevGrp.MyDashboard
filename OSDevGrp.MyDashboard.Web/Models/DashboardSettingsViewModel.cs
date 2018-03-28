@@ -43,11 +43,13 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         public IDashboardSettings ToDashboardSettings()
         {
-            return new DashboardSettings()
+            return new DashboardSettings
             {
                 NumberOfNews = NumberOfNews,
                 UseReddit = UseReddit,
-                RedditAccessToken = string.IsNullOrWhiteSpace(RedditAccessToken) ? null : OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(RedditAccessToken)
+                RedditAccessToken = string.IsNullOrWhiteSpace(RedditAccessToken) ? null : OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(RedditAccessToken),
+                IncludeNsfwContent = false,
+                OnlyNsfwContent = false
             };
         }
 

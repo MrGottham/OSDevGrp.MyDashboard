@@ -7,5 +7,9 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
         bool UseReddit { get; set; }
 
         IRedditAccessToken RedditAccessToken { get; set; }
+
+        bool IncludeNsfwContent { get; set; }
+
+        bool OnlyNsfwContent { get; set; }
     }
 }
