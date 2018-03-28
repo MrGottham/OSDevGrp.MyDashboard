@@ -28,5 +28,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
         public DashboardSettingsViewModel Settings { get; set; }
 
         public ObjectViewModel<IRedditAuthenticatedUser> RedditAuthenticatedUser { get; set; }
+
+        public IEnumerable<ObjectViewModel<IRedditSubreddit>> RedditSubreddits { get; set; }
     }
 }
