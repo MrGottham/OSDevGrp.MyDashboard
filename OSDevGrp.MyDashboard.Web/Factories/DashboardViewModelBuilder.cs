@@ -114,11 +114,11 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             
             return new DashboardViewModel
             {
-                Informations = informationViewModelCollection.OrderByDescending(informationViewModel => informationViewModel.Timestamp),
-                SystemErrors = systemErrorViewModelCollection.OrderByDescending(systemErrorViewModel => systemErrorViewModel.Timestamp),
+                Informations = informationViewModelCollection.OrderByDescending(informationViewModel => informationViewModel.Timestamp).ToList(),
+                SystemErrors = systemErrorViewModelCollection.OrderByDescending(systemErrorViewModel => systemErrorViewModel.Timestamp).ToList(),
                 Settings = dashboardSettingsViewModel,
                 RedditAuthenticatedUser = objectViewModelForRedditAuthenticatedUser,
-                RedditSubreddits = objectViewModelForRedditSubredditCollection
+                RedditSubreddits = objectViewModelForRedditSubredditCollection.OrderByDescending(objectViewModelForRedditSubreddit => objectViewModelForRedditSubreddit.Object.Subscribers).ToList()
             };
         }
 
@@ -262,28 +262,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 Message = _htmlHelper.ConvertNewLines(exception.Message),
                 Details = _htmlHelper.ConvertNewLines(exception.StackTrace)
             };
-            AddSystemErrorViewModel(systemErrorViewModel, systemErrorViewModelCollection, syncRoot);
-        }
-
-        private static void AddSystemErrorViewModel(SystemErrorViewModel systemErrorViewModel, IList<SystemErrorViewModel> systemErrorViewModelCollection, object syncRoot)
-        {
-            if (systemErrorViewModel == null)
-            {
-                throw new ArgumentNullException(nameof(systemErrorViewModel));
-            }
-            if (systemErrorViewModelCollection == null)
-            {
-                throw new ArgumentNullException(nameof(systemErrorViewModelCollection));
-            }
-            if (syncRoot == null)
-            {
-                throw new ArgumentNullException(nameof(syncRoot));
-            }
-
-            lock (syncRoot)
-            {
-                systemErrorViewModelCollection.Add(systemErrorViewModel);
-            }
+            AddViewModelToViewModelCollection(systemErrorViewModel, systemErrorViewModelCollection, syncRoot);
         }
 
         #endregion

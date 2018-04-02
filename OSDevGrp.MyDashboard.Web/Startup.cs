@@ -62,7 +62,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddTransient<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>, DashboardSettingsViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<DashboardViewModel, IDashboard>, DashboardViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>, RedditAuthenticatedUserToObjectViewModelBuilder>();
-            
+            services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>, RedditSubredditToObjectViewModelBuilder>();
             // Adds other services.
             services.AddMvc();
         }

@@ -196,7 +196,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, dashboardSettings: dashboardSettings, redditAuthenticatedUser: redditAuthenticatedUser, redditSubredditCollection: redditSubredditCollection);
 
             DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel();
-            ObjectViewModel<IRedditAuthenticatedUser> objectViewModelForRedditAuthenticatedUser = CreateObjectViewModel<IRedditAuthenticatedUser>();
+            ObjectViewModel<IRedditAuthenticatedUser> objectViewModelForRedditAuthenticatedUser = CreateObjectViewModel<IRedditAuthenticatedUser>(redditAuthenticatedUser, DateTime.Now.AddDays(_random.Next(1, 365) * -1).AddMinutes(_random.Next(-120, 120)));
             IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(dashboardSettingsViewModel: dashboardSettingsViewModel, objectViewModelForRedditAuthenticatedUser: objectViewModelForRedditAuthenticatedUser);
 
             Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
@@ -438,23 +438,23 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 }));
 
             _redditAuthenticatedUserToObjectViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IRedditAuthenticatedUser>()))
-                .Returns(Task.Run<ObjectViewModel<IRedditAuthenticatedUser>>(() => 
+                .Returns<IRedditAuthenticatedUser>(redditAuthenticatedUser => Task.Run<ObjectViewModel<IRedditAuthenticatedUser>>(() => 
                 {
                     if (string.IsNullOrWhiteSpace(aggregateExceptionMessage) == false)
                     {
                         throw new Exception(aggregateExceptionMessage);
                     }
-                    return objectViewModelForRedditAuthenticatedUser ?? CreateObjectViewModel<IRedditAuthenticatedUser>();
+                    return objectViewModelForRedditAuthenticatedUser ?? CreateObjectViewModel<IRedditAuthenticatedUser>(redditAuthenticatedUser, DateTime.Now.AddDays(_random.Next(1, 365) * -1).AddMinutes(_random.Next(-120, 120)));
                 }));
 
             _redditSubredditToObjectViewModelBuilder.Setup(m => m.BuildAsync(It.IsAny<IRedditSubreddit>()))
-                .Returns(Task.Run<ObjectViewModel<IRedditSubreddit>>(() => 
+                .Returns<IRedditSubreddit>(redditSubreddit => Task.Run<ObjectViewModel<IRedditSubreddit>>(() => 
                 {
                     if (string.IsNullOrWhiteSpace(aggregateExceptionMessage) == false)
                     {
                         throw new Exception(aggregateExceptionMessage);
                     }
-                    return CreateObjectViewModel<IRedditSubreddit>();
+                    return CreateObjectViewModel<IRedditSubreddit>(redditSubreddit, DateTime.Now.AddDays(_random.Next(1, 365) * -1).AddMinutes(_random.Next(-120, 120)));
                 }));
 
             _htmlHelperMock.Setup(m => m.ConvertNewLines(It.IsAny<string>()))
@@ -530,6 +530,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             while (redditSubredditCollection.Count < numberOfRedditSubreddits)
             {
                 Mock<IRedditSubreddit> redditSubredditMock = new Mock<IRedditSubreddit>();
+                redditSubredditMock.Setup(m => m.Subscribers)
+                    .Returns(_random.Next(2500, 10000));
                 redditSubredditCollection.Add(redditSubredditMock.Object);
             }
             return redditSubredditCollection;
@@ -556,9 +558,17 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             return new DashboardSettingsViewModel();
         }
 
-        private ObjectViewModel<TObject> CreateObjectViewModel<TObject>() where TObject : class
+        private ObjectViewModel<TObject> CreateObjectViewModel<TObject>(TObject obj, DateTime timestamp) where TObject : class
         {
-            return new ObjectViewModel<TObject>();
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+            return new ObjectViewModel<TObject>()
+            {
+                Object = obj,
+                Timestamp = timestamp
+            };
         }
     } 
 }
