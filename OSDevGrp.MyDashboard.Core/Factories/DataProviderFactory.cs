@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
@@ -91,6 +92,30 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 throw new Exception($"Unable to get the access token from Reddit: {redditAccessToken.Error}");
             });
         }
+
+        public Task<IEnumerable<IRedditKnownSubreddit>> GetKnownNsfwSubredditsAsync()
+        {
+            Random random = new Random(DateTime.Now.Millisecond);            
+            IEnumerable<IRedditKnownSubreddit> knownNsfwSubreddits = new List<IRedditKnownSubreddit>
+            {
+                new RedditKnownSubreddit("milf", CalculateRank(random)),
+                new RedditKnownSubreddit("gonewild30plus", CalculateRank(random)),
+                new RedditKnownSubreddit("gifsgonewild", CalculateRank(random)),
+                new RedditKnownSubreddit("gwnerdy", CalculateRank(random))
+            };
+
+            return Task.Run<IEnumerable<IRedditKnownSubreddit>>(() => knownNsfwSubreddits.OrderBy(m => m.Rank).ThenBy(m => m.Name).ToList());
+        }
+
+        private int CalculateRank(Random random)
+        {
+            if (random == null)
+            {
+                throw new ArgumentNullException(nameof(random));
+            }
+            return random.Next(0, 1000);
+        }
+        
 
         #endregion 
     }

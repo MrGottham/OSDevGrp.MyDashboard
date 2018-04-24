@@ -12,5 +12,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Factories
         Task<Uri> AcquireRedditAuthorizationTokenAsync(string clientId, string state, Uri redirectUri);
 
         Task<IRedditAccessToken> GetRedditAccessTokenAsync(string clientId, string clientSecret, string code, Uri redirectUri);
+
+        Task<IEnumerable<IRedditKnownSubreddit>> GetKnownNsfwSubredditsAsync();
     }
 }
