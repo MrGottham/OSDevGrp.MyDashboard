@@ -1,4 +1,5 @@
 ﻿@using System.Linq;
+@using OSDevGrp.MyDashboard.Core.Contracts.Models;
 @using OSDevGrp.MyDashboard.Web.Models;
 @model DashboardViewModel
 
@@ -63,6 +64,14 @@
         @if (Model.Settings != null)
         {
             @Html.Partial("_DashboardSettingsPartial", Model.Settings)                        
+        }
+        @if (Model.RedditSubreddits != null && Model.RedditSubreddits.Any())
+        {
+            <h2>Subreddits</h2>
+            @foreach (ObjectViewModel<IRedditSubreddit> objectViewModelForRedditSubreddit in Model.RedditSubreddits)
+            {
+                @Html.Raw(objectViewModelForRedditSubreddit.Html);
+            }
         }
         @if (Model.SystemErrors != null && Model.SystemErrors.Any())
         {
