@@ -134,7 +134,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
             string state = Guid.NewGuid().ToString("D");
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
             
-            const string scope = "identity privatemessages mysubreddits";
+            const string scope = "identity privatemessages mysubreddits read";
             Uri expectedUri = new Uri($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope={scope}");
 
             IDataProviderFactory sut = CreateSut();

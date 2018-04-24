@@ -8,5 +8,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Repositories
         Task<IRedditResponse<IRedditAuthenticatedUser>> GetAuthenticatedUserAsync(IRedditAccessToken accessToken);
 
         Task<IRedditResponse<IRedditList<IRedditSubreddit>>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken);
+
+        Task<IRedditResponse<IRedditSubreddit>> GetSpecificSubredditAsync(IRedditAccessToken accessToken, string subreddit);
     }
 }
