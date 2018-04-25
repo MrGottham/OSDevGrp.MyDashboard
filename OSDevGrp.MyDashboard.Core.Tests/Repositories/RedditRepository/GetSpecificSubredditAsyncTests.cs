@@ -32,68 +32,34 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
         public void GetSpecificSubredditAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
-            string subreddit = Guid.NewGuid().ToString("D");
+            IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
 
             IRedditRepository sut = CreateSut();
 
-            sut.GetSpecificSubredditAsync(accessToken, subreddit);
+            sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("subreddit")]
-        public void GetSpecificSubredditAsync_WhenSubredditIsNull_ThrowsArgumentNullException()
+        [ExpectedArgumentNullException("knownSubreddit")]
+        public void GetSpecificSubredditAsync_WhenKnownSubredditIsNull_ThrowsArgumentNullException()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            const string subreddit = null;
+            const IRedditKnownSubreddit knownSubreddit = null;
 
             IRedditRepository sut = CreateSut();
 
-            sut.GetSpecificSubredditAsync(accessToken, subreddit);
-        }
-
-        [TestMethod]
-        [ExpectedArgumentNullException("subreddit")]
-        public void GetSpecificSubredditAsync_WhenSubredditIsWhiteSpace_ThrowsArgumentNullException()
-        {
-            IRedditAccessToken accessToken = CreateRedditAccessToken();
-            const string subreddit = " ";
-
-            IRedditRepository sut = CreateSut();
-
-            sut.GetSpecificSubredditAsync(accessToken, subreddit);
-        }
-
-        [TestMethod]
-        [ExpectedArgumentNullException("subreddit")]
-        public void GetSpecificSubredditAsync_WhenSubredditIsWhiteSpaces_ThrowsArgumentNullException()
-        {
-            IRedditAccessToken accessToken = CreateRedditAccessToken();
-            const string subreddit = "  ";
-
-            IRedditRepository sut = CreateSut();
-
-            sut.GetSpecificSubredditAsync(accessToken, subreddit);
-        }
-
-        public void GetSpecificSubredditAsync_WhenSubredditIsEmpty_ThrowsArgumentNullException()
-        {
-            IRedditAccessToken accessToken = CreateRedditAccessToken();
-            string subreddit = string.Empty;
-
-            IRedditRepository sut = CreateSut();
-
-            sut.GetSpecificSubredditAsync(accessToken, subreddit);
+            sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
         }
 
         [TestMethod]
         public void GetSpecificSubredditAsync_WhenCalled_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
+            IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
 
             IRedditRepository sut = CreateSut();
-            string subreddit = Guid.NewGuid().ToString("D");
 
-            Task<IRedditResponse<IRedditSubreddit>> getSpecificSubredditTask = sut.GetSpecificSubredditAsync(redditAccessToken, subreddit);
+            Task<IRedditResponse<IRedditSubreddit>> getSpecificSubredditTask = sut.GetSpecificSubredditAsync(redditAccessToken, knownSubreddit);
             getSpecificSubredditTask.Wait();
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(aggregateException => 
@@ -128,6 +94,19 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
             redditAccessTokenMock.Setup(m => m.AccessToken)
                 .Returns(Guid.NewGuid().ToString("D"));
             return redditAccessTokenMock;
+        }
+
+        private IRedditKnownSubreddit CreateRedditKnownSubreddit()
+        {
+            return CreateRedditKnownSubredditMock().Object;
+        }
+
+        private Mock<IRedditKnownSubreddit> CreateRedditKnownSubredditMock()
+        {
+            Mock<IRedditKnownSubreddit> redditKnownSubredditMock = new Mock<IRedditKnownSubreddit>();
+            redditKnownSubredditMock.Setup(m => m.Name)
+                .Returns(Guid.NewGuid().ToString("D"));
+            return redditKnownSubredditMock;
         }
     }
 }

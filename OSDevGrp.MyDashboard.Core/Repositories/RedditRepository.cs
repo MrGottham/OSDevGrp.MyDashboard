@@ -122,22 +122,22 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             });
         }
 
-        public Task<IRedditResponse<IRedditSubreddit>> GetSpecificSubredditAsync(IRedditAccessToken accessToken, string subreddit)
+        public Task<IRedditResponse<IRedditSubreddit>> GetSpecificSubredditAsync(IRedditAccessToken accessToken, IRedditKnownSubreddit knownSubreddit)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException(nameof(accessToken));
             }
-            if (string.IsNullOrWhiteSpace(subreddit))
+            if (knownSubreddit == null)
             {
-                throw new ArgumentNullException(nameof(subreddit));
+                throw new ArgumentNullException(nameof(knownSubreddit));
             }
 
             return Task.Run<IRedditResponse<IRedditSubreddit>>(() => 
             {
                 try
                 {
-                    Task<IRedditResponse<RedditListChild<RedditSubreddit>>> getTask = GetAsync<RedditListChild<RedditSubreddit>>(new Uri($"{RedditApiUrl}/r/{subreddit}/about"), accessToken.TokenType, accessToken.AccessToken);
+                    Task<IRedditResponse<RedditListChild<RedditSubreddit>>> getTask = GetAsync<RedditListChild<RedditSubreddit>>(new Uri($"{RedditApiUrl}/r/{knownSubreddit.Name}/about"), accessToken.TokenType, accessToken.AccessToken);
                     getTask.Wait();
 
                     IRedditResponse<RedditListChild<RedditSubreddit>> response = getTask.Result;
