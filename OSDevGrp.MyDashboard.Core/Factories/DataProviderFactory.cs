@@ -104,7 +104,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 new RedditKnownSubreddit("gwnerdy", CalculateRank(random))
             };
 
-            return Task.Run<IEnumerable<IRedditKnownSubreddit>>(() => knownNsfwSubreddits.OrderBy(m => m.Rank).ThenBy(m => m.Name).ToList());
+            return Task.Run<IEnumerable<IRedditKnownSubreddit>>(() => knownNsfwSubreddits);
         }
 
         private int CalculateRank(Random random)
