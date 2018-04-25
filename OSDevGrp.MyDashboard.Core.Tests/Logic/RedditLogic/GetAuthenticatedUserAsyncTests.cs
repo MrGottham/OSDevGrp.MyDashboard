@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
@@ -15,6 +16,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
     {
         #region Private variables
 
+        private Mock<IDataProviderFactory> _dataProviderFactoryMock;
         private Mock<IRedditRepository> _redditRepositoryMock;
         private Mock<IRedditRateLimitLogic> _redditRateLimitLogicMock;
         private Mock<IRedditFilterLogic> _redditFilterLogicMock;
@@ -26,6 +28,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         [TestInitialize]
         public void TestInitialize()
         {
+            _dataProviderFactoryMock = new Mock<IDataProviderFactory>();
             _redditRepositoryMock = new Mock<IRedditRepository>();
             _redditRateLimitLogicMock = new Mock<IRedditRateLimitLogic>();
             _redditFilterLogicMock = new Mock<IRedditFilterLogic>();
@@ -270,6 +273,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
                 .Returns(Task.Run(() => { }));
 
             return new OSDevGrp.MyDashboard.Core.Logic.RedditLogic(
+                _dataProviderFactoryMock.Object,
                 _redditRepositoryMock.Object,
                 _redditRateLimitLogicMock.Object,
                 _redditFilterLogicMock.Object,
