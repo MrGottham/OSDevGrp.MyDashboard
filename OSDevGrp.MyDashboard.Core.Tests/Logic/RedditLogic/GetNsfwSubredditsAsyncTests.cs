@@ -133,13 +133,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             int numberOfSubreddits = _random.Next(1, 10);
 
             int numberOfKnownNsfwSubreddits = _random.Next(5, 10);
+            int numberOfSubredditsToGet = Math.Min(numberOfSubreddits, numberOfKnownNsfwSubreddits);
             IEnumerable<IRedditKnownSubreddit> knownNsfwSubredditCollection = CreateRedditKnownSubredditCollection(numberOfSubreddits: numberOfKnownNsfwSubreddits);
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection);
 
             Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
             getNsfwSubredditsTask.Wait();
 
-            _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == Math.Min(numberOfSubreddits, numberOfKnownNsfwSubreddits))), Times.Once);
+            _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == numberOfSubredditsToGet)), Times.Exactly(numberOfSubredditsToGet > 1 ? 1 : 2));
         }
 
         [TestMethod]
@@ -235,6 +236,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             int numberOfSubreddits = _random.Next(1, 10);
 
             int numberOfKnownNsfwSubreddits = _random.Next(5, 10);
+            int numberOfSubredditsToGet = Math.Min(numberOfSubreddits, numberOfKnownNsfwSubreddits);
             IEnumerable<IRedditKnownSubreddit> knownNsfwSubredditCollection = CreateRedditKnownSubredditCollection(numberOfSubreddits: numberOfKnownNsfwSubreddits);
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection, willExceedRateLimit: willExceedRateLimit);
@@ -242,10 +244,36 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
             getNsfwSubredditsTask.Wait();
 
-            _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == 1)), Times.Exactly(Math.Min(numberOfSubreddits, numberOfKnownNsfwSubreddits) + Convert.ToInt32(numberOfSubreddits == 1)));
+            _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == 1)), Times.Exactly(numberOfSubredditsToGet + Convert.ToInt32(numberOfSubredditsToGet == 1)));
         }
 
-        private IRedditLogic CreateSut(IEnumerable<IRedditKnownSubreddit> knownNsfwSubredditCollection = null, bool willExceedRateLimit = false, Exception exception = null)
+        [TestMethod]
+        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetSpecificSubredditAsyncWasCalledOnRedditRepositoryForEachKnownNsfwSubredditToGet()
+        {
+            IRedditAccessToken accessToken = CreateRedditAccessToken();;
+            int numberOfSubreddits = _random.Next(1, 10);
+
+            int numberOfKnownNsfwSubreddits = _random.Next(5, 10);
+            int numberOfSubredditsToGet = Math.Min(numberOfSubreddits, numberOfKnownNsfwSubreddits);
+            IEnumerable<IRedditKnownSubreddit> knownNsfwSubredditCollection = CreateRedditKnownSubredditCollection(numberOfSubreddits: numberOfKnownNsfwSubreddits);
+            IEnumerable<IRedditKnownSubreddit> knownNsfwSubredditToGetCollection = knownNsfwSubredditCollection
+                .OrderBy(m => m.Rank)
+                .ThenBy(m => m.Name)
+                .Take(numberOfSubredditsToGet)
+                .ToList();
+            const bool willExceedRateLimit = false;
+            IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection, willExceedRateLimit: willExceedRateLimit);
+
+            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
+            getNsfwSubredditsTask.Wait();
+
+            _redditRepositoryMock.Verify(m => m.GetSpecificSubredditAsync(
+                    It.Is<IRedditAccessToken>(value => value == accessToken),
+                    It.Is<IRedditKnownSubreddit>(value => knownNsfwSubredditToGetCollection.Contains(value))),
+                Times.Exactly(numberOfSubredditsToGet));
+        }
+
+        private IRedditLogic CreateSut(IEnumerable<IRedditKnownSubreddit> knownNsfwSubredditCollection = null, bool willExceedRateLimit = false, IRedditResponse<IRedditSubreddit> redditResponse = null, Exception exception = null)
         {
             if (exception != null)
             {
@@ -262,6 +290,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
                 .Returns(willExceedRateLimit);
             _redditRateLimitLogicMock.Setup(m => m.EnforceRateLimitAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime>()))
                 .Returns(Task.Run(() => { }));
+
+            _redditRepositoryMock.Setup(m => m.GetSpecificSubredditAsync(It.IsAny<IRedditAccessToken>(), It.IsAny<IRedditKnownSubreddit>()))
+                .Returns(Task.Run(() => redditResponse ?? CreateRedditResponse()));
 
             _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<AggregateException>()))
                 .Returns(Task.Run(() => { }));
@@ -311,6 +342,40 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             redditKnownSubredditMock.Setup(m => m.Rank)
                 .Returns(_random.Next(1, 1000));
             return redditKnownSubredditMock; 
+        }
+ 
+        private IRedditResponse<IRedditSubreddit> CreateRedditResponse(int? rateLimitUsed = null, int? rateLimitRemaining = null, DateTime? rateLimitResetTime = null, DateTime? receivedTime = null, IRedditSubreddit subreddit = null)
+        {
+            return CreateRedditResponseMock(rateLimitUsed, rateLimitRemaining, rateLimitResetTime, receivedTime, subreddit).Object;
+        }
+
+        private Mock<IRedditResponse<IRedditSubreddit>> CreateRedditResponseMock(int? rateLimitUsed = null, int? rateLimitRemaining = null, DateTime? rateLimitResetTime = null, DateTime? receivedTime = null, IRedditSubreddit subreddit = null)
+        {
+            Mock<IRedditResponse<IRedditSubreddit>> redditResponseMock = new Mock<IRedditResponse<IRedditSubreddit>>();
+            redditResponseMock.Setup(m => m.RateLimitUsed)
+                .Returns(rateLimitUsed ?? _random.Next(1, 60));
+            redditResponseMock.Setup(m => m.RateLimitRemaining)
+                .Returns(rateLimitRemaining ?? _random.Next(1, 60));
+            redditResponseMock.Setup(m => m.RateLimitResetTime)
+                .Returns(rateLimitResetTime ?? DateTime.Now.AddSeconds(_random.Next(30, 60)));
+            redditResponseMock.Setup(m => m.ReceivedTime)
+                .Returns(receivedTime ?? DateTime.Now.AddSeconds(_random.Next(1, 10) * -1));
+            redditResponseMock.Setup(m => m.Data)
+                .Returns(subreddit ?? CreateSubreddit());
+            return redditResponseMock;
+        }
+
+        private IRedditSubreddit CreateSubreddit(long? subscribers = null)
+        {
+            return CreateSubredditMock(subscribers).Object;
+        }
+
+        private Mock<IRedditSubreddit> CreateSubredditMock(long? subscribers = null)
+        {
+            Mock<IRedditSubreddit> subredditMock = new Mock<IRedditSubreddit>();
+            subredditMock.Setup(m => m.Subscribers)
+                .Returns(subscribers ?? _random.Next(2500, 10000));
+            return subredditMock;
         }
     }
 }

@@ -144,6 +144,42 @@ namespace OSDevGrp.MyDashboard.Core.Logic
             });
         }
 
+        public Task<IRedditSubreddit> GetSpecificSubredditAsync(IRedditAccessToken accessToken, IRedditKnownSubreddit knownSubreddit)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+            if (knownSubreddit == null)
+            {
+                throw new ArgumentNullException(nameof(knownSubreddit));
+            }
+
+            return Task.Run<IRedditSubreddit>(() => 
+            {
+                IRedditSubreddit s = null;
+                try
+                {
+                    if (_redditRateLimitLogic.WillExceedRateLimit(1))
+                    {
+                        return null;
+                    }
+
+                    Task<IRedditResponse<IRedditSubreddit>> getSpecificSubredditTask = _redditRepository.GetSpecificSubredditAsync(accessToken, knownSubreddit);
+                    getSpecificSubredditTask.Wait();
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+               return s;
+            });
+        }
+
         public Task<IEnumerable<IRedditSubreddit>> GetNsfwSubredditsAsync(IRedditAccessToken accessToken, int numberOfSubreddits)
         {
             if (accessToken == null)
@@ -201,39 +237,6 @@ namespace OSDevGrp.MyDashboard.Core.Logic
             filterTask.Wait();
 
             return filterTask.Result;
-        }
-        
-        private Task<IRedditSubreddit> GetSpecificSubredditAsync(IRedditAccessToken accessToken, IRedditKnownSubreddit knownSubreddit)
-        {
-            if (accessToken == null)
-            {
-                throw new ArgumentNullException(nameof(accessToken));
-            }
-            if (knownSubreddit == null)
-            {
-                throw new ArgumentNullException(nameof(knownSubreddit));
-            }
-
-            return Task.Run<IRedditSubreddit>(() => 
-            {
-                IRedditSubreddit s = null;
-                try
-                {
-                    if (_redditRateLimitLogic.WillExceedRateLimit(1))
-                    {
-                        return null;
-                    }
-                }
-                 catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-               return s;
-            });
         }
 
         #endregion
