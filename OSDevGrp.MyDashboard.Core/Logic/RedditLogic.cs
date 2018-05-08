@@ -157,7 +157,6 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
             return Task.Run<IRedditSubreddit>(() => 
             {
-                IRedditSubreddit s = null;
                 try
                 {
                     if (_redditRateLimitLogic.WillExceedRateLimit(1))
@@ -167,6 +166,13 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
                     Task<IRedditResponse<IRedditSubreddit>> getSpecificSubredditTask = _redditRepository.GetSpecificSubredditAsync(accessToken, knownSubreddit);
                     getSpecificSubredditTask.Wait();
+
+                    IRedditResponse<IRedditSubreddit> response = getSpecificSubredditTask.Result;
+
+                    Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
+                    enforceRateLimitTask.Wait();
+
+                    return response.Data;
                 }
                 catch (AggregateException ex)
                 {
@@ -176,7 +182,7 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                 {
                     _exceptionHandler.HandleAsync(ex).Wait();
                 }
-               return s;
+               return null;
             });
         }
 
@@ -205,10 +211,16 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                         return new List<IRedditSubreddit>(0);
                     }
 
-                    Task<IRedditSubreddit>[] getSpecificSubredditArray = knownNsfwSubreddits.Take(numberOfSubredditsToGet)
+                    Task<IRedditSubreddit>[] getSpecificSubredditTaskArray = knownNsfwSubreddits.Take(numberOfSubredditsToGet)
                         .Select(knownNsfwSubreddit => GetSpecificSubredditAsync(accessToken, knownNsfwSubreddit))
                         .ToArray();
-                    Task.WaitAll(getSpecificSubredditArray);
+                    Task.WaitAll(getSpecificSubredditTaskArray);
+
+                    return getSpecificSubredditTaskArray
+                        .Where(getSpecificSubredditTask => getSpecificSubredditTask.IsCompleted && getSpecificSubredditTask.IsFaulted == false && getKnownNsfwSubredditsTask.IsCanceled == false)
+                        .Select(getSpecificSubredditTask => getSpecificSubredditTask.Result)
+                        .OrderByDescending(subreddit => subreddit.Subscribers)
+                        .ToList();
                 }
                 catch (AggregateException ex)
                 {
