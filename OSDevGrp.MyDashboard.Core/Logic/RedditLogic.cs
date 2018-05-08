@@ -219,6 +219,7 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                     return getSpecificSubredditTaskArray
                         .Where(getSpecificSubredditTask => getSpecificSubredditTask.IsCompleted && getSpecificSubredditTask.IsFaulted == false && getKnownNsfwSubredditsTask.IsCanceled == false)
                         .Select(getSpecificSubredditTask => getSpecificSubredditTask.Result)
+                        .Where(subreddit => subreddit != null)
                         .OrderByDescending(subreddit => subreddit.Subscribers)
                         .ToList();
                 }
