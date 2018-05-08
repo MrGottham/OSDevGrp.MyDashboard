@@ -126,7 +126,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
         [DataMember(Name = "after", IsRequired = true)]
         internal string After { get; set; }
 
-        [DataMember(Name = "whitelist_status", IsRequired = true)]
+        [DataMember(Name = "whitelist_status", IsRequired = false)]
         internal string WhitelistStatus { get; set; }
 
         [DataMember(Name = "dist", IsRequired = true)]
