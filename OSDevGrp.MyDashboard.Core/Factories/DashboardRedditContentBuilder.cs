@@ -101,13 +101,17 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             {
                 try
                 {
-                    Task<IEnumerable<IRedditSubreddit>>[] getSubredditTaskArray = new[] 
+                    IList<Task<IEnumerable<IRedditSubreddit>>> getSubredditTaskCollection = new List<Task<IEnumerable<IRedditSubreddit>>>
                     {
                         _redditLogic.GetSubredditsForAuthenticatedUserAsync(accessToken, over18 && includeNsfwContent, over18 && onlyNsfwContent)
                     };
-                    Task.WaitAll(getSubredditTaskArray);
+                    if (over18 && (includeNsfwContent || onlyNsfwContent))
+                    {
+                        getSubredditTaskCollection.Add(_redditLogic.GetNsfwSubredditsAsync(accessToken, 4));
+                    }
+                    Task.WaitAll(getSubredditTaskCollection.ToArray());
 
-                    return getSubredditTaskArray
+                    return getSubredditTaskCollection
                         .Where(getsubredditTask => getsubredditTask.IsCompleted && getsubredditTask.IsFaulted == false && getsubredditTask.IsCanceled == false)
                         .SelectMany(getsubredditTask => getsubredditTask.Result)
                         .OrderByDescending(subreddit => subreddit.Subscribers)
