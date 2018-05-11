@@ -14,6 +14,8 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 
         IDashboardSettings Settings { get; }
 
+        IDashboardRules Rules { get; }
+
         void Replace(IEnumerable<INews> news);
 
         void Replace(IRedditAuthenticatedUser redditAuthenticatedUser);

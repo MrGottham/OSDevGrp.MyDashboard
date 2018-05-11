@@ -14,6 +14,8 @@ namespace OSDevGrp.MyDashboard.Core.Models
         private IList<IRedditSubreddit> _redditSubreddits = new List<IRedditSubreddit>();
         private IList<ISystemError> _systemErrors = new List<ISystemError>();
         private IDashboardSettings _settings;
+        private IDashboardRules _rules;
+        private readonly object _syncRoot = new object();
 
         #endregion
 
@@ -56,6 +58,17 @@ namespace OSDevGrp.MyDashboard.Core.Models
             get
             {
                 return _settings;
+            }
+        }
+
+        public IDashboardRules Rules
+        {
+            get
+            {
+                lock (_syncRoot)
+                {
+                    return _rules ?? (_rules = new DashboardRules(RedditAuthenticatedUser));
+                }
             }
         }
 

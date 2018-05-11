@@ -50,6 +50,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
             Assert.IsNull(sut.Settings);
         }
         
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectRulesNotEqualToNull()
+        {
+            IDashboard sut = CreateSut();
+
+            Assert.IsNotNull(sut.Rules);
+        }
+        
         private IDashboard CreateSut()
         {
             return new OSDevGrp.MyDashboard.Core.Models.Dashboard();
