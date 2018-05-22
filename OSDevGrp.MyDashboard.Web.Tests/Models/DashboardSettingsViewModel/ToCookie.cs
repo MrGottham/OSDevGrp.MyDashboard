@@ -77,12 +77,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
                 Times.Once);
         }
 
-        private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null, string redditAccessToken = null)
+        private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null, bool? allowNsfwContent = null, bool? includeNsfwContent = null, bool? onlyNsfwContent = null, string redditAccessToken = null)
         {
             return new OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel
             {
                 NumberOfNews = numberOfNews ?? _random.Next(25, 50),
                 UseReddit = useReddit ?? _random.Next(100) > 50,
+                AllowNsfwContent = allowNsfwContent ?? _random.Next(100) > 50,
+                IncludeNsfwContent = includeNsfwContent,
+                OnlyNsfwContent = onlyNsfwContent,
                 RedditAccessToken = redditAccessToken
             };
         }

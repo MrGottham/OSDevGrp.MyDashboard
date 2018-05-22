@@ -112,7 +112,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 HandleException(ex, systemErrorViewModelCollection, syncRoot);
             }
             
-            return new DashboardViewModel
+            DashboardViewModel dashboardViewModel = new DashboardViewModel
             {
                 Informations = informationViewModelCollection.OrderByDescending(informationViewModel => informationViewModel.Timestamp).ToList(),
                 SystemErrors = systemErrorViewModelCollection.OrderByDescending(systemErrorViewModel => systemErrorViewModel.Timestamp).ToList(),
@@ -120,6 +120,8 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 RedditAuthenticatedUser = objectViewModelForRedditAuthenticatedUser,
                 RedditSubreddits = objectViewModelForRedditSubredditCollection.OrderByDescending(objectViewModelForRedditSubreddit => objectViewModelForRedditSubreddit.Object.Subscribers).ToList()
             };
+            dashboardViewModel.ApplyRules(dashboard.Rules);
+            return dashboardViewModel;
         }
 
         private Task HandleAsync<TViewModel>(IDashboard dashboard, Func<IDashboard, Task<TViewModel>[]> taskArrayGenerator, Action<TViewModel> resultHandler, Action<Exception> exceptionHandler) where TViewModel : IViewModel

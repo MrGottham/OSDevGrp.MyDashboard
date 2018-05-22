@@ -58,13 +58,19 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
+            bool allowNsfwContent = _random.Next(100) > 50;
+            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
+            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
             string redditAccessToken = _random.Next(100) > 50 ? Guid.NewGuid().ToString("D") : null;
-            string base64 = CreateSut(numberOfNews, useReddit, redditAccessToken).ToBase64();
+            string base64 = CreateSut(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken).ToBase64();
 
             OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel result = OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel.Create(base64);
             Assert.IsNotNull(result);
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
+            Assert.AreEqual(allowNsfwContent, result.AllowNsfwContent);
+            Assert.AreEqual(includeNsfwContent, result.IncludeNsfwContent);
+            Assert.AreEqual(onlyNsfwContent, result.OnlyNsfwContent);
             Assert.AreEqual(redditAccessToken, result.RedditAccessToken);
         }
         
@@ -161,23 +167,32 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
             const bool containsCookie = true;
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
+            bool allowNsfwContent = _random.Next(100) > 50;
+            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
+            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
             string redditAccessToken = _random.Next(100) > 50 ? Guid.NewGuid().ToString("D") : null;
-            string cookieValue = CreateSut(numberOfNews, useReddit, redditAccessToken).ToBase64();
+            string cookieValue = CreateSut(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken).ToBase64();
             HttpContext httpContext = CreateHttpContext(containsCookie: containsCookie, cookieValue: cookieValue);
 
             OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel result = OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel.Create(httpContext);
             Assert.IsNotNull(result);
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
+            Assert.AreEqual(allowNsfwContent, result.AllowNsfwContent);
+            Assert.AreEqual(includeNsfwContent, result.IncludeNsfwContent);
+            Assert.AreEqual(onlyNsfwContent, result.OnlyNsfwContent);
             Assert.AreEqual(redditAccessToken, result.RedditAccessToken);
         }
         
-        private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null, string redditAccessToken = null)
+        private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null, bool? allowNsfwContent = null, bool? includeNsfwContent = null, bool? onlyNsfwContent = null, string redditAccessToken = null)
         {
             return new OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel
             {
                 NumberOfNews = numberOfNews ?? _random.Next(25, 50),
                 UseReddit = useReddit ?? _random.Next(100) > 50,
+                AllowNsfwContent = allowNsfwContent ?? _random.Next(100) > 50,
+                IncludeNsfwContent = includeNsfwContent,
+                OnlyNsfwContent = onlyNsfwContent,
                 RedditAccessToken = redditAccessToken
             };
         }

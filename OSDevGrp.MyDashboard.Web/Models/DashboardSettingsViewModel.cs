@@ -15,19 +15,59 @@ namespace OSDevGrp.MyDashboard.Web.Models
         #region Properties
 
         [Range(0, 250)]
-        [Display(Name="Number of news", ShortName="News", Description="Number of news to receive")]
+        [Display(Name = "Number of news", ShortName = "News", Description = "Number of news to receive")]
         [DataMember(Name = "NumberOfNews", IsRequired = true)]
         public int NumberOfNews { get; set; }
         
-        [Display(Name="Use Reddit", ShortName="Reddit", Description="Collect data from Reddit")]
+        [Display(Name = "Use Reddit", ShortName = "Reddit", Description = "Collect data from Reddit")]
         [DataMember(Name = "UseReddit", IsRequired = true)]
         public bool UseReddit { get; set; }
 
-        [Display(Name="Reddit Access Token", ShortName="Access Token", Description="Access Token received from Reddit")]
+        [Display(Name = "Allow NSFW content", ShortName = "Allow NSFW", Description = "Allow NSFW content from Reddit")]
+        [DataMember(Name = "AllowNsfwContent", IsRequired = true)]
+        public bool AllowNsfwContent { get; set; }
+
+        [Display(Name = "Include NSFW content", ShortName = "Include NSFW", Description = "Include NSFW content from Reddit")]
+        [DataMember(Name = "IncludeNsfwContent", IsRequired = false)]
+        public bool? IncludeNsfwContent { get; set; }
+
+        [Display(Name = "Include NSFW content", ShortName = "Include NSFW", Description = "Include NSFW content from Reddit")]
+        [IgnoreDataMember]
+        public bool NotNullableIncludeNsfwContent
+        {
+            get
+            {
+                return IncludeNsfwContent ?? false;
+            }
+            set
+            {
+                IncludeNsfwContent = value;
+            }
+        }
+
+        [Display(Name = "Only NSFW content", ShortName = "Only NSFW", Description = "Show only NSFW content from Reddit")]
+        [DataMember(Name = "OnlyNsfwContent", IsRequired = false)]
+        public bool? OnlyNsfwContent { get; set; }
+
+        [Display(Name = "Only NSFW content", ShortName = "Only NSFW", Description = "Show only NSFW content from Reddit")]
+        [IgnoreDataMember]
+        public bool NotNullableOnlyNsfwContent
+        {
+            get
+            {
+                return OnlyNsfwContent ?? false;
+            }
+            set
+            {
+                OnlyNsfwContent = value;
+            }
+        }
+
+        [Display(Name = "Reddit Access Token", ShortName = "Access Token", Description = "Access Token received from Reddit")]
         [DataMember(Name = "RedditAccessToken", IsRequired = false)]
         public string RedditAccessToken { get; set; }
 
-        [Display(Name="Cookie name", ShortName="Cookie name", Description="Cookie name for the dashboard settings view model")]
+        [Display(Name = "Cookie name", ShortName = "Cookie name", Description = "Cookie name for the dashboard settings view model")]
         [IgnoreDataMember]
         public static string CookieName
         {
@@ -48,8 +88,8 @@ namespace OSDevGrp.MyDashboard.Web.Models
                 NumberOfNews = NumberOfNews,
                 UseReddit = UseReddit,
                 RedditAccessToken = string.IsNullOrWhiteSpace(RedditAccessToken) ? null : OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(RedditAccessToken),
-                IncludeNsfwContent = false,
-                OnlyNsfwContent = false
+                IncludeNsfwContent = IncludeNsfwContent ?? false,
+                OnlyNsfwContent = OnlyNsfwContent ?? false
             };
         }
 
@@ -114,6 +154,22 @@ namespace OSDevGrp.MyDashboard.Web.Models
             }
 
             return Create(requestCookieCollection[CookieName]);
+        }
+
+        public void ApplyRules(IDashboardRules rules)
+        {
+            if (rules == null)
+            {
+                throw new ArgumentNullException(nameof(rules));
+            }
+
+            AllowNsfwContent = rules.AllowNsfwContent;
+            if (AllowNsfwContent)
+            {
+                return;
+            }
+            IncludeNsfwContent = null;
+            OnlyNsfwContent = null;
         }
 
         #endregion

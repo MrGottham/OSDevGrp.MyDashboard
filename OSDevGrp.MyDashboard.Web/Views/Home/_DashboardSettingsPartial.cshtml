@@ -20,6 +20,19 @@
                     <input asp-for="UseReddit" class="form-check-input" /> @Html.LabelFor(m => m.UseReddit)
                 </label>
             </div>
+            @if (Model.AllowNsfwContent)
+            {
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input asp-for="NotNullableIncludeNsfwContent" class="form-check-input" /> @Html.LabelFor(m => m.IncludeNsfwContent)
+                    </label>
+                </div>
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input asp-for="NotNullableOnlyNsfwContent" class="form-check-input" /> @Html.LabelFor(m => m.OnlyNsfwContent)
+                    </label>
+                </div>
+            }
             <div class="text-center">
                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary">Commit</button>

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
@@ -7,6 +8,8 @@ namespace OSDevGrp.MyDashboard.Web.Models
 {
     public class DashboardViewModel : IViewModel
     {
+        #region Properties
+
         public IEnumerable<InformationViewModel> Informations { get; set; }
 
         public IEnumerable<InformationViewModel> InformationsWithImageUrl
@@ -30,5 +33,25 @@ namespace OSDevGrp.MyDashboard.Web.Models
         public ObjectViewModel<IRedditAuthenticatedUser> RedditAuthenticatedUser { get; set; }
 
         public IEnumerable<ObjectViewModel<IRedditSubreddit>> RedditSubreddits { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        public void ApplyRules(IDashboardRules rules)
+        {
+            if (rules == null)
+            {
+                throw new ArgumentNullException(nameof(rules));
+            }
+
+            if (Settings == null)
+            {
+                return;
+            }
+            Settings.ApplyRules(rules);
+        }
+
+        #endregion
     }
 }

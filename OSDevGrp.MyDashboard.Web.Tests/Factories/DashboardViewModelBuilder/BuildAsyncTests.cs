@@ -186,6 +186,19 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertRulesWasCalledOnDashboard()
+        {
+            Mock<IDashboard> dashboardMock = CreateDashboardMock();
+
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut();
+
+            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboardMock.Object);
+            buildTask.Wait();
+
+            dashboardMock.Verify(m => m.Rules, Times.Once);
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_ReturnsInitializedDashboardViewModel()
         {
             List<INews> newsCollection = CreateNewsCollection(_random.Next(50, 75)).ToList();
@@ -469,12 +482,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 _htmlHelperMock.Object);
         }
 
-        private IDashboard CreateDashboard(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null)
+        private IDashboard CreateDashboard(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null, IDashboardRules dashboardRules = null)
         {
-            return CreateDashboardMock(newsCollection, systemErrorCollection, dashboardSettings, redditAuthenticatedUser, redditSubredditCollection).Object;
+            return CreateDashboardMock(newsCollection, systemErrorCollection, dashboardSettings, redditAuthenticatedUser, redditSubredditCollection, dashboardRules).Object;
         }
 
-        private Mock<IDashboard> CreateDashboardMock(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null)
+        private Mock<IDashboard> CreateDashboardMock(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null, IDashboardRules dashboardRules = null)
         {
             Mock<IDashboard> dashboardMock = new Mock<IDashboard>();
             dashboardMock.Setup(m => m.News)
@@ -487,6 +500,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 .Returns(redditAuthenticatedUser);
             dashboardMock.Setup(m => m.RedditSubreddits)
                 .Returns(redditSubredditCollection ?? CreateRedditSubredditCollection(_random.Next(10, 25)));
+            dashboardMock.Setup(m => m.Rules)
+                .Returns(dashboardRules ?? CreateDashboardRules());
             return dashboardMock;
         }
 
@@ -535,6 +550,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 redditSubredditCollection.Add(redditSubredditMock.Object);
             }
             return redditSubredditCollection;
+        }
+
+        private IDashboardRules CreateDashboardRules()
+        {
+            Mock<IDashboardRules> dashboardRulesMock = new Mock<IDashboardRules>();
+            return dashboardRulesMock.Object;
         }
 
         private InformationViewModel CreateInformationViewModel(DateTime timestamp)

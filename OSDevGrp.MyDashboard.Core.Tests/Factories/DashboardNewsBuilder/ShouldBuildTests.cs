@@ -39,6 +39,31 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
         }
 
         [TestMethod]
+        public void ShouldBuild_WhenCalled_AssertNumberOfNewsWasCalledOnDashboardSettings()
+        {
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
+
+            IDashboardNewsBuilder sut = CreateSut();
+
+            bool result = sut.ShouldBuild(dashboardSettingsMock.Object);
+
+            dashboardSettingsMock.Verify(m => m.NumberOfNews, Times.Once);
+        }
+
+        [TestMethod]
+        public void ShouldBuild_WhenNumberOfNewsInDashboardSettingsIsLowerThanZero_AssertOnlyNsfwContentWasNotCalledOnDashboardSettings()
+        {
+            int numberOfNews = _random.Next(1, 10) * -1;
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock(numberOfNews);
+
+            IDashboardNewsBuilder sut = CreateSut();
+
+            bool result = sut.ShouldBuild(dashboardSettingsMock.Object);
+
+            dashboardSettingsMock.Verify(m => m.OnlyNsfwContent, Times.Never);
+        }
+
+        [TestMethod]
         public void ShouldBuild_WhenNumberOfNewsInDashboardSettingsIsLowerThanZero_ReturnsFalse()
         {
             int numberOfNews = _random.Next(1, 10) * -1;
@@ -49,6 +74,19 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
             bool result = sut.ShouldBuild(dashboardSettings);
 
             Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ShouldBuild_WhenNumberOfNewsInDashboardSettingsIsEqualToZero_AssertOnlyNsfwContentWasNotCalledOnDashboardSettings()
+        {
+            const int numberOfNews = 0;
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock(numberOfNews);
+
+            IDashboardNewsBuilder sut = CreateSut();
+
+            bool result = sut.ShouldBuild(dashboardSettingsMock.Object);
+
+            dashboardSettingsMock.Verify(m => m.OnlyNsfwContent, Times.Never);
         }
 
         [TestMethod]
@@ -65,10 +103,38 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
         }
 
         [TestMethod]
-        public void ShouldBuild_WhenNumberOfNewsInDashboardSettingsIsGreaterThanZero_ReturnsTrue()
+        public void ShouldBuild_WhenNumberOfNewsInDashboardSettingsIsGreaterThanZero_AssertOnlyNsfwContentWasCalledOnDashboardSettings()
         {
             int numberOfNews = _random.Next(1, 10);
-            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews);
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock(numberOfNews);
+
+            IDashboardNewsBuilder sut = CreateSut();
+
+            bool result = sut.ShouldBuild(dashboardSettingsMock.Object);
+
+            dashboardSettingsMock.Verify(m => m.OnlyNsfwContent, Times.Once);
+        }
+
+        [TestMethod]
+        public void ShouldBuild_WhenNumberOfNewsInDashboardSettingsIsGreaterThanZeroAndOnlyNsfwContentInDashboardSettingsIsTrue_ReturnsFalse()
+        {
+            int numberOfNews = _random.Next(1, 10);
+            const bool onlyNsfwContent = true;
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews, onlyNsfwContent);
+
+            IDashboardNewsBuilder sut = CreateSut();
+
+            bool result = sut.ShouldBuild(dashboardSettings);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public void ShouldBuild_WhenNumberOfNewsInDashboardSettingsIsGreaterThanZeroAndOnlyNsfwContentInDashboardSettingsIsFalse_ReturnsTrue()
+        {
+            int numberOfNews = _random.Next(1, 10);
+            const bool onlyNsfwContent = false;
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews, onlyNsfwContent);
 
             IDashboardNewsBuilder sut = CreateSut();
 
@@ -85,12 +151,19 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
             );
         }
 
-        private IDashboardSettings CreateDashboardSettings(int numberOfNews = 25)
+        private IDashboardSettings CreateDashboardSettings(int numberOfNews = 25, bool? onlyNsfwContent = null)
+        {
+            return CreateDashboardSettingsMock(numberOfNews, onlyNsfwContent).Object;
+        }
+
+        private Mock<IDashboardSettings> CreateDashboardSettingsMock(int numberOfNews = 25, bool? onlyNsfwContent = null)
         {
             Mock<IDashboardSettings> dashboardSettingsMock = new Mock<IDashboardSettings>();
             dashboardSettingsMock.Setup(m => m.NumberOfNews)
                 .Returns(numberOfNews);
-            return dashboardSettingsMock.Object;
+            dashboardSettingsMock.Setup(m => m.OnlyNsfwContent)
+                .Returns(onlyNsfwContent ?? _random.Next(100) > 50);
+            return dashboardSettingsMock;
         }
     }
 }

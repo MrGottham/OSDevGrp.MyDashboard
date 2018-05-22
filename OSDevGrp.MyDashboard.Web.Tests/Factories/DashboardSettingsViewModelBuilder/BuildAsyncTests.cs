@@ -106,6 +106,32 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertIncludeNsfwContentWasCalledOnDashboardSettings()
+        {
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
+            buildTask.Wait();
+
+            dashboardSettingsMock.Verify(m => m.IncludeNsfwContent, Times.Once());
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalled_AssertOnlyNsfwContentWasCalledOnDashboardSettings()
+        {
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
+            buildTask.Wait();
+
+            dashboardSettingsMock.Verify(m => m.OnlyNsfwContent, Times.Once());
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_AssertHttpContextWasCalledOnHttpContextAccessor()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
@@ -144,8 +170,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
+            bool includeNsfwContent = _random.Next(100) > 50;
+            bool onlyNsfwContent = _random.Next(100) > 50;
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
-            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews, useReddit, redditAccessToken);
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(numberOfNews, useReddit, includeNsfwContent, onlyNsfwContent, redditAccessToken);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
@@ -156,6 +184,27 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
             Assert.IsNotNull(result);
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
+            Assert.IsFalse(result.AllowNsfwContent);
+            if (includeNsfwContent)
+            {
+                Assert.IsTrue(result.IncludeNsfwContent.HasValue);
+                Assert.IsTrue(result.IncludeNsfwContent.Value);
+            }
+            else
+            {
+                Assert.IsFalse(result.IncludeNsfwContent.HasValue);
+                Assert.IsNull(result.IncludeNsfwContent);
+            }
+            if (onlyNsfwContent)
+            {
+                Assert.IsTrue(result.OnlyNsfwContent.HasValue);
+                Assert.IsTrue(result.OnlyNsfwContent.Value);
+            }
+            else
+            {
+                Assert.IsFalse(result.OnlyNsfwContent.HasValue);
+                Assert.IsNull(result.OnlyNsfwContent);
+            }
             Assert.IsNotNull(result.RedditAccessToken);
         }
 
@@ -192,6 +241,74 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
             Assert.AreEqual(redditAccessTokenAsBase64, result.RedditAccessToken);
         }
 
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereIncludeNsfwContentIsFalse_ReturnsInitializedDashboardSettingsViewModel()
+        {
+            const bool includeNsfwContent = false;
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(includeNsfwContent: includeNsfwContent);
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
+            buildTask.Wait();
+
+            DashboardSettingsViewModel result = buildTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.IncludeNsfwContent.HasValue);
+            Assert.IsNull(result.IncludeNsfwContent);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereIncludeNsfwContentIsTrue_ReturnsInitializedDashboardSettingsViewModel()
+        {
+            const bool includeNsfwContent = true;
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(includeNsfwContent: includeNsfwContent);
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
+            buildTask.Wait();
+
+            DashboardSettingsViewModel result = buildTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.IncludeNsfwContent.HasValue);
+            Assert.IsTrue(result.IncludeNsfwContent.Value);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereOnlyNsfwContentIsFalse_ReturnsInitializedDashboardSettingsViewModel()
+        {
+            const bool onlyNsfwContent = false;
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(onlyNsfwContent: onlyNsfwContent);
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
+            buildTask.Wait();
+
+            DashboardSettingsViewModel result = buildTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsFalse(result.OnlyNsfwContent.HasValue);
+            Assert.IsNull(result.OnlyNsfwContent);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWhereOnlyNsfwContentIsTrue_ReturnsInitializedDashboardSettingsViewModel()
+        {
+            const bool onlyNsfwContent = true;
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(onlyNsfwContent: onlyNsfwContent);
+
+            IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
+
+            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
+            buildTask.Wait();
+
+            DashboardSettingsViewModel result = buildTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.OnlyNsfwContent.HasValue);
+            Assert.IsTrue(result.OnlyNsfwContent.Value);
+        }
+
         private IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> CreateSut(IResponseCookies responseCookies = null)
         {
             Mock<HttpResponse> httpResponseMock = new Mock<HttpResponse>();
@@ -208,18 +325,22 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
             return new OSDevGrp.MyDashboard.Web.Factories.DashboardSettingsViewModelBuilder(_httpContextAccessorMock.Object);
         }
 
-        private IDashboardSettings CreateDashboardSettings(int? numberOfNews = null, bool? useReddit = null, IRedditAccessToken redditAccessToken = null)
+        private IDashboardSettings CreateDashboardSettings(int? numberOfNews = null, bool? useReddit = null, bool? includeNsfwContent = null, bool? onlyNsfwContent = null, IRedditAccessToken redditAccessToken = null)
         {
-            return CreateDashboardSettingsMock(numberOfNews, useReddit, redditAccessToken).Object;
+            return CreateDashboardSettingsMock(numberOfNews, useReddit, includeNsfwContent, onlyNsfwContent, redditAccessToken).Object;
         }
 
-        private Mock<IDashboardSettings> CreateDashboardSettingsMock(int? numberOfNews = null, bool? useReddit = null, IRedditAccessToken redditAccessToken = null)
+        private Mock<IDashboardSettings> CreateDashboardSettingsMock(int? numberOfNews = null, bool? useReddit = null, bool? includeNsfwContent = null, bool? onlyNsfwContent = null, IRedditAccessToken redditAccessToken = null)
         {
             Mock<IDashboardSettings> dashboardSettingsMock = new Mock<IDashboardSettings>();
             dashboardSettingsMock.Setup(m => m.NumberOfNews)
                 .Returns(numberOfNews ?? _random.Next(25, 50));
             dashboardSettingsMock.Setup(m => m.UseReddit)
                 .Returns(useReddit ?? _random.Next(100) > 50);
+            dashboardSettingsMock.Setup(m => m.IncludeNsfwContent)
+                .Returns(includeNsfwContent ?? _random.Next(100) > 50);
+            dashboardSettingsMock.Setup(m => m.OnlyNsfwContent)
+                .Returns(onlyNsfwContent ?? _random.Next(100) > 50);
             dashboardSettingsMock.Setup(m => m.RedditAccessToken)
                 .Returns(redditAccessToken);
             return dashboardSettingsMock;

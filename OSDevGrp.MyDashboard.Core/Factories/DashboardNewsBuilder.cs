@@ -39,7 +39,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 throw new ArgumentNullException(nameof(dashboardSettings));
             }
 
-            return dashboardSettings.NumberOfNews > 0;
+            return dashboardSettings.NumberOfNews > 0 && dashboardSettings.OnlyNsfwContent == false;
         }
 
         public Task BuildAsync(IDashboardSettings dashboardSettings, IDashboard dashboard)

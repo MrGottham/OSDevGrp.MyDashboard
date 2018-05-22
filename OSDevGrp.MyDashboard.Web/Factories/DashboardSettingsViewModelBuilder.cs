@@ -43,10 +43,15 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 }
             }
 
+            bool includeNsfwContent = dashboardSettings.IncludeNsfwContent;
+            bool onlyNsfwContent = dashboardSettings.OnlyNsfwContent;
+
             DashboardSettingsViewModel dashboardSettingsViewModel = new DashboardSettingsViewModel
             {
                 NumberOfNews = dashboardSettings.NumberOfNews,
                 UseReddit = dashboardSettings.UseReddit,
+                IncludeNsfwContent = includeNsfwContent ? true : (bool?) null,
+                OnlyNsfwContent = onlyNsfwContent ? true : (bool?) null,
                 RedditAccessToken = redditAccessToken != null ? redditAccessToken.ToBase64() : null
             };
 

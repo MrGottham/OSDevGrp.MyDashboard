@@ -37,6 +37,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
             {
                 NumberOfNews = _random.Next(25, 50),
                 UseReddit = _random.Next(100) > 50,
+                AllowNsfwContent = _random.Next(100) > 50,
+                IncludeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null,
+                OnlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null,
                 RedditAccessToken = _random.Next(100) > 50 ? Guid.NewGuid().ToString("D") : null
             };
         }

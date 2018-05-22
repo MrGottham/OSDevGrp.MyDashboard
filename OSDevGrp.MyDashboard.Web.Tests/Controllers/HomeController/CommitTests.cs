@@ -103,6 +103,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = true;
+            bool allowNsfwContent = _random.Next(100) > 50;
+            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
+            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
             string accessToken = Guid.NewGuid().ToString("D");
             string tokenType = Guid.NewGuid().ToString("D");
             int expiresIn = _random.Next(60, 300);
@@ -110,7 +113,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             string refreshToken = Guid.NewGuid().ToString("D");
             DateTime received = DateTime.UtcNow;
             string redditAccessToken = CreateReddditAccessTokenAsBase64(accessToken, tokenType, expiresIn, scope, refreshToken, received);
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, redditAccessToken);
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
@@ -126,8 +129,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     string.Compare(dashboardSettings.RedditAccessToken.Expires.ToString(), received.ToLocalTime().AddSeconds(expiresIn).ToString(), StringComparison.Ordinal) == 0 &&
                     string.Compare(dashboardSettings.RedditAccessToken.Scope, scope, StringComparison.Ordinal) == 0 &&
                     string.Compare(dashboardSettings.RedditAccessToken.RefreshToken, refreshToken, StringComparison.Ordinal) == 0 &&
-                    dashboardSettings.IncludeNsfwContent == false &&
-                    dashboardSettings.OnlyNsfwContent == false)),
+                    dashboardSettings.IncludeNsfwContent == (includeNsfwContent != null && includeNsfwContent.Value) &&
+                    dashboardSettings.OnlyNsfwContent == (onlyNsfwContent != null && onlyNsfwContent.Value))),
                 Times.Once);
         }
 
@@ -215,8 +218,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnDataProviderFactory()
         {
             const bool useReddit = true;
+            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
+            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
             const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, includeNsfwContent: includeNsfwContent, onlyNsfwContent: onlyNsfwContent, redditAccessToken: redditAccessToken);
 
             string redditClientId = Guid.NewGuid().ToString("D");
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(redditClientId: redditClientId);
@@ -312,8 +317,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = true;
+            bool allowNsfwContent = _random.Next(100) > 50;
+            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
+            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
             const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, redditAccessToken);
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken);
 
             AggregateException aggregateException = new AggregateException();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
@@ -325,8 +333,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings.NumberOfNews == numberOfNews &&
                     dashboardSettings.UseReddit == false &&
                     dashboardSettings.RedditAccessToken == null &&
-                    dashboardSettings.IncludeNsfwContent == false &&
-                    dashboardSettings.OnlyNsfwContent == false)),
+                    dashboardSettings.IncludeNsfwContent == (includeNsfwContent != null && includeNsfwContent.Value) &&
+                    dashboardSettings.OnlyNsfwContent == (onlyNsfwContent != null && onlyNsfwContent.Value))),
                 Times.Once);
         }
 
@@ -389,8 +397,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = true;
+            bool allowNsfwContent = _random.Next(100) > 50;
+            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
+            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
             const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, redditAccessToken);
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken);
 
 
             Exception exception = new Exception();
@@ -403,8 +414,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings.NumberOfNews == numberOfNews &&
                     dashboardSettings.UseReddit == false &&
                     dashboardSettings.RedditAccessToken == null &&
-                    dashboardSettings.IncludeNsfwContent == false &&
-                    dashboardSettings.OnlyNsfwContent == false)),
+                    dashboardSettings.IncludeNsfwContent == (includeNsfwContent != null && includeNsfwContent.Value) &&
+                    dashboardSettings.OnlyNsfwContent == (onlyNsfwContent != null && onlyNsfwContent.Value))),
                 Times.Once);
         }
 
@@ -495,7 +506,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = false;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit);
+            bool allowNsfwContent = _random.Next(100) > 50;
+            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
+            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
@@ -506,8 +520,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                     dashboardSettings.NumberOfNews == numberOfNews &&
                     dashboardSettings.UseReddit == false &&
                     dashboardSettings.RedditAccessToken == null &&
-                    dashboardSettings.IncludeNsfwContent == false &&
-                    dashboardSettings.OnlyNsfwContent == false)),
+                    dashboardSettings.IncludeNsfwContent == (includeNsfwContent != null && includeNsfwContent.Value) &&
+                    dashboardSettings.OnlyNsfwContent == (onlyNsfwContent != null && onlyNsfwContent.Value))),
                 Times.Once);
         }
 
@@ -602,12 +616,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 _httpContextAccessorMock.Object);
         }
 
-        private DashboardSettingsViewModel CreateDashboardSettingsViewModel(int? numberOfNews = null, bool? useReddit = null, string redditAccessToken = null)
+        private DashboardSettingsViewModel CreateDashboardSettingsViewModel(int? numberOfNews = null, bool? useReddit = null, bool? allowNsfwContent = null, bool? includeNsfwContent = null, bool? onlyNsfwContent = null, string redditAccessToken = null)
         {
             return new DashboardSettingsViewModel
             {
                 NumberOfNews = numberOfNews ?? _random.Next(25, 50),
                 UseReddit = useReddit ?? _random.Next(100) > 50,
+                AllowNsfwContent = allowNsfwContent ?? _random.Next(100) > 50,
+                IncludeNsfwContent = includeNsfwContent,
+                OnlyNsfwContent = onlyNsfwContent,
                 RedditAccessToken = redditAccessToken
             };
         }

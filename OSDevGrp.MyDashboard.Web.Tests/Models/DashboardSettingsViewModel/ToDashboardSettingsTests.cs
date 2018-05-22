@@ -26,17 +26,79 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
+            bool includeNsfwContent = _random.Next(100) > 50;
+            bool onlyNsfwContent = _random.Next(100) > 50;
             string redditAccessToken = CreateReddditAccessToken().ToBase64();
-            OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel sut = CreateSut(numberOfNews, useReddit, redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel sut = CreateSut(numberOfNews, useReddit, includeNsfwContent, onlyNsfwContent, redditAccessToken);
 
             IDashboardSettings result = sut.ToDashboardSettings();
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(DashboardSettings));
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
+            Assert.AreEqual(includeNsfwContent, result.IncludeNsfwContent);
+            Assert.AreEqual(onlyNsfwContent, result.OnlyNsfwContent);
             Assert.IsNotNull(result.RedditAccessToken);
+        }
+
+        [TestMethod]
+        public void ToDashboardSettings_WhenCalledWhereIncludeNsfwContentIsNull_ReturnsInitializedDashboardSettings()
+        {
+            bool? includeNsfwContent = null;
+            OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel sut = CreateSut(includeNsfwContent: includeNsfwContent);
+
+            IDashboardSettings result = sut.ToDashboardSettings();
             Assert.IsFalse(result.IncludeNsfwContent);
+        }
+
+        [TestMethod]
+        public void ToDashboardSettings_WhenCalledWhereIncludeNsfwContentIsFalse_ReturnsInitializedDashboardSettings()
+        {
+            const bool includeNsfwContent = false;
+            OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel sut = CreateSut(includeNsfwContent: includeNsfwContent);
+
+            IDashboardSettings result = sut.ToDashboardSettings();
+            Assert.IsFalse(result.IncludeNsfwContent);
+        }
+
+        [TestMethod]
+        public void ToDashboardSettings_WhenCalledWhereIncludeNsfwContentIsTrue_ReturnsInitializedDashboardSettings()
+        {
+            const bool includeNsfwContent = true;
+            OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel sut = CreateSut(includeNsfwContent: includeNsfwContent);
+
+            IDashboardSettings result = sut.ToDashboardSettings();
+            Assert.IsTrue(result.IncludeNsfwContent);
+        }
+
+        [TestMethod]
+        public void ToDashboardSettings_WhenCalledWhereOnlyNsfwContentIsNull_ReturnsInitializedDashboardSettings()
+        {
+            bool? onlyNsfwContent = null;
+            OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel sut = CreateSut(onlyNsfwContent: onlyNsfwContent);
+
+            IDashboardSettings result = sut.ToDashboardSettings();
             Assert.IsFalse(result.OnlyNsfwContent);
+        }
+
+        [TestMethod]
+        public void ToDashboardSettings_WhenCalledWhereOnlyNsfwContentIsFalse_ReturnsInitializedDashboardSettings()
+        {
+            const bool onlyNsfwContent = false;
+            OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel sut = CreateSut(onlyNsfwContent: onlyNsfwContent);
+
+            IDashboardSettings result = sut.ToDashboardSettings();
+            Assert.IsFalse(result.OnlyNsfwContent);
+        }
+
+        [TestMethod]
+        public void ToDashboardSettings_WhenCalledWhereOnlyNsfwContentIsTrue_ReturnsInitializedDashboardSettings()
+        {
+            const bool onlyNsfwContent = true;
+            OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel sut = CreateSut(onlyNsfwContent: onlyNsfwContent);
+
+            IDashboardSettings result = sut.ToDashboardSettings();
+            Assert.IsTrue(result.OnlyNsfwContent);
         }
 
         [TestMethod]
@@ -111,13 +173,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
             Assert.AreEqual(refreshToken, result.RedditAccessToken.RefreshToken);
         }
 
-        private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null, string redditAccessToken = null)
+        private OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel CreateSut(int? numberOfNews = null, bool? useReddit = null, bool? includeNsfwContent = null, bool? onlyNsfwContent = null, string redditAccessToken = null)
         {
             return new OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel
             {
                 NumberOfNews = numberOfNews ?? _random.Next(25, 50),
                 UseReddit = useReddit ?? _random.Next(100) > 50,
-                RedditAccessToken = redditAccessToken
+                IncludeNsfwContent = includeNsfwContent,
+                OnlyNsfwContent = onlyNsfwContent,
+                RedditAccessToken = redditAccessToken,
             };
         }
 
