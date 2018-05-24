@@ -68,7 +68,11 @@ namespace OSDevGrp.MyDashboard.Core.Models
         { 
             get
             {
-                return string.IsNullOrWhiteSpace(BannerImageUrlAsString) == false ? new Uri(BannerImageUrlAsString) : null;
+                if (string.IsNullOrWhiteSpace(BannerImageUrlAsString) || Uri.IsWellFormedUriString(BannerImageUrlAsString, UriKind.Absolute) == false)
+                {
+                    return null;
+                }
+                return new Uri(BannerImageUrlAsString);
             }
         }
 
@@ -80,7 +84,11 @@ namespace OSDevGrp.MyDashboard.Core.Models
         { 
             get
             {
-                return string.IsNullOrWhiteSpace(HeaderImageUrlAsString) == false ? new Uri(HeaderImageUrlAsString) : null;
+                if (string.IsNullOrWhiteSpace(HeaderImageUrlAsString) || Uri.IsWellFormedUriString(HeaderImageUrlAsString, UriKind.Absolute) == false)
+                {
+                    return null;
+                }
+                return new Uri(HeaderImageUrlAsString);
             }
         }
 
@@ -92,7 +100,11 @@ namespace OSDevGrp.MyDashboard.Core.Models
         { 
             get
             {
-                return string.IsNullOrWhiteSpace(IconImageUrlAsString) == false ? new Uri(IconImageUrlAsString) : null;
+                if (string.IsNullOrWhiteSpace(IconImageUrlAsString) || Uri.IsWellFormedUriString(IconImageUrlAsString, UriKind.Absolute) == false)
+                {
+                    return null;
+                }
+                return new Uri(IconImageUrlAsString);
             }
         }
 
@@ -108,10 +120,15 @@ namespace OSDevGrp.MyDashboard.Core.Models
         [DataMember(Name = "subscribers", IsRequired = true)]
         public long Subscribers { get; protected set; }
         
+        [IgnoreDataMember]
         public Uri Url
         { 
             get
             {
+                if (Uri.IsWellFormedUriString(UrlAsString, UriKind.Absolute))
+                {
+                    return new Uri(UrlAsString);
+                }
                 return new Uri($"http://www.reddit.com{UrlAsString}");
             }
         }

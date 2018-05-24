@@ -10,5 +10,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Repositories
         Task<IRedditResponse<IRedditList<IRedditSubreddit>>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken);
 
         Task<IRedditResponse<IRedditSubreddit>> GetSpecificSubredditAsync(IRedditAccessToken accessToken, IRedditKnownSubreddit knownSubreddit);
+
+        Task<IRedditResponse<IRedditList<IRedditLink>>> GetLinksAsync(IRedditAccessToken accessToken, IRedditSubreddit subreddit);
     }
 }

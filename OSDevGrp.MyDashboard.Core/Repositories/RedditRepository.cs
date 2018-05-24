@@ -156,6 +156,55 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             });
         }
 
+        public Task<IRedditResponse<IRedditList<IRedditLink>>> GetLinksAsync(IRedditAccessToken accessToken, IRedditSubreddit subreddit)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+            if (subreddit == null)
+            {
+                throw new ArgumentNullException(nameof(subreddit));
+            }
+
+            return Task.Run<IRedditResponse<IRedditList<IRedditLink>>>(() => 
+            {
+                try
+                {
+                    if (subreddit.Url == null)
+                    {
+                        return null;
+                    }
+
+                    string localPath = subreddit.Url.LocalPath;
+                    if (localPath.StartsWith("/"))
+                    {
+                        localPath = localPath.Substring(1);
+                    }
+                    if (localPath.EndsWith("/"))
+                    {
+                        localPath = localPath.Substring(0, localPath.Length - 1);
+                    }
+
+                    Task<IRedditResponse<RedditList<RedditLink>>> getTask = GetAsync<RedditList<RedditLink>>(new Uri($"{RedditApiUrl}/{localPath}/new"), accessToken.TokenType, accessToken.AccessToken);
+                    getTask.Wait();
+
+                    IRedditResponse<RedditList<RedditLink>> response = getTask.Result;
+
+                    return response.As<IRedditList<IRedditLink>>(response.Data.As<IRedditLink>());
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                return null;
+            });
+        }
+
         internal async Task<IRedditResponse<TRedditObject>> GetAsync<TRedditObject>(Uri requestUri, string authenticationHeaderScheme, string authenticationHeaderParameter) where TRedditObject : class, IRedditObject
         {
             if (requestUri == null)
