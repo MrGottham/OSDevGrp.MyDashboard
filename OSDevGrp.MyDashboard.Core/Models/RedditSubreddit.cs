@@ -114,6 +114,15 @@ namespace OSDevGrp.MyDashboard.Core.Models
         [DataMember(Name = "user_is_banned", IsRequired = true)]
         public bool UserIsBanned { get; protected set; }
 
+        [IgnoreDataMember]
+        public bool UserBanned
+        {
+            get
+            {
+                return UserIsBanned;
+            }
+        }
+
         [DataMember(Name = "over18", IsRequired = true)]
         public bool Over18 { get; protected set; }
 

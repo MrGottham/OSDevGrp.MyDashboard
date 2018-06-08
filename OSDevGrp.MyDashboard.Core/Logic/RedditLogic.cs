@@ -78,6 +78,10 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                     getAuthenticatedUserTask.Wait();
 
                     IRedditResponse<IRedditAuthenticatedUser> response = getAuthenticatedUserTask.Result;
+                    if (response == null)
+                    {
+                        return null;
+                    }
 
                     Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
                     enforceRateLimitTask.Wait();
@@ -116,21 +120,17 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                     getSubredditsForAuthenticatedUserTask.Wait();
 
                     IRedditResponse<IRedditList<IRedditSubreddit>> response = getSubredditsForAuthenticatedUserTask.Result;
+                    if (response == null)
+                    {
+                        return new List<IRedditSubreddit>(0);
+                    }
 
                     Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
                     enforceRateLimitTask.Wait();
 
-                    IEnumerable<IRedditSubreddit> filteredSubredditCollection = ApplyFilter(response.Data, subredditCollection => _redditFilterLogic.RemoveUserBannedContentAsync(subredditCollection));
-                    if (includeNsfwContent == false)
-                    {
-                        filteredSubredditCollection = ApplyFilter(filteredSubredditCollection, subredditCollection => _redditFilterLogic.RemoveNsfwContentAsync(subredditCollection));
-                    }
-                    if (onlyNsfwContent)
-                    {
-                        filteredSubredditCollection = ApplyFilter(filteredSubredditCollection, subredditCollection => _redditFilterLogic.RemoveNoneNsfwContentAsync(subredditCollection));
-                    }
-
-                    return filteredSubredditCollection.OrderByDescending(m => m.Subscribers).ToList();
+                    return ApplyFilters(response.Data, includeNsfwContent, onlyNsfwContent)
+                        .OrderByDescending(subreddit => subreddit.Subscribers)
+                        .ToList();
                 }
                 catch (AggregateException ex)
                 {
@@ -168,6 +168,10 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                     getSpecificSubredditTask.Wait();
 
                     IRedditResponse<IRedditSubreddit> response = getSpecificSubredditTask.Result;
+                    if (response == null)
+                    {
+                        return null;
+                    }
 
                     Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
                     enforceRateLimitTask.Wait();
@@ -235,18 +239,85 @@ namespace OSDevGrp.MyDashboard.Core.Logic
             });
         }
 
-        private IEnumerable<IRedditSubreddit> ApplyFilter(IEnumerable<IRedditSubreddit> subredditCollection, Func<IEnumerable<IRedditSubreddit>, Task<IEnumerable<IRedditSubreddit>>> filterTaskGetter)
+        public Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IRedditSubreddit subreddit, bool includeNsfwContent, bool onlyNsfwContent)
         {
-            if (subredditCollection == null)
+            if (accessToken == null)
             {
-                throw new ArgumentNullException(nameof(subredditCollection));
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+            if (subreddit == null)
+            {
+                throw new ArgumentNullException(nameof(subreddit));
+            }
+
+            return Task.Run<IEnumerable<IRedditLink>>(() =>
+            {
+                try
+                {
+                    if (_redditRateLimitLogic.WillExceedRateLimit(1))
+                    {
+                        return new List<IRedditLink>(0);
+                    }
+
+                    Task<IRedditResponse<IRedditList<IRedditLink>>> getLinksTask = _redditRepository.GetLinksAsync(accessToken, subreddit);
+                    getLinksTask.Wait();
+
+                    IRedditResponse<IRedditList<IRedditLink>> response = getLinksTask.Result;
+                    if (response == null)
+                    {
+                        return new List<IRedditLink>(0);
+                    }
+
+                    Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
+                    enforceRateLimitTask.Wait();
+
+                    return ApplyFilters(response.Data, includeNsfwContent, onlyNsfwContent)
+                        .OrderByDescending(link => link.CreatedTime)
+                        .ToList();
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                return new List<IRedditLink>(0);
+            });
+        }
+
+        private IEnumerable<T> ApplyFilters<T>(IEnumerable<T> filterableCollection, bool includeNsfwContent, bool onlyNsfwContent) where T : IRedditFilterable
+        {
+            if (filterableCollection == null)
+            {
+                throw new ArgumentNullException(nameof(filterableCollection));
+            }
+
+            IEnumerable<T> resultCollection = ApplyFilter(filterableCollection, collection => _redditFilterLogic.RemoveUserBannedContentAsync(collection));
+            if (includeNsfwContent == false)
+            {
+                resultCollection = ApplyFilter(resultCollection, collection => _redditFilterLogic.RemoveNsfwContentAsync(collection));
+            }
+            if (onlyNsfwContent)
+            {
+                resultCollection = ApplyFilter(resultCollection, collection => _redditFilterLogic.RemoveNoneNsfwContentAsync(collection));
+            }
+            return resultCollection;
+        }
+
+        private IEnumerable<T> ApplyFilter<T>(IEnumerable<T> filterableCollection, Func<IEnumerable<T>, Task<IEnumerable<T>>> filterTaskGetter) where T : IRedditFilterable
+        {
+            if (filterableCollection == null)
+            {
+                throw new ArgumentNullException(nameof(filterableCollection));
             }
             if (filterTaskGetter == null)
             {
                 throw new ArgumentNullException(nameof(filterTaskGetter));
             }
 
-            Task<IEnumerable<IRedditSubreddit>> filterTask = filterTaskGetter(subredditCollection);
+            Task<IEnumerable<T>> filterTask = filterTaskGetter(filterableCollection);
             filterTask.Wait();
 
             return filterTask.Result;

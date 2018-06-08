@@ -6,10 +6,10 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Logic
 {
     public interface IRedditFilterLogic
     {
-        Task<IEnumerable<IRedditSubreddit>> RemoveUserBannedContentAsync(IEnumerable<IRedditSubreddit> subredditCollection);
+        Task<IEnumerable<T>> RemoveUserBannedContentAsync<T>(IEnumerable<T> filterableCollection) where T : IRedditFilterable;
 
-        Task<IEnumerable<IRedditSubreddit>> RemoveNsfwContentAsync(IEnumerable<IRedditSubreddit> subredditCollection);
+        Task<IEnumerable<T>> RemoveNsfwContentAsync<T>(IEnumerable<T> filterableCollection) where T : IRedditFilterable;
 
-        Task<IEnumerable<IRedditSubreddit>> RemoveNoneNsfwContentAsync(IEnumerable<IRedditSubreddit> subredditCollection);
+        Task<IEnumerable<T>> RemoveNoneNsfwContentAsync<T>(IEnumerable<T> subredditCollection) where T : IRedditFilterable;
     }
 }

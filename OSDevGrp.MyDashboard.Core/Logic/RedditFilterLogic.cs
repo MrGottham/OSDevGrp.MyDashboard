@@ -11,34 +11,34 @@ namespace OSDevGrp.MyDashboard.Core.Logic
     {
         #region Methods
 
-        public Task<IEnumerable<IRedditSubreddit>> RemoveUserBannedContentAsync(IEnumerable<IRedditSubreddit> subredditCollection)
+        public Task<IEnumerable<T>> RemoveUserBannedContentAsync<T>(IEnumerable<T> filterableCollection) where T : IRedditFilterable
         {
-            if (subredditCollection == null)
+            if (filterableCollection == null)
             {
-                throw new ArgumentNullException(nameof(subredditCollection));
+                throw new ArgumentNullException(nameof(filterableCollection));
             }
 
-            return Task.Run<IEnumerable<IRedditSubreddit>>(() => subredditCollection.Where(subreddit => subreddit.UserIsBanned == false).ToList());
+            return Task.Run<IEnumerable<T>>(() => filterableCollection.Where(filterable => filterable.UserBanned == false).ToList());
         }
 
-        public Task<IEnumerable<IRedditSubreddit>> RemoveNsfwContentAsync(IEnumerable<IRedditSubreddit> subredditCollection)
+        public Task<IEnumerable<T>> RemoveNsfwContentAsync<T>(IEnumerable<T> filterableCollection) where T : IRedditFilterable
         {
-            if (subredditCollection == null)
+            if (filterableCollection == null)
             {
-                throw new ArgumentNullException(nameof(subredditCollection));
+                throw new ArgumentNullException(nameof(filterableCollection));
             }
 
-            return Task.Run<IEnumerable<IRedditSubreddit>>(() => subredditCollection.Where(subreddit => subreddit.Over18 == false).ToList());
+            return Task.Run<IEnumerable<T>>(() => filterableCollection.Where(filterable => filterable.Over18 == false).ToList());
         }
 
-        public Task<IEnumerable<IRedditSubreddit>> RemoveNoneNsfwContentAsync(IEnumerable<IRedditSubreddit> subredditCollection)
+        public Task<IEnumerable<T>> RemoveNoneNsfwContentAsync<T>(IEnumerable<T> filterableCollection) where T : IRedditFilterable
         {
-            if (subredditCollection == null)
+            if (filterableCollection == null)
             {
-                throw new ArgumentNullException(nameof(subredditCollection));
+                throw new ArgumentNullException(nameof(filterableCollection));
             }
 
-            return Task.Run<IEnumerable<IRedditSubreddit>>(() => subredditCollection.Where(subreddit => subreddit.Over18).ToList());
+            return Task.Run<IEnumerable<T>>(() => filterableCollection.Where(filterable => filterable.Over18).ToList());
         }
 
         #endregion

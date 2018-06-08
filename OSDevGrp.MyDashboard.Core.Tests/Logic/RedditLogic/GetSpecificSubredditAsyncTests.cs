@@ -362,12 +362,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             return redditResponseMock;
         }
 
-        private IRedditSubreddit CreateSubreddit(long? subscribers = null)
+        private IRedditSubreddit CreateSubreddit()
         {
-            return CreateSubredditMock(subscribers).Object;
+            return CreateSubredditMock().Object;
         }
 
-        private Mock<IRedditSubreddit> CreateSubredditMock(long? subscribers = null)
+        private Mock<IRedditSubreddit> CreateSubredditMock()
         {
             Mock<IRedditSubreddit> subredditMock = new Mock<IRedditSubreddit>();
             return subredditMock;

@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 
 namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 {
-    public interface IRedditLink : IRedditCreatedThing
+    public interface IRedditLink : IRedditCreatedThing, IRedditFilterable
     {
         IRedditSubreddit Subreddit { get; }
 
@@ -16,8 +17,14 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 
         Uri ThumbnailUrl { get; }
 
-        bool Over18 { get; }
- 
+        IEnumerable<IRedditImage> Images { get; }
+
+        string BannedBy { get; }
+
+        DateTime? BannedAtTime { get; }
+
+        DateTime? BannedAtUtcTime { get; }
+
         Uri Url { get; }
     }
 }

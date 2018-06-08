@@ -26,60 +26,60 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("subredditCollection")]
-        public void RemoveUserBannedContentAsync_WhenSubredditCollectionIsNull_ThrowsArgumentNullException()
+        [ExpectedArgumentNullException("filterableCollection")]
+        public void RemoveUserBannedContentAsync_WhenFilterableCollectionIsNull_ThrowsArgumentNullException()
         {
             IRedditFilterLogic sut = CreateSut();
 
-            sut.RemoveUserBannedContentAsync(null);
+            sut.RemoveUserBannedContentAsync((IEnumerable<IRedditFilterable>) null);
         }
 
         [TestMethod]
-        public void RemoveUserBannedContentAsync_WhenCalled_AssertUserIsBannedWasCalledOnEachSubredditInCollection()
+        public void RemoveUserBannedContentAsync_WhenCalled_AssertUserBannedWasCalledOnEachFilterableInCollection()
         {
-            Mock<IRedditSubreddit> subreddit1Mock = CreateSubredditMock();
-            Mock<IRedditSubreddit> subreddit2Mock = CreateSubredditMock();
-            Mock<IRedditSubreddit> subreddit3Mock = CreateSubredditMock();
-            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(
-                subreddit1Mock.Object,
-                subreddit2Mock.Object,
-                subreddit3Mock.Object);
+            Mock<IRedditFilterable> filterable1Mock = CreateFilterableMock();
+            Mock<IRedditFilterable> filterable2Mock = CreateFilterableMock();
+            Mock<IRedditFilterable> filterable3Mock = CreateFilterableMock();
+            IEnumerable<IRedditFilterable> filterableCollection = CreateFilterableCollection(
+                filterable1Mock.Object,
+                filterable2Mock.Object,
+                filterable3Mock.Object);
             
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditSubreddit>> removeUserBannedContentTask = sut.RemoveUserBannedContentAsync(subredditCollection);
+            Task<IEnumerable<IRedditFilterable>> removeUserBannedContentTask = sut.RemoveUserBannedContentAsync(filterableCollection);
             removeUserBannedContentTask.Wait();
 
-            subreddit1Mock.Verify(m => m.UserIsBanned, Times.Once);
-            subreddit2Mock.Verify(m => m.UserIsBanned, Times.Once);
-            subreddit3Mock.Verify(m => m.UserIsBanned, Times.Once);
+            filterable1Mock.Verify(m => m.UserBanned, Times.Once);
+            filterable2Mock.Verify(m => m.UserBanned, Times.Once);
+            filterable3Mock.Verify(m => m.UserBanned, Times.Once);
         }
 
         [TestMethod]
         public void RemoveUserBannedContentAsync_WhenCalled_ReturnsFilteredCollection()
         {
-            bool userIsBannedOnSubreddit1 = _random.Next(1, 100) > 50;
-            bool userIsBannedOnSubreddit2 = _random.Next(1, 100) > 50;
-            bool userIsBannedOnSubreddit3 = _random.Next(1, 100) > 50;
-            IRedditSubreddit subreddit1 = CreateSubreddit(userIsBanned: userIsBannedOnSubreddit1);
-            IRedditSubreddit subreddit2 = CreateSubreddit(userIsBanned: userIsBannedOnSubreddit2);
-            IRedditSubreddit subreddit3 = CreateSubreddit(userIsBanned: userIsBannedOnSubreddit3);
-            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(
-                subreddit1,
-                subreddit2,
-                subreddit3);
+            bool userBannedOnFilterable1 = _random.Next(1, 100) > 50;
+            bool userBannedOnFilterable2 = _random.Next(1, 100) > 50;
+            bool userBannedOnFilterable3 = _random.Next(1, 100) > 50;
+            IRedditFilterable filterable1 = CreateFilterable(userBanned: userBannedOnFilterable1);
+            IRedditFilterable filterable2 = CreateFilterable(userBanned: userBannedOnFilterable2);
+            IRedditFilterable filterable3 = CreateFilterable(userBanned: userBannedOnFilterable3);
+            IEnumerable<IRedditFilterable> filterableCollection = CreateFilterableCollection(
+                filterable1,
+                filterable2,
+                filterable3);
             
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditSubreddit>> removeUserBannedContentTask = sut.RemoveUserBannedContentAsync(subredditCollection);
+            Task<IEnumerable<IRedditFilterable>> removeUserBannedContentTask = sut.RemoveUserBannedContentAsync(filterableCollection);
             removeUserBannedContentTask.Wait();
 
-            IEnumerable<IRedditSubreddit> result = removeUserBannedContentTask.Result;
+            IEnumerable<IRedditFilterable> result = removeUserBannedContentTask.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(Convert.ToInt32(!userIsBannedOnSubreddit1) + Convert.ToInt32(!userIsBannedOnSubreddit2) + Convert.ToInt32(!userIsBannedOnSubreddit3), result.Count());
-            Assert.AreNotEqual(userIsBannedOnSubreddit1, result.Contains(subreddit1));
-            Assert.AreNotEqual(userIsBannedOnSubreddit2, result.Contains(subreddit2));
-            Assert.AreNotEqual(userIsBannedOnSubreddit3, result.Contains(subreddit3));
+            Assert.AreEqual(Convert.ToInt32(!userBannedOnFilterable1) + Convert.ToInt32(!userBannedOnFilterable2) + Convert.ToInt32(!userBannedOnFilterable3), result.Count());
+            Assert.AreNotEqual(userBannedOnFilterable1, result.Contains(filterable1));
+            Assert.AreNotEqual(userBannedOnFilterable2, result.Contains(filterable2));
+            Assert.AreNotEqual(userBannedOnFilterable3, result.Contains(filterable3));
         }
 
         private IRedditFilterLogic CreateSut()
@@ -87,7 +87,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
             return new OSDevGrp.MyDashboard.Core.Logic.RedditFilterLogic();
         }
 
-        private IEnumerable<IRedditSubreddit> CreateSubredditCollection(params IRedditSubreddit[] source)
+        private IEnumerable<IRedditFilterable> CreateFilterableCollection(params IRedditFilterable[] source)
         {
             if (source == null)
             {
@@ -96,17 +96,17 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
             return source;
         }
 
-        private IRedditSubreddit CreateSubreddit(bool? userIsBanned = null)
+        private IRedditFilterable CreateFilterable(bool? userBanned = null)
         {
-            return CreateSubredditMock(userIsBanned).Object;
+            return CreateFilterableMock(userBanned).Object;
         }
 
-        private Mock<IRedditSubreddit> CreateSubredditMock(bool? userIsBanned = null)
+        private Mock<IRedditFilterable> CreateFilterableMock(bool? userBanned = null)
         {
-            Mock<IRedditSubreddit> subredditMock = new Mock<IRedditSubreddit>();
-            subredditMock.Setup(m => m.UserIsBanned)
-                .Returns(userIsBanned ?? _random.Next(1, 100) > 50);
-            return subredditMock;
+            Mock<IRedditFilterable> filterableMock = new Mock<IRedditFilterable>();
+            filterableMock.Setup(m => m.UserBanned)
+                .Returns(userBanned ?? _random.Next(1, 100) > 50);
+            return filterableMock;
         }
     }
 }

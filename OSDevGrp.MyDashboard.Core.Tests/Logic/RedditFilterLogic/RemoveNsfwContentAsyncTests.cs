@@ -26,60 +26,60 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("subredditCollection")]
-        public void RemoveNsfwContentAsync_WhenSubredditCollectionIsNull_ThrowsArgumentNullException()
+        [ExpectedArgumentNullException("filterableCollection")]
+        public void RemoveNsfwContentAsync_WhenFilterableCollectionIsNull_ThrowsArgumentNullException()
         {
             IRedditFilterLogic sut = CreateSut();
 
-            sut.RemoveNsfwContentAsync(null);
+            sut.RemoveNsfwContentAsync((IEnumerable<IRedditFilterable>) null);
         }
 
         [TestMethod]
-        public void RemoveNsfwContentAsync_WhenCalled_AssertOver18WasCalledOnEachSubredditInCollection()
+        public void RemoveNsfwContentAsync_WhenCalled_AssertOver18WasCalledOnEachFilterableInCollection()
         {
-            Mock<IRedditSubreddit> subreddit1Mock = CreateSubredditMock();
-            Mock<IRedditSubreddit> subreddit2Mock = CreateSubredditMock();
-            Mock<IRedditSubreddit> subreddit3Mock = CreateSubredditMock();
-            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(
-                subreddit1Mock.Object,
-                subreddit2Mock.Object,
-                subreddit3Mock.Object);
+            Mock<IRedditFilterable> filterable1Mock = CreateFilterableMock();
+            Mock<IRedditFilterable> filterable2Mock = CreateFilterableMock();
+            Mock<IRedditFilterable> filterable3Mock = CreateFilterableMock();
+            IEnumerable<IRedditFilterable> filterableCollection = CreateFilterableCollection(
+                filterable1Mock.Object,
+                filterable2Mock.Object,
+                filterable3Mock.Object);
             
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditSubreddit>> removeNsfwContentTask = sut.RemoveNsfwContentAsync(subredditCollection);
+            Task<IEnumerable<IRedditFilterable>> removeNsfwContentTask = sut.RemoveNsfwContentAsync(filterableCollection);
             removeNsfwContentTask.Wait();
 
-            subreddit1Mock.Verify(m => m.Over18, Times.Once);
-            subreddit2Mock.Verify(m => m.Over18, Times.Once);
-            subreddit3Mock.Verify(m => m.Over18, Times.Once);
+            filterable1Mock.Verify(m => m.Over18, Times.Once);
+            filterable2Mock.Verify(m => m.Over18, Times.Once);
+            filterable3Mock.Verify(m => m.Over18, Times.Once);
         }
 
         [TestMethod]
         public void RemoveNsfwContentAsync_WhenCalled_ReturnsFilteredCollection()
         {
-            bool over18OnSubreddit1 = _random.Next(1, 100) > 50;
-            bool over18OnSubreddit2 = _random.Next(1, 100) > 50;
-            bool over18OnSubreddit3 = _random.Next(1, 100) > 50;
-            IRedditSubreddit subreddit1 = CreateSubreddit(over18: over18OnSubreddit1);
-            IRedditSubreddit subreddit2 = CreateSubreddit(over18: over18OnSubreddit2);
-            IRedditSubreddit subreddit3 = CreateSubreddit(over18: over18OnSubreddit3);
-            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(
-                subreddit1,
-                subreddit2,
-                subreddit3);
+            bool over18OnFilterable1 = _random.Next(1, 100) > 50;
+            bool over18OnFilterable2 = _random.Next(1, 100) > 50;
+            bool over18OnFilterable3 = _random.Next(1, 100) > 50;
+            IRedditFilterable filterable1 = CreateFilterable(over18: over18OnFilterable1);
+            IRedditFilterable filterable2 = CreateFilterable(over18: over18OnFilterable2);
+            IRedditFilterable filterable3 = CreateFilterable(over18: over18OnFilterable3);
+            IEnumerable<IRedditFilterable> filterableCollection = CreateFilterableCollection(
+                filterable1,
+                filterable2,
+                filterable3);
             
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditSubreddit>> removeNsfwContentTask = sut.RemoveNsfwContentAsync(subredditCollection);
+            Task<IEnumerable<IRedditFilterable>> removeNsfwContentTask = sut.RemoveNsfwContentAsync(filterableCollection);
             removeNsfwContentTask.Wait();
 
-            IEnumerable<IRedditSubreddit> result = removeNsfwContentTask.Result;
+            IEnumerable<IRedditFilterable> result = removeNsfwContentTask.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(Convert.ToInt32(!over18OnSubreddit1) + Convert.ToInt32(!over18OnSubreddit2) + Convert.ToInt32(!over18OnSubreddit3), result.Count());
-            Assert.AreNotEqual(over18OnSubreddit1, result.Contains(subreddit1));
-            Assert.AreNotEqual(over18OnSubreddit2, result.Contains(subreddit2));
-            Assert.AreNotEqual(over18OnSubreddit3, result.Contains(subreddit3));
+            Assert.AreEqual(Convert.ToInt32(!over18OnFilterable1) + Convert.ToInt32(!over18OnFilterable2) + Convert.ToInt32(!over18OnFilterable3), result.Count());
+            Assert.AreNotEqual(over18OnFilterable1, result.Contains(filterable1));
+            Assert.AreNotEqual(over18OnFilterable2, result.Contains(filterable2));
+            Assert.AreNotEqual(over18OnFilterable3, result.Contains(filterable3));
         }
 
         private IRedditFilterLogic CreateSut()
@@ -87,7 +87,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
             return new OSDevGrp.MyDashboard.Core.Logic.RedditFilterLogic();
         }
 
-        private IEnumerable<IRedditSubreddit> CreateSubredditCollection(params IRedditSubreddit[] source)
+        private IEnumerable<IRedditFilterable> CreateFilterableCollection(params IRedditFilterable[] source)
         {
             if (source == null)
             {
@@ -96,17 +96,17 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
             return source;
         }
 
-        private IRedditSubreddit CreateSubreddit(bool? over18 = null)
+        private IRedditFilterable CreateFilterable(bool? over18 = null)
         {
-            return CreateSubredditMock(over18).Object;
+            return CreateFilterableMock(over18).Object;
         }
 
-        private Mock<IRedditSubreddit> CreateSubredditMock(bool? over18 = null)
+        private Mock<IRedditFilterable> CreateFilterableMock(bool? over18 = null)
         {
-            Mock<IRedditSubreddit> subredditMock = new Mock<IRedditSubreddit>();
-            subredditMock.Setup(m => m.Over18)
+            Mock<IRedditFilterable> filterableMock = new Mock<IRedditFilterable>();
+            filterableMock.Setup(m => m.Over18)
                 .Returns(over18 ?? _random.Next(1, 100) > 50);
-            return subredditMock;
+            return filterableMock;
         }
     }
 }

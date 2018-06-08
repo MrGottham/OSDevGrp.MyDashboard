@@ -2,7 +2,7 @@ using System;
 
 namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 {
-    public interface IRedditSubreddit : IRedditCreatedThing
+    public interface IRedditSubreddit : IRedditCreatedThing, IRedditFilterable
     {
         string DisplayName { get; }
 
@@ -27,8 +27,6 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
         Uri IconImageUrl { get; }
 
         bool UserIsBanned { get; }
-
-        bool Over18 { get; }
 
         long Subscribers { get; }
 
