@@ -11,5 +11,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Logic
         Task<IEnumerable<T>> RemoveNsfwContentAsync<T>(IEnumerable<T> filterableCollection) where T : IRedditFilterable;
 
         Task<IEnumerable<T>> RemoveNoneNsfwContentAsync<T>(IEnumerable<T> subredditCollection) where T : IRedditFilterable;
+
+        Task<IRedditThingComparer<T>> CreateComparerAsync<T>() where T : IRedditThing;
     }
 }

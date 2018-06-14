@@ -14,7 +14,7 @@ using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 {
     [TestClass]
-    public class GetLinksAsyncTests
+    public class GetLinksAsyncWithSubredditCollectionTests
     {
         #region Private variables
 
@@ -43,57 +43,58 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             IRedditLogic sut = CreateSut();
 
-            sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("subreddit")]
-        public void GetLinksAsync_WhenSubredditIsNull_ThrowsArgumentNullException()
+        [ExpectedArgumentNullException("subredditCollection")]
+        public void GetLinksAsync_WhenSubredditCollectionIsNull_ThrowsArgumentNullException()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            const IRedditSubreddit subreddit = null;
+            const IEnumerable<IRedditSubreddit> subredditCollection = null;
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             IRedditLogic sut = CreateSut();
 
-            sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
         }
 
         [TestMethod]
         public void GetLinksAsync_WhenCalled_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogic()
         {
+            int numberOfSubreddits = _random.Next(1, 10);
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(numberOfSubreddits: numberOfSubreddits);
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             IRedditLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
-            _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == 1)), Times.Once);
+            _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == numberOfSubreddits)), Times.Exactly(numberOfSubreddits > 1 ? 1 : 2));
         }
 
         [TestMethod]
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertGetLinksAsyncWasNotCalledOnRedditRepository()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _redditRepositoryMock.Verify(m => m.GetLinksAsync(
@@ -106,14 +107,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertEnforceRateLimitAsyncWasNotCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _redditRateLimitLogicMock.Verify(m => m.EnforceRateLimitAsync(
@@ -128,14 +129,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertRemoveUserBannedContentAsyncWasNotCalledOnRedditFilterLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _redditFilterLogicMock.Verify(m => m.RemoveUserBannedContentAsync(It.IsAny<IEnumerable<IRedditLink>>()), Times.Never);
@@ -145,14 +146,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertRemoveNsfwContentAsyncWasNotCalledOnRedditFilterLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _redditFilterLogicMock.Verify(m => m.RemoveNsfwContentAsync(It.IsAny<IEnumerable<IRedditLink>>()), Times.Never);
@@ -162,31 +163,48 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertRemoveNoneNsfwContentAsyncWasNotCalledOnRedditFilterLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _redditFilterLogicMock.Verify(m => m.RemoveNoneNsfwContentAsync(It.IsAny<IEnumerable<IRedditLink>>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertCreateComparerAsyncWasNotCalledOnRedditFilterLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
+            getLinksTask.Wait();
+
+            _redditFilterLogicMock.Verify(m => m.CreateComparerAsync<IRedditLink>(), Times.Never);
+        }
+
+        [TestMethod]
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        {
+            IRedditAccessToken accessToken = CreateRedditAccessToken();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
+            bool includeNsfwContent = _random.Next(100) > 50;
+            bool onlyNsfwContent = _random.Next(100) > 50;
+
+            const bool willExceedRateLimit = true;
+            IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
+
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
@@ -197,14 +215,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasExceeded_ReturnsEmptyCollection()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             IEnumerable<IRedditLink> result = getLinksTask.Result;
@@ -213,30 +231,35 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetLinksAsyncWasCalledOnRedditRepository()
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetLinksAsyncWasCalledOnRedditRepositoryForEachSubredditInCollection()
         {
+            int numberOfSubreddits = _random.Next(1, 10);
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(numberOfSubreddits: numberOfSubreddits);
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
-            _redditRepositoryMock.Verify(m => m.GetLinksAsync(
-                    It.Is<IRedditAccessToken>(value => value == accessToken),
-                    It.Is<IRedditSubreddit>(value => value == subreddit)),
-                Times.Once);
+            foreach (IRedditSubreddit subreddit in subredditCollection)
+            {
+                _redditRepositoryMock.Verify(m => m.GetLinksAsync(
+                        It.Is<IRedditAccessToken>(value => value == accessToken),
+                        It.Is<IRedditSubreddit>(value => value == subreddit)),
+                    Times.Once);
+            }
         }
 
         [TestMethod]
-        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertEnforceRateLimitAsyncWasCalledOnRedditRateLimitLogic()
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertEnforceRateLimitAsyncWasCalledOnRedditRateLimitLogicForEachSubredditInCollection()
         {
+            int numberOfSubreddits = _random.Next(1, 10);
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(numberOfSubreddits: numberOfSubreddits);
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -248,7 +271,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IRedditResponse<IRedditList<IRedditLink>> redditResponse = CreateRedditResponse(rateLimitUsed, rateLimitRemaining, rateLimitResetTime, receivedTime);
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, redditResponse: redditResponse);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _redditRateLimitLogicMock.Verify(m => m.EnforceRateLimitAsync(
@@ -256,14 +279,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
                     It.Is<int>(value => value == rateLimitRemaining),
                     It.Is<DateTime?>(value => value.HasValue && value.Value == rateLimitResetTime),
                     It.Is<DateTime>(value => value == receivedTime)), 
-                Times.Once);
+                Times.Exactly(numberOfSubreddits));
         }
 
         [TestMethod]
-        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertRemoveUserBannedContentAsyncWasCalledOnRedditFilterLogic()
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertRemoveUserBannedContentAsyncWasCalledOnRedditFilterLogicForEachSubredditInCollection()
         {
+            int numberOfSubreddits = _random.Next(1, 10);
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(numberOfSubreddits: numberOfSubreddits);
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -272,17 +296,18 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IRedditResponse<IRedditList<IRedditLink>> redditResponse = CreateRedditResponse(redditList: redditList);
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, redditResponse: redditResponse);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
-            _redditFilterLogicMock.Verify(m => m.RemoveUserBannedContentAsync(It.Is<IEnumerable<IRedditLink>>(value => value == redditList)), Times.Once);
+            _redditFilterLogicMock.Verify(m => m.RemoveUserBannedContentAsync(It.Is<IEnumerable<IRedditLink>>(value => value == redditList)), Times.Exactly(numberOfSubreddits));
         }
 
         [TestMethod]
-        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndIncludeNsfwContentIsFalse_AssertRemoveNsfwContentAsyncWasCalledOnRedditFilterLogic()
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndIncludeNsfwContentIsFalse_AssertRemoveNsfwContentAsyncWasCalledOnRedditFilterLogicForEachSubredditInCollection()
         {
+            int numberOfSubreddits = _random.Next(1, 10);
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(numberOfSubreddits: numberOfSubreddits);
             const bool includeNsfwContent = false;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -290,34 +315,35 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IEnumerable<IRedditLink> filteredLinkCollection = new List<IRedditLink>(0);
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, filteredLinkCollection: filteredLinkCollection);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
-            _redditFilterLogicMock.Verify(m => m.RemoveNsfwContentAsync(It.Is<IEnumerable<IRedditLink>>(value => value == filteredLinkCollection)), Times.Once);
+            _redditFilterLogicMock.Verify(m => m.RemoveNsfwContentAsync(It.Is<IEnumerable<IRedditLink>>(value => value == filteredLinkCollection)), Times.Exactly(numberOfSubreddits));
         }
 
         [TestMethod]
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndIncludeNsfwContentIsTrue_AssertRemoveNsfwContentAsyncWasNotCalledOnRedditFilterLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             const bool includeNsfwContent = true;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _redditFilterLogicMock.Verify(m => m.RemoveNsfwContentAsync(It.IsAny<IEnumerable<IRedditLink>>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndOnlyNsfwContentIsTrue_AssertRemoveNoneNsfwContentAsyncWasCalledOnRedditFilterLogic()
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndOnlyNsfwContentIsTrue_AssertRemoveNoneNsfwContentAsyncWasCalledOnRedditFilterLogicForEachSubredditInCollection()
         {
+            int numberOfSubreddits = _random.Next(1, 10);
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(numberOfSubreddits: numberOfSubreddits);
             bool includeNsfwContent = _random.Next(100) > 50;
             const bool onlyNsfwContent = true;
 
@@ -325,41 +351,58 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IEnumerable<IRedditLink> filteredLinkCollection = new List<IRedditLink>(0);
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, filteredLinkCollection: filteredLinkCollection);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
-            _redditFilterLogicMock.Verify(m => m.RemoveNoneNsfwContentAsync(It.Is<IEnumerable<IRedditLink>>(value => value == filteredLinkCollection)), Times.Once);
+            _redditFilterLogicMock.Verify(m => m.RemoveNoneNsfwContentAsync(It.Is<IEnumerable<IRedditLink>>(value => value == filteredLinkCollection)), Times.Exactly(numberOfSubreddits));
         }
 
         [TestMethod]
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndOnlyNsfwContentIsFalse_AssertRemoveNoneNsfwContentAsyncWasNotCalledOnRedditFilterLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             const bool onlyNsfwContent = false;
 
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _redditFilterLogicMock.Verify(m => m.RemoveNoneNsfwContentAsync(It.IsAny<IEnumerable<IRedditLink>>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertCreateComparerAsyncWasCalledOnRedditFilterLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
+            getLinksTask.Wait();
+
+            _redditFilterLogicMock.Verify(m => m.CreateComparerAsync<IRedditLink>(), Times.Once);
+        }
+
+        [TestMethod]
+        public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        {
+            IRedditAccessToken accessToken = CreateRedditAccessToken();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
+            bool includeNsfwContent = _random.Next(100) > 50;
+            bool onlyNsfwContent = _random.Next(100) > 50;
+
+            const bool willExceedRateLimit = false;
+            IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
+
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
@@ -369,8 +412,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         [TestMethod]
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertCreatedTimeWasCalledOnEachLinkInFilteredCollectionOfLinks()
         {
+            int numberOfSubreddits = _random.Next(1, 10);
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(numberOfSubreddits: numberOfSubreddits);
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -386,19 +430,20 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             };
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, filteredLinkCollection: filteredLinkCollection);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
-            link1Mock.Verify(m => m.CreatedTime, Times.Once);
-            link2Mock.Verify(m => m.CreatedTime, Times.Once);
-            link3Mock.Verify(m => m.CreatedTime, Times.Once);
+            link1Mock.Verify(m => m.CreatedTime, Times.Exactly(numberOfSubreddits * 2));
+            link2Mock.Verify(m => m.CreatedTime, Times.Exactly(numberOfSubreddits * 2));
+            link3Mock.Verify(m => m.CreatedTime, Times.Exactly(numberOfSubreddits * 2));
         }
 
         [TestMethod]
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceeded_ReturnsFilteredCollectionOfLinks()
         {
+            int numberOfSubreddits = _random.Next(1, 10);
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection(numberOfSubreddits: numberOfSubreddits);
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -414,22 +459,22 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             };
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, filteredLinkCollection: filteredLinkCollection);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             IEnumerable<IRedditLink> result = getLinksTask.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(filteredLinkCollection.Count(), result.Count());
-            Assert.IsTrue(result.Contains(link1));
-            Assert.IsTrue(result.Contains(link2));
-            Assert.IsTrue(result.Contains(link3));
+            Assert.AreEqual(filteredLinkCollection.Count() * numberOfSubreddits, result.Count());
+            Assert.AreEqual(numberOfSubreddits, result.Count(subreddit => subreddit == link1));
+            Assert.AreEqual(numberOfSubreddits, result.Count(subreddit => subreddit == link2));
+            Assert.AreEqual(numberOfSubreddits, result.Count(subreddit => subreddit == link3));
         }
 
         [TestMethod]
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -437,7 +482,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: aggregateException);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
@@ -447,7 +492,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_ReturnsEmptyLinkCollection()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -455,7 +500,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: aggregateException);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             IEnumerable<IRedditLink> result = getLinksTask.Result;
@@ -467,7 +512,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -475,7 +520,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: exception);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
@@ -485,7 +530,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void GetLinksAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_ReturnsEmptyLinkCollection()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
-            IRedditSubreddit subreddit = CreateSubreddit();
+            IEnumerable<IRedditSubreddit> subredditCollection = CreateSubredditCollection();
             bool includeNsfwContent = _random.Next(100) > 50;
             bool onlyNsfwContent = _random.Next(100) > 50;
 
@@ -493,7 +538,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: exception);
 
-            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            Task<IEnumerable<IRedditLink>> getLinksTask = sut.GetLinksAsync(accessToken, subredditCollection, includeNsfwContent, onlyNsfwContent);
             getLinksTask.Wait();
 
             IEnumerable<IRedditLink> result = getLinksTask.Result;
@@ -503,21 +548,27 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
         private IRedditLogic CreateSut(bool willExceedRateLimit = false, IRedditResponse<IRedditList<IRedditLink>> redditResponse = null, IEnumerable<IRedditLink> filteredLinkCollection = null, Exception exception = null)
         {
-            _redditRateLimitLogicMock.Setup(m => m.WillExceedRateLimit(It.IsAny<int>()))
-                .Returns(willExceedRateLimit);
-            _redditRateLimitLogicMock.Setup(m => m.EnforceRateLimitAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime>()))
-                .Returns(Task.Run(() => { }));
-
             if (exception != null)
             {
-                _redditRepositoryMock.Setup(m => m.GetLinksAsync(It.IsAny<IRedditAccessToken>(), It.IsAny<IRedditSubreddit>()))
+                _redditRateLimitLogicMock.Setup(m => m.WillExceedRateLimit(It.IsAny<int>()))
                     .Throws(exception);
             }
             else
             {
-                _redditRepositoryMock.Setup(m => m.GetLinksAsync(It.IsAny<IRedditAccessToken>(), It.IsAny<IRedditSubreddit>()))
-                    .Returns(Task.Run(() => redditResponse ?? CreateRedditResponse()));
+                _redditRateLimitLogicMock.Setup(m => m.WillExceedRateLimit(It.IsAny<int>()))
+                    .Returns(willExceedRateLimit);
             }
+            _redditRateLimitLogicMock.Setup(m => m.EnforceRateLimitAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime>()))
+                .Returns(Task.Run(() => { }));
+
+            _redditRepositoryMock.Setup(m => m.GetLinksAsync(It.IsAny<IRedditAccessToken>(), It.IsAny<IRedditSubreddit>()))
+                .Returns(Task.Run(() => redditResponse ?? CreateRedditResponse()));
+
+            Mock<IRedditThingComparer<IRedditLink>> redditLinkComparerMock = new Mock<IRedditThingComparer<IRedditLink>>();
+            redditLinkComparerMock.Setup(m => m.Equals(It.IsAny<IRedditLink>(), It.IsAny<IRedditLink>()))
+                .Returns(false);
+            redditLinkComparerMock.Setup(m => m.GetHashCode())
+                .Returns(_random.Next());
 
             _redditFilterLogicMock.Setup(m => m.RemoveUserBannedContentAsync(It.IsAny<IEnumerable<IRedditLink>>()))
                 .Returns(Task.Run<IEnumerable<IRedditLink>>(() => filteredLinkCollection ?? new List<IRedditLink>(0)));
@@ -525,6 +576,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
                 .Returns(Task.Run<IEnumerable<IRedditLink>>(() => filteredLinkCollection ?? new List<IRedditLink>(0)));
             _redditFilterLogicMock.Setup(m => m.RemoveNoneNsfwContentAsync(It.IsAny<IEnumerable<IRedditLink>>()))
                 .Returns(Task.Run<IEnumerable<IRedditLink>>(() => filteredLinkCollection ?? new List<IRedditLink>(0)));
+            _redditFilterLogicMock.Setup(m => m.CreateComparerAsync<IRedditLink>())
+                .Returns(Task.Run<IRedditThingComparer<IRedditLink>>(() => redditLinkComparerMock.Object));
 
             _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<AggregateException>()))
                 .Returns(Task.Run(() => { }));
@@ -548,6 +601,16 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         {
             Mock<IRedditAccessToken> redditAccessTokenMock = new Mock<IRedditAccessToken>();
             return redditAccessTokenMock; 
+        }
+
+        private IEnumerable<IRedditSubreddit> CreateSubredditCollection(int numberOfSubreddits = 4)
+        {
+            IList<IRedditSubreddit> subredditCollection = new List<IRedditSubreddit>(numberOfSubreddits);
+            while (subredditCollection.Count < numberOfSubreddits)
+            {
+                subredditCollection.Add(CreateSubreddit());
+            }
+            return subredditCollection;
         }
 
         private IRedditSubreddit CreateSubreddit()

@@ -41,6 +41,11 @@ namespace OSDevGrp.MyDashboard.Core.Logic
             return Task.Run<IEnumerable<T>>(() => filterableCollection.Where(filterable => filterable.Over18).ToList());
         }
 
+        public Task<IRedditThingComparer<T>> CreateComparerAsync<T>() where T : IRedditThing
+        {
+            return Task.Run<IRedditThingComparer<T>>(() => new RedditThingComparer<T>());
+        }
+
         #endregion
     }
 }

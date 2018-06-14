@@ -287,6 +287,53 @@ namespace OSDevGrp.MyDashboard.Core.Logic
             });
         }
 
+        public Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IEnumerable<IRedditSubreddit> subredditCollection, bool includeNsfwContent, bool onlyNsfwContent)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+            if (subredditCollection == null)
+            {
+                throw new ArgumentNullException(nameof(subredditCollection));
+            }
+
+            return Task.Run<IEnumerable<IRedditLink>>(() =>
+            {
+                try
+                {
+                    if (_redditRateLimitLogic.WillExceedRateLimit(subredditCollection.Count()))
+                    {
+                        return new List<IRedditLink>(0);
+                    }
+
+                    Task<IEnumerable<IRedditLink>>[] getLinksTaskArray = subredditCollection
+                        .Select(subreddit => GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent))
+                        .ToArray();
+                    Task.WaitAll(getLinksTaskArray);
+
+                    Task<IRedditThingComparer<IRedditLink>> createComparerTask = _redditFilterLogic.CreateComparerAsync<IRedditLink>();
+                    createComparerTask.Wait();
+
+                    return getLinksTaskArray
+                        .Where(getLinksTask => getLinksTask.IsCompleted && getLinksTask.IsFaulted == false && getLinksTask.IsCanceled == false)
+                        .SelectMany(getLinksTask => getLinksTask.Result)
+                        .Distinct(createComparerTask.Result)
+                        .OrderByDescending(link => link.CreatedTime)
+                        .ToList();
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex).Wait();
+                }
+                return new List<IRedditLink>(0);
+            });
+        }
+
         private IEnumerable<T> ApplyFilters<T>(IEnumerable<T> filterableCollection, bool includeNsfwContent, bool onlyNsfwContent) where T : IRedditFilterable
         {
             if (filterableCollection == null)

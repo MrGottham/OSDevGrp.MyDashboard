@@ -15,5 +15,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Logic
         Task<IEnumerable<IRedditSubreddit>> GetNsfwSubredditsAsync(IRedditAccessToken accessToken, int numberOfSubreddits);
 
         Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IRedditSubreddit subreddit, bool includeNsfwContent, bool onlyNsfwContent);
+
+        Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IEnumerable<IRedditSubreddit> subredditCollection, bool includeNsfwContent, bool onlyNsfwContent);
     }
 }
