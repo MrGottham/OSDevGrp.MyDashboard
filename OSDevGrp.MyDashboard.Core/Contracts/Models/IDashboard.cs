@@ -10,6 +10,8 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
 
         IEnumerable<IRedditSubreddit> RedditSubreddits { get; }
 
+        IEnumerable<IRedditLink> RedditLinks { get; }
+
         IEnumerable<ISystemError> SystemErrors { get; }
 
         IDashboardSettings Settings { get; }
@@ -21,6 +23,8 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
         void Replace(IRedditAuthenticatedUser redditAuthenticatedUser);
 
         void Replace(IEnumerable<IRedditSubreddit> redditSubreddits);
+
+        void Replace(IEnumerable<IRedditLink> redditLinks);
 
         void Replace(IEnumerable<ISystemError> systemErrors);
 

@@ -82,6 +82,9 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                     bool onlyNsfwContent = dashboardSettings.OnlyNsfwContent;
                     IEnumerable<IRedditSubreddit> subreddits = await GetSubredditsAsync(accessToken, over18, includeNsfwContent, onlyNsfwContent);
                     dashboard.Replace(subreddits);
+
+                    IEnumerable<IRedditLink> links = await GetLinksAsync(accessToken, subreddits, over18, includeNsfwContent, onlyNsfwContent);
+                    dashboard.Replace(links);
                 }
                 catch (Exception ex)
                 {
@@ -126,6 +129,38 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                     _exceptionHandler.HandleAsync(ex);
                 }
                 return new List<IRedditSubreddit>(0);
+            });
+        }
+
+        private Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IEnumerable<IRedditSubreddit> subreddits, bool over18, bool includeNsfwContent, bool onlyNsfwContent)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+            if (subreddits == null)
+            {
+                throw new ArgumentNullException(nameof(subreddits));
+            }
+
+            return Task.Run<IEnumerable<IRedditLink>>(() =>
+            {
+                try
+                {
+                    Task<IEnumerable<IRedditLink>> getLinksTask = _redditLogic.GetLinksAsync(accessToken, subreddits, over18 && includeNsfwContent, over18 && onlyNsfwContent);
+                    getLinksTask.Wait();
+
+                    return getLinksTask.Result.ToList();
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex);
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex);
+                }
+                return new List<IRedditLink>(0);
             });
         }
 

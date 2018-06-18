@@ -63,7 +63,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
             Assert.IsNotNull(sut.RedditAuthenticatedUser);
             Assert.AreEqual(redditAuthenticatedUser, sut.RedditAuthenticatedUser);
         }
-        
+
         [TestMethod]
         [ExpectedArgumentNullException("redditSubreddits")]
         public void Replace_WhenCalledWithRedditSubredditsEqualToNull_ThrowsArgumentNullExcpetion()
@@ -74,9 +74,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
 
             sut.Replace(redditSubreddits);
         }
-        
+
         [TestMethod]
-        public void Replace_WhenCalledWithIRedditSubredditsNotEqualToNull_ExpectedReplacedCollection()
+        public void Replace_WhenCalledWithRedditSubredditsNotEqualToNull_ExpectedReplacedCollection()
         {
             IEnumerable<IRedditSubreddit> redditSubreddits = new List<IRedditSubreddit>
             {
@@ -93,7 +93,37 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
             Assert.AreEqual(redditSubreddits.Count(), sut.RedditSubreddits.Count());
             Assert.IsTrue(sut.RedditSubreddits.All(redditSubreddit => redditSubreddits.Contains(redditSubreddit)));
         }
-        
+
+        [TestMethod]
+        [ExpectedArgumentNullException("redditLinks")]
+        public void Replace_WhenCalledWithRedditLinksEqualToNull_ThrowsArgumentNullExcpetion()
+        {
+            const IEnumerable<IRedditLink> redditLinks = null;
+
+            IDashboard sut = CreateSut();
+
+            sut.Replace(redditLinks);
+        }
+
+        [TestMethod]
+        public void Replace_WhenCalledWithRedditLinksNotEqualToNull_ExpectedReplacedCollection()
+        {
+            IEnumerable<IRedditLink> redditLinks = new List<IRedditLink>
+            {
+                new Mock<IRedditLink>().Object,
+                new Mock<IRedditLink>().Object,
+                new Mock<IRedditLink>().Object
+            };
+
+            IDashboard sut = CreateSut();
+
+            sut.Replace(redditLinks);
+
+            Assert.IsNotNull(sut.RedditLinks);
+            Assert.AreEqual(redditLinks.Count(), sut.RedditLinks.Count());
+            Assert.IsTrue(sut.RedditLinks.All(redditLink => redditLinks.Contains(redditLink)));
+        }
+
         [TestMethod]
         [ExpectedArgumentNullException("systemErrors")]
         public void Replace_WhenCalledWithSystemErrorsEqualToNull_ThrowsArgumentNullExcpetion()

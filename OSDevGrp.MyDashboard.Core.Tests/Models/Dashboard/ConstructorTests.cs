@@ -32,7 +32,16 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
             Assert.IsNotNull(sut.RedditSubreddits);
             Assert.IsFalse(sut.RedditSubreddits.Any());
         }
-        
+
+        [TestMethod]
+        public void Constructor_WhenCalled_ExpectRedditLinksEqualToEmptyCollection()
+        {
+            IDashboard sut = CreateSut();
+
+            Assert.IsNotNull(sut.RedditLinks);
+            Assert.IsFalse(sut.RedditLinks.Any());
+        }
+
         [TestMethod]
         public void Constructor_WhenCalled_ExpectSystemErrorsEqualToEmptyCollection()
         {
