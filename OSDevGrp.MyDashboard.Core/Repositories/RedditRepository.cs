@@ -305,7 +305,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                         throw new UnauthorizedAccessException("You are not authorized to perform this operation against Reddit.");
                         
                     default:
-                        throw new Exception($"Unable to perform an operation against Reddit: {httpResponseMessage.ReasonPhrase}");
+                        throw new Exception($"Unable to perform an operation against Reddit ({httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri}): {httpResponseMessage.ReasonPhrase}");
                 }
             }
 

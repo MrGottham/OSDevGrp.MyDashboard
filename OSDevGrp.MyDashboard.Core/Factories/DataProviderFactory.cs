@@ -98,10 +98,18 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             Random random = new Random(DateTime.Now.Millisecond);            
             IEnumerable<IRedditKnownSubreddit> knownNsfwSubreddits = new List<IRedditKnownSubreddit>
             {
+                new RedditKnownSubreddit("gonewildcurvy", CalculateRank(random)),
+                new RedditKnownSubreddit("gonewildplus", CalculateRank(random)),
+                new RedditKnownSubreddit("bigboobsgw", CalculateRank(random)),
+                new RedditKnownSubreddit("homegrowntits", CalculateRank(random)),
                 new RedditKnownSubreddit("milf", CalculateRank(random)),
                 new RedditKnownSubreddit("gonewild30plus", CalculateRank(random)),
+                new RedditKnownSubreddit("onmww", CalculateRank(random)),
+                new RedditKnownSubreddit("wouldyoufuckmywife", CalculateRank(random)),
+                new RedditKnownSubreddit("wifesharing", CalculateRank(random)),
                 new RedditKnownSubreddit("gifsgonewild", CalculateRank(random)),
-                new RedditKnownSubreddit("gwnerdy", CalculateRank(random))
+                new RedditKnownSubreddit("gwnerdy", CalculateRank(random)),
+                new RedditKnownSubreddit("chubby", CalculateRank(random))
             };
 
             return Task.Run<IEnumerable<IRedditKnownSubreddit>>(() => knownNsfwSubreddits);
