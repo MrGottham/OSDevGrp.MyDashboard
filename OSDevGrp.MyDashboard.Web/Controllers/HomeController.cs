@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
@@ -21,16 +20,15 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         private readonly IDashboardFactory _dashboardFactory;
         private readonly IViewModelBuilder<DashboardViewModel, IDashboard> _dashboardViewModelBuilder;
-        private readonly IDataProviderFactory _dataProviderFactory;
+        private readonly IRedditAccessTokenProviderFactory _redditAccessTokenProviderFactory;
         private readonly IExceptionHandler _exceptionHandler;
-        private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         #endregion
 
         #region Constructor
 
-        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IDataProviderFactory dataProviderFactory, IExceptionHandler exceptionHandler, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IRedditAccessTokenProviderFactory redditAccessTokenProviderFactory, IExceptionHandler exceptionHandler, IHttpContextAccessor httpContextAccessor)
         {
             if (dashboardFactory == null)
             {
@@ -40,17 +38,13 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 throw new ArgumentNullException(nameof(dashboardViewModelBuilder));
             }
-            if (dataProviderFactory == null)
+            if (redditAccessTokenProviderFactory == null)
             {
-                throw new ArgumentNullException(nameof(dataProviderFactory));
+                throw new ArgumentNullException(nameof(redditAccessTokenProviderFactory));
             }
             if (exceptionHandler == null)
             {
                 throw new ArgumentNullException(nameof(exceptionHandler));
-            }
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
             }
             if (httpContextAccessor == null)
             {
@@ -59,9 +53,8 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             _dashboardFactory = dashboardFactory;
             _dashboardViewModelBuilder = dashboardViewModelBuilder;
-            _dataProviderFactory = dataProviderFactory;
+            _redditAccessTokenProviderFactory = redditAccessTokenProviderFactory;
             _exceptionHandler = exceptionHandler;
-            _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -191,11 +184,10 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             try
             {
-                string clientId = _configuration["Authentication:Reddit:ClientId"];
                 string dashboardSettingsViewModelAsBase64 = dashboardSettingsViewModel.ToBase64();
                 Uri redirectUrl = GetRedditCallbackUri(httpContext);
 
-                Task<Uri> acquireRedditAccessTokenTask = _dataProviderFactory.AcquireRedditAuthorizationTokenAsync(clientId, dashboardSettingsViewModelAsBase64, redirectUrl);
+                Task<Uri> acquireRedditAccessTokenTask = _redditAccessTokenProviderFactory.AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModelAsBase64, redirectUrl);
                 acquireRedditAccessTokenTask.Wait();
                 
                 return Redirect(acquireRedditAccessTokenTask.Result.AbsoluteUri);
@@ -226,11 +218,9 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             
             try
             {
-                string clientId = _configuration["Authentication:Reddit:ClientId"];
-                string clientSecret = _configuration["Authentication:Reddit:ClientSecret"];
                 Uri redirectUrl = GetRedditCallbackUri(httpContext);
 
-                Task<IRedditAccessToken> getRedditAccessTokenTask = _dataProviderFactory.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUrl);
+                Task<IRedditAccessToken> getRedditAccessTokenTask = _redditAccessTokenProviderFactory.GetRedditAccessTokenAsync(code, redirectUrl);
                 getRedditAccessTokenTask.Wait();
 
                 return getRedditAccessTokenTask.Result;

@@ -17,6 +17,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         #region Private variables
 
         private Mock<IDataProviderFactory> _dataProviderFactoryMock;
+        private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
         private Mock<IRedditRepository> _redditRepositoryMock;
         private Mock<IRedditRateLimitLogic> _redditRateLimitLogicMock;
         private Mock<IRedditFilterLogic> _redditFilterLogicMock;
@@ -29,6 +30,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         public void TestInitialize()
         {
             _dataProviderFactoryMock = new Mock<IDataProviderFactory>();
+            _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
             _redditRepositoryMock = new Mock<IRedditRepository>();
             _redditRateLimitLogicMock = new Mock<IRedditRateLimitLogic>();
             _redditFilterLogicMock = new Mock<IRedditFilterLogic>();
@@ -313,6 +315,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
             return new OSDevGrp.MyDashboard.Core.Logic.RedditLogic(
                 _dataProviderFactoryMock.Object,
+                _redditAccessTokenProviderFactoryMock.Object,
                 _redditRepositoryMock.Object,
                 _redditRateLimitLogicMock.Object,
                 _redditFilterLogicMock.Object,

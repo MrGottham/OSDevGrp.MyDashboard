@@ -15,6 +15,7 @@ namespace OSDevGrp.MyDashboard.Core.Logic
         #region Private variables
 
         private readonly IDataProviderFactory _dataProviderFactory;
+        private readonly IRedditAccessTokenProviderFactory _redditAccessTokenProviderFactory;
         private readonly IRedditRepository _redditRepository;
         private readonly IRedditRateLimitLogic _redditRateLimitLogic;
         private readonly IRedditFilterLogic _redditFilterLogic;
@@ -24,11 +25,15 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
         #region Constructor
 
-        public RedditLogic(IDataProviderFactory dataProviderFactory, IRedditRepository redditRepository, IRedditRateLimitLogic redditRateLimitLogic, IRedditFilterLogic redditFilterLogic, IExceptionHandler exceptionHandler)
+        public RedditLogic(IDataProviderFactory dataProviderFactory, IRedditAccessTokenProviderFactory redditAccessTokenProviderFactory, IRedditRepository redditRepository, IRedditRateLimitLogic redditRateLimitLogic, IRedditFilterLogic redditFilterLogic, IExceptionHandler exceptionHandler)
         {
             if (dataProviderFactory == null)
             {
                 throw new ArgumentNullException(nameof(dataProviderFactory));
+            }
+            if (redditAccessTokenProviderFactory == null)
+            {
+                throw new ArgumentNullException(nameof(redditAccessTokenProviderFactory));
             }
             if (redditRepository == null)
             {
@@ -48,6 +53,7 @@ namespace OSDevGrp.MyDashboard.Core.Logic
             }
 
             _dataProviderFactory = dataProviderFactory;
+            _redditAccessTokenProviderFactory = redditAccessTokenProviderFactory;
             _redditRepository = redditRepository;
             _redditRateLimitLogic = redditRateLimitLogic;
             _redditFilterLogic = redditFilterLogic;
@@ -58,6 +64,39 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
         #region Methods
         
+        public Task<IRedditAccessToken> RenewAccessTokenAsync(IRedditAccessToken accessToken)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException(nameof(accessToken));
+            }
+
+            return Task.Run<IRedditAccessToken>(() => 
+            {
+                try
+                {
+                    if (DateTime.Now <= accessToken.Expires)
+                    {
+                        return accessToken;
+                    }
+
+                    Task<IRedditAccessToken> renewRedditAccessTokenTask = _redditAccessTokenProviderFactory.RenewRedditAccessTokenAsync(accessToken.RefreshToken);
+                    renewRedditAccessTokenTask.Wait();
+
+                    return renewRedditAccessTokenTask.Result;
+                }
+                catch (AggregateException ex)
+                {
+                    _exceptionHandler.HandleAsync(ex);
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler.HandleAsync(ex);
+                }
+                return null;
+            });
+        }
+
         public Task<IRedditAuthenticatedUser> GetAuthenticatedUserAsync(IRedditAccessToken accessToken)
         {
             if (accessToken == null)

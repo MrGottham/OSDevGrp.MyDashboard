@@ -85,7 +85,39 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertGetAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public void BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRenewAccessTokenAsyncWasNotCalledOnRedditLogic()
+        {
+            DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300));
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
+            IDashboard dashboard = CreateDashboard();
+
+            IDashboardRedditContentBuilder sut = CreateSut();
+
+            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
+            buildTask.Wait();
+
+            _redditLogicMock.Verify(m => m.RenewAccessTokenAsync(It.IsAny<IRedditAccessToken>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRedditAccessTokenSetterWasNotCalledOnDashboardSettings()
+        {
+            DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300));
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock(redditAccessToken: redditAccessToken);
+            IDashboard dashboard = CreateDashboard();
+
+            IDashboardRedditContentBuilder sut = CreateSut();
+
+            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
+            buildTask.Wait();
+
+            dashboardSettingsMock.VerifySet(m => m.RedditAccessToken = It.IsAny<IRedditAccessToken>(), Times.Never);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertGetAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
             IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
@@ -97,6 +129,90 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             buildTask.Wait();
 
             _redditLogicMock.Verify(m => m.GetAuthenticatedUserAsync(It.Is<IRedditAccessToken>(value => value == redditAccessToken)), Times.Once);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWithExpiredRedditAccessToken_AssertRenewAccessTokenAsyncWasCalledOnRedditLogic()
+        {
+            DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
+            IDashboard dashboard = CreateDashboard();
+
+            IDashboardRedditContentBuilder sut = CreateSut();
+
+            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
+            buildTask.Wait();
+
+            _redditLogicMock.Verify(m => m.RenewAccessTokenAsync(It.Is<IRedditAccessToken>(value => value == redditAccessToken)), Times.Once);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNull_AssertRedditAccessTokenSetterWasNotCalledOnDashboardSettings()
+        {
+            DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock(redditAccessToken: redditAccessToken);
+            IDashboard dashboard = CreateDashboard();
+
+            const IRedditAccessToken renewedRedditAccessToken = null;
+            IDashboardRedditContentBuilder sut = CreateSut(renewedRedditAccessToken: renewedRedditAccessToken);
+
+            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
+            buildTask.Wait();
+
+            dashboardSettingsMock.VerifySet(m => m.RedditAccessToken = It.IsAny<IRedditAccessToken>(), Times.Never);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNull_AssertGetAuthenticatedUserAsyncWasNotCalledOnRedditLogic()
+        {
+            DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
+            IDashboard dashboard = CreateDashboard();
+
+            const IRedditAccessToken renewedRedditAccessToken = null;
+            IDashboardRedditContentBuilder sut = CreateSut(renewedRedditAccessToken: renewedRedditAccessToken);
+
+            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
+            buildTask.Wait();
+
+            _redditLogicMock.Verify(m => m.GetAuthenticatedUserAsync(It.IsAny<IRedditAccessToken>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNotNull_AssertRedditAccessTokenSetterWasCalledOnDashboardSettings()
+        {
+            DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
+            Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock(redditAccessToken: redditAccessToken);
+            IDashboard dashboard = CreateDashboard();
+
+            IRedditAccessToken renewedRedditAccessToken = CreateRedditAccessToken();
+            IDashboardRedditContentBuilder sut = CreateSut(renewedRedditAccessToken: renewedRedditAccessToken);
+
+            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
+            buildTask.Wait();
+
+            dashboardSettingsMock.VerifySet(m => m.RedditAccessToken = It.Is<IRedditAccessToken>(value => value == renewedRedditAccessToken), Times.Once);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNotNull_AssertGetAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        {
+            DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
+            IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
+            IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
+            IDashboard dashboard = CreateDashboard();
+
+            IRedditAccessToken renewedRedditAccessToken = CreateRedditAccessToken();
+            IDashboardRedditContentBuilder sut = CreateSut(renewedRedditAccessToken: renewedRedditAccessToken);
+
+            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
+            buildTask.Wait();
+
+            _redditLogicMock.Verify(m => m.GetAuthenticatedUserAsync(It.Is<IRedditAccessToken>(value => value == renewedRedditAccessToken)), Times.Once);
         }
 
         [TestMethod]
@@ -721,11 +837,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
         }
 
-        private IDashboardRedditContentBuilder CreateSut(bool hasRedditAuthenticatedUser = true, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> subredditsForAuthenticatedUser = null, IEnumerable<IRedditSubreddit> nsfwSubreddits = null, IEnumerable<IRedditLink> links = null, Exception exception = null)
+        private IDashboardRedditContentBuilder CreateSut(bool hasRedditAuthenticatedUser = true, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> subredditsForAuthenticatedUser = null, IEnumerable<IRedditSubreddit> nsfwSubreddits = null, IEnumerable<IRedditLink> links = null, IRedditAccessToken renewedRedditAccessToken = null, Exception exception = null)
         {
-            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<Exception>()))
-                .Returns(Task.Run(() => { }));
-
             if (exception != null)
             {
                 _redditLogicMock.Setup(m => m.GetAuthenticatedUserAsync(It.IsAny<IRedditAccessToken>()))
@@ -747,6 +860,11 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
                 .Returns(Task.Run<IEnumerable<IRedditSubreddit>>(() => nsfwSubreddits ?? CreateSubredditCollection(CreateSubreddit(), CreateSubreddit(), CreateSubreddit())));
             _redditLogicMock.Setup(m => m.GetLinksAsync(It.IsAny<IRedditAccessToken>(), It.IsAny<IEnumerable<IRedditSubreddit>>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .Returns(Task.Run<IEnumerable<IRedditLink>>(() => links ?? CreateLinkCollection(CreateLink(), CreateLink(), CreateLink(), CreateLink(), CreateLink())));
+            _redditLogicMock.Setup(m => m.RenewAccessTokenAsync(It.IsAny<IRedditAccessToken>()))
+                .Returns(Task.Run<IRedditAccessToken>(() => renewedRedditAccessToken));
+
+            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<Exception>()))
+                .Returns(Task.Run(() => { }));
 
             return new OSDevGrp.MyDashboard.Core.Factories.DashboardRedditContentBuilder(
                 _redditLogicMock.Object,

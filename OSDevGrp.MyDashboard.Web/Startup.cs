@@ -41,6 +41,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Adds dependencies for the repositories.
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
+            services.AddTransient<IRedditAccessTokenProviderFactory, RedditAccessTokenProviderFactory>();
             services.AddTransient<INewsRepository, NewsRepository>();
             services.AddTransient<IRedditRepository, RedditRepository>();
             services.AddSingleton<IExceptionRepository, ExceptionRepository>();

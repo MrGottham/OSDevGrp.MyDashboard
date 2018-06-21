@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
@@ -15,7 +14,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
     {
         #region Private variables
 
-        private Mock<IDataProviderFactory> _dataProviderFactoryMock;
         private Mock<IExceptionHandler> _exceptionHandlerMock;
 
         #endregion
@@ -23,7 +21,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
         [TestInitialize]
         public void TestInitialize()
         {
-            _dataProviderFactoryMock = new Mock<IDataProviderFactory>();
             _exceptionHandlerMock = new Mock<IExceptionHandler>();
         }
 
@@ -61,9 +58,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
             _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<Exception>()))
                 .Returns(Task.Run(() => { }));
 
-            return new OSDevGrp.MyDashboard.Core.Repositories.RedditRepository(
-                _dataProviderFactoryMock.Object,
-                _exceptionHandlerMock.Object);
+            return new OSDevGrp.MyDashboard.Core.Repositories.RedditRepository(_exceptionHandlerMock.Object);
         }
 
         private IRedditAccessToken CreateRedditAccessToken()

@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
@@ -21,9 +20,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
         private Mock<IDashboardFactory> _dashboardFactoryMock;
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
-        private Mock<IDataProviderFactory> _dataProviderFactoryMock;
+        private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
         private Mock<IExceptionHandler> _exceptionHandlerMock;
-        private Mock<IConfiguration> _configurationMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Random _random;
 
@@ -34,9 +32,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             _dashboardFactoryMock = new Mock<IDashboardFactory>();
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
-            _dataProviderFactoryMock = new Mock<IDataProviderFactory>();
+            _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
             _exceptionHandlerMock = new Mock<IExceptionHandler>();
-            _configurationMock = new Mock<IConfiguration>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _random = new Random(DateTime.Now.Millisecond);
         }
@@ -152,7 +149,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void RedditCallback_WhenCalledWithError_AssertAuthenticationRedditClientIdWasNotCalledOnConfiguration()
+        public void RedditCallback_WhenCalledWithError_AssertGetRedditAccessTokenAsyncWasNotCalledOnredditAccessTokenProviderFactory()
         {
             string code = Guid.NewGuid().ToString("D");
             string state = CreateDashboardSettingsViewModel().ToBase64();
@@ -162,37 +159,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             sut.RedditCallback(code, state, error);
 
-            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Never);
-        }
-
-        [TestMethod]
-        public void RedditCallback_WhenCalledWithError_AssertAuthenticationRedditClientSecretWasNotCalledOnConfiguration()
-        {
-            string code = Guid.NewGuid().ToString("D");
-            string state = CreateDashboardSettingsViewModel().ToBase64();
-            string error = Guid.NewGuid().ToString("D");
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            sut.RedditCallback(code, state, error);
-
-            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientSecret", value, StringComparison.Ordinal) == 0)], Times.Never);
-        }
-
-        [TestMethod]
-        public void RedditCallback_WhenCalledWithError_AssertGetRedditAccessTokenAsyncWasNotCalledOnDataProviderFactory()
-        {
-            string code = Guid.NewGuid().ToString("D");
-            string state = CreateDashboardSettingsViewModel().ToBase64();
-            string error = Guid.NewGuid().ToString("D");
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            sut.RedditCallback(code, state, error);
-
-            _dataProviderFactoryMock.Verify(m => m.GetRedditAccessTokenAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
+            _redditAccessTokenProviderFactoryMock.Verify(m => m.GetRedditAccessTokenAsync(
                     It.IsAny<string>(),
                     It.IsAny<Uri>()),
                 Times.Never);
@@ -289,7 +256,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void RedditCallback_WhenCalledWithoutError_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
+        public void RedditCallback_WhenCalledWithoutError_AssertGetRedditAccessTokenAsyncWasCalledOnRedditAccessTokenProviderFactory()
         {
             string code = Guid.NewGuid().ToString("D");
             string state = CreateDashboardSettingsViewModel().ToBase64();
@@ -298,37 +265,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             sut.RedditCallback(code, state);
 
-            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Once);
-        }
-
-        [TestMethod]
-        public void RedditCallback_WhenCalledWithoutError_AssertAuthenticationRedditClientSecretWasCalledOnConfiguration()
-        {
-            string code = Guid.NewGuid().ToString("D");
-            string state = CreateDashboardSettingsViewModel().ToBase64();
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            sut.RedditCallback(code, state);
-
-            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientSecret", value, StringComparison.Ordinal) == 0)], Times.Once);
-        }
-
-        [TestMethod]
-        public void RedditCallback_WhenCalledWithoutError_AssertGetRedditAccessTokenAsyncWasCalledOnDataProviderFactory()
-        {
-            string code = Guid.NewGuid().ToString("D");
-            string state = CreateDashboardSettingsViewModel().ToBase64();
-
-            string redditClientId = Guid.NewGuid().ToString("D");
-            string redditClientSecret = Guid.NewGuid().ToString("D");
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(redditClientId: redditClientId, redditClientSecret: redditClientSecret);
-
-            sut.RedditCallback(code, state);
-
-            _dataProviderFactoryMock.Verify(m => m.GetRedditAccessTokenAsync(
-                    It.Is<string>(value => string.Compare(redditClientId, value, StringComparison.Ordinal) == 0),
-                    It.Is<string>(value => string.Compare(redditClientSecret, value, StringComparison.Ordinal) == 0),
+            _redditAccessTokenProviderFactoryMock.Verify(m => m.GetRedditAccessTokenAsync(
                     It.Is<string>(value => string.Compare(code, value, StringComparison.Ordinal) == 0),
                     It.Is<Uri>(value => value == new Uri("http://localhost:5000/Home/RedditCallback"))),
                 Times.Once);
@@ -564,7 +501,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.AreEqual(dashboardViewModel, viewResult.Model);
         }
 
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null, string redditClientId = null, string redditClientSecret = null, IRedditAccessToken redditAccessToken = null, Exception exception = null)
+        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null, IRedditAccessToken redditAccessToken = null, Exception exception = null)
         {
             _dashboardFactoryMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
                 .Returns(Task.Run<IDashboard>(() => dashboard ?? CreateDashboard()));
@@ -574,12 +511,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             if (exception != null)
             {
-                _dataProviderFactoryMock.Setup(m => m.GetRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>()))
+                _redditAccessTokenProviderFactoryMock.Setup(m => m.GetRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<Uri>()))
                     .Throws(exception);
             }
             else
             {
-                _dataProviderFactoryMock.Setup(m => m.GetRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Uri>()))
+                _redditAccessTokenProviderFactoryMock.Setup(m => m.GetRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<Uri>()))
                     .Returns(Task.Run<IRedditAccessToken>(() => redditAccessToken ?? CreateRedditAccessToken()));
             }
 
@@ -588,11 +525,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<Exception>()))
                 .Returns(Task.Run(() => { }));
             
-            _configurationMock.Setup(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)])
-                .Returns(redditClientId ?? Guid.NewGuid().ToString("D"));
-            _configurationMock.Setup(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientSecret", value, StringComparison.Ordinal) == 0)])
-                .Returns(redditClientSecret ?? Guid.NewGuid().ToString("D"));
-
             HttpContext httpContext = new DefaultHttpContext();
             httpContext.Request.Scheme = "http";
             httpContext.Request.Host = new HostString("localhost", 5000);
@@ -602,9 +534,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
            return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
-                _dataProviderFactoryMock.Object,
+                _redditAccessTokenProviderFactoryMock.Object,
                 _exceptionHandlerMock.Object,
-                _configurationMock.Object,
                 _httpContextAccessorMock.Object);
         }
  

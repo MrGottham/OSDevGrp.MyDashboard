@@ -93,6 +93,44 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             });
         }
 
+        public Task<IRedditAccessToken> RenewRedditAccessTokenAsync(string clientId, string clientSecret, string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new ArgumentNullException(nameof(clientId));
+            }
+            if (string.IsNullOrWhiteSpace(clientSecret))
+            {
+                throw new ArgumentNullException(nameof(clientSecret));
+            }
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw new ArgumentNullException(nameof(refreshToken));
+            }
+
+            return Task.Run<IRedditAccessToken>(async () => 
+            {
+                IDictionary<string, string> formFields = new Dictionary<string, string>
+                {
+                    {"grant_type", "refresh_token"},
+                    {"refresh_token", refreshToken}
+                };
+
+                IRedditResponse<RedditAccessToken> redditResponse = await RedditRepository.PostAsync<RedditAccessToken>(
+                    new Uri("https://www.reddit.com/api/v1/access_token"),
+                    "Basic",
+                    Convert.ToBase64String(Encoding.ASCII.GetBytes($"{clientId}:{clientSecret}")),
+                    formFields);
+
+                RedditAccessToken redditAccessToken = redditResponse.Data;
+                if (string.IsNullOrWhiteSpace(redditAccessToken.Error))
+                {
+                    return redditAccessToken;
+                }
+                throw new Exception($"Unable to renew the access token from Reddit: {redditAccessToken.Error}");
+            });
+        }
+
         public Task<IEnumerable<IRedditKnownSubreddit>> GetKnownNsfwSubredditsAsync()
         {
             Random random = new Random(DateTime.Now.Millisecond);            

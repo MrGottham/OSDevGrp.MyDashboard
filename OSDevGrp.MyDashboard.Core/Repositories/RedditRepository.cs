@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
@@ -26,25 +25,19 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
 
         #region Private variables
 
-        private readonly IDataProviderFactory _dataProviderFactory;
         private readonly IExceptionHandler _exceptionHandler;
 
         #endregion
 
         #region Constructor
 
-        public RedditRepository(IDataProviderFactory dataProviderFactory, IExceptionHandler exceptionHandler)
+        public RedditRepository(IExceptionHandler exceptionHandler)
         {
-            if (dataProviderFactory == null)
-            {
-                throw new ArgumentNullException(nameof(dataProviderFactory));
-            }
             if (exceptionHandler == null)
             {
                 throw new ArgumentNullException(nameof(exceptionHandler));
             }
 
-            _dataProviderFactory = dataProviderFactory;
             _exceptionHandler = exceptionHandler;
         }
 

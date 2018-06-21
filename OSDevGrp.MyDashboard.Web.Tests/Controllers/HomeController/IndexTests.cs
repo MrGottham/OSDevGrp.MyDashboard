@@ -3,7 +3,6 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
@@ -22,9 +21,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
         private Mock<IDashboardFactory> _dashboardFactoryMock;
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
-        private Mock<IDataProviderFactory> _dataProviderFactoryMock;
+        private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
         private Mock<IExceptionHandler> _exceptionHandlerMock;
-        private Mock<IConfiguration> _configurationMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Random _random;
 
@@ -35,9 +33,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             _dashboardFactoryMock = new Mock<IDashboardFactory>();
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
-            _dataProviderFactoryMock = new Mock<IDataProviderFactory>();
+            _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
             _exceptionHandlerMock = new Mock<IExceptionHandler>();
-            _configurationMock = new Mock<IConfiguration>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _random = new Random(DateTime.Now.Millisecond);
         }
@@ -363,9 +360,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
-                _dataProviderFactoryMock.Object,
+                _redditAccessTokenProviderFactoryMock.Object,
                 _exceptionHandlerMock.Object,
-                _configurationMock.Object,
                 _httpContextAccessorMock.Object);
         }
 

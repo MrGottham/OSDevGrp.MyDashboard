@@ -67,7 +67,12 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                     IRedditAccessToken accessToken = dashboardSettings.RedditAccessToken;
                     if (DateTime.Now > accessToken.Expires)
                     {
-                        // TODO: Renew our access token.
+                        accessToken = await _redditLogic.RenewAccessTokenAsync(accessToken);
+                        if (accessToken == null)
+                        {
+                            return;
+                        }
+                        dashboardSettings.RedditAccessToken = accessToken;
                     }
 
                     IRedditAuthenticatedUser authenticatedUser = await _redditLogic.GetAuthenticatedUserAsync(accessToken);

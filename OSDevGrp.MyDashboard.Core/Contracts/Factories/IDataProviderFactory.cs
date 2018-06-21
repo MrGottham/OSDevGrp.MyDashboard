@@ -13,6 +13,8 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Factories
 
         Task<IRedditAccessToken> GetRedditAccessTokenAsync(string clientId, string clientSecret, string code, Uri redirectUri);
 
+        Task<IRedditAccessToken> RenewRedditAccessTokenAsync(string clientId, string clientSecret, string refreshToken);
+
         Task<IEnumerable<IRedditKnownSubreddit>> GetKnownNsfwSubredditsAsync();
     }
 }
