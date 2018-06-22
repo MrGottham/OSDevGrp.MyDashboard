@@ -24,7 +24,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
         }
 
         [TestMethod]
-        public void WillExceedRateLimit_WhenExpectedCallsDoesExceedReamingAndResetTimeHasPassed_ExpectTrue()
+        public void WillExceedRateLimit_WhenExpectedCallsDoesExceedReamingAndResetTimeHasPassed_ExpectFalse()
         {
             int remaining = _random.Next(10, 60);
             DateTime resetTime = DateTime.Now.AddSeconds(_random.Next(1, 10) * -1);
@@ -33,11 +33,11 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             bool result = sut.WillExceedRateLimit(remaining + _random.Next(1, 10));
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void WillExceedRateLimit_WhenExpectedCallsEqaulToReamingAndResetTimeHasPassed_ExpectTrue()
+        public void WillExceedRateLimit_WhenExpectedCallsEqaulToReamingAndResetTimeHasPassed_ExpectFalse()
         {
             int remaining = _random.Next(10, 60);
             DateTime resetTime = DateTime.Now.AddSeconds(_random.Next(1, 10) * -1);
@@ -46,11 +46,11 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             bool result = sut.WillExceedRateLimit(remaining);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void WillExceedRateLimit_WhenExpectedCallsDoesNotExceedReamingAndResetTimeHasPassed_ExpectTrue()
+        public void WillExceedRateLimit_WhenExpectedCallsDoesNotExceedReamingAndResetTimeHasPassed_ExpectFalse()
         {
             int remaining = _random.Next(10, 60);
             DateTime resetTime = DateTime.Now.AddSeconds(_random.Next(1, 10) * -1);
@@ -59,7 +59,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             bool result = sut.WillExceedRateLimit(remaining - _random.Next(1, 10));
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
