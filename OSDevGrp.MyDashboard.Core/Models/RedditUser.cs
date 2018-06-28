@@ -53,5 +53,15 @@ namespace OSDevGrp.MyDashboard.Core.Models
         protected string Id { get; set; }
 
         #endregion
+
+        #region Methods
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext streamingContext)
+        {
+            UserName = UnescapeRedditString(UserName);
+        }
+
+        #endregion
     }
 }

@@ -80,6 +80,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
             {
                 Received = DateTime.UtcNow;
             }
+            Error = UnescapeRedditString(Error);
         }
 
         #endregion

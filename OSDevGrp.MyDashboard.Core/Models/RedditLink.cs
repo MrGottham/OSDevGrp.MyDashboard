@@ -61,6 +61,10 @@ namespace OSDevGrp.MyDashboard.Core.Models
         { 
             get
             {
+                if (string.IsNullOrWhiteSpace(ThumbnailAsString) || Uri.IsWellFormedUriString(ThumbnailAsString, UriKind.Absolute) == false)
+                {
+                    return null;
+                }
                 return new Uri(ThumbnailAsString);
             }
         }
@@ -143,6 +147,22 @@ namespace OSDevGrp.MyDashboard.Core.Models
 
         [DataMember(Name = "url", IsRequired = true)]
         protected string UrlAsString { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext streamingContext)
+        {
+            Title = UnescapeRedditString(Title);
+            SelftextAsText = UnescapeRedditString(SelftextAsText);
+            SelftextAsHtml = UnescapeRedditString(SelftextAsHtml);
+            Author = UnescapeRedditString(Author);
+            ThumbnailAsString = UnescapeRedditString(ThumbnailAsString);
+            BannedBy = UnescapeRedditString(BannedBy);
+            UrlAsString = UnescapeRedditString(UrlAsString);
+        }
 
         #endregion
     }

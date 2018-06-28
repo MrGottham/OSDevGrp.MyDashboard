@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Core.Repositories;
 
@@ -12,6 +13,26 @@ namespace OSDevGrp.MyDashboard.Core.Factories
 {
     public class DataProviderFactory : IDataProviderFactory
     {
+        #region Private variables
+
+        private readonly IRandomizer _randomizer;
+
+        #endregion
+
+        #region Constructor
+
+        public DataProviderFactory(IRandomizer randomizer)
+        {
+            if (randomizer == null)
+            {
+                throw new ArgumentNullException(nameof(randomizer));
+            }
+
+            _randomizer = randomizer;
+        }
+
+        #endregion
+        
         #region Methods
 
         public Task<IEnumerable<INewsProvider>> BuildNewsProvidersAsync()
@@ -133,36 +154,30 @@ namespace OSDevGrp.MyDashboard.Core.Factories
 
         public Task<IEnumerable<IRedditKnownSubreddit>> GetKnownNsfwSubredditsAsync()
         {
-            Random random = new Random(DateTime.Now.Millisecond);            
             IEnumerable<IRedditKnownSubreddit> knownNsfwSubreddits = new List<IRedditKnownSubreddit>
             {
-                new RedditKnownSubreddit("gonewildcurvy", CalculateRank(random)),
-                new RedditKnownSubreddit("gonewildplus", CalculateRank(random)),
-                new RedditKnownSubreddit("bigboobsgw", CalculateRank(random)),
-                new RedditKnownSubreddit("homegrowntits", CalculateRank(random)),
-                new RedditKnownSubreddit("milf", CalculateRank(random)),
-                new RedditKnownSubreddit("gonewild30plus", CalculateRank(random)),
-                new RedditKnownSubreddit("onmww", CalculateRank(random)),
-                new RedditKnownSubreddit("wouldyoufuckmywife", CalculateRank(random)),
-                new RedditKnownSubreddit("wifesharing", CalculateRank(random)),
-                new RedditKnownSubreddit("gifsgonewild", CalculateRank(random)),
-                new RedditKnownSubreddit("gwnerdy", CalculateRank(random)),
-                new RedditKnownSubreddit("chubby", CalculateRank(random))
+                new RedditKnownSubreddit("gonewildcurvy", CalculateRank()),
+                new RedditKnownSubreddit("gonewildplus", CalculateRank()),
+                new RedditKnownSubreddit("bigboobsgw", CalculateRank()),
+                new RedditKnownSubreddit("homegrowntits", CalculateRank()),
+                new RedditKnownSubreddit("milf", CalculateRank()),
+                new RedditKnownSubreddit("gonewild30plus", CalculateRank()),
+                new RedditKnownSubreddit("onmww", CalculateRank()),
+                new RedditKnownSubreddit("wouldyoufuckmywife", CalculateRank()),
+                new RedditKnownSubreddit("wifesharing", CalculateRank()),
+                new RedditKnownSubreddit("gifsgonewild", CalculateRank()),
+                new RedditKnownSubreddit("gwnerdy", CalculateRank()),
+                new RedditKnownSubreddit("chubby", CalculateRank())
             };
 
             return Task.Run<IEnumerable<IRedditKnownSubreddit>>(() => knownNsfwSubreddits);
         }
 
-        private int CalculateRank(Random random)
+        private int CalculateRank()
         {
-            if (random == null)
-            {
-                throw new ArgumentNullException(nameof(random));
-            }
-            return random.Next(0, 1000);
+            return _randomizer.Next(0, 1000);
         }
-        
-
+ 
         #endregion 
     }
 }

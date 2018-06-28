@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Factories;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
@@ -11,6 +13,18 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
     [TestClass]
     public class BuildNewsProvidersAsyncTests
     {
+        #region Private variables
+
+        private Mock<IRandomizer> _randomizerMock;
+
+        #endregion
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _randomizerMock = new Mock<IRandomizer>();
+        }
+
         [TestMethod]
         public void BuildNewsProvidersAsync_WhenCalled_ReturnsNewsProviders()
         {
@@ -31,7 +45,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
         private IDataProviderFactory CreateSut()
         {
-            return new OSDevGrp.MyDashboard.Core.Factories.DataProviderFactory();
+            return new OSDevGrp.MyDashboard.Core.Factories.DataProviderFactory(_randomizerMock.Object);
         }
 
         private void AssertNewsProvider(INewsProvider newsProvider, string name, string url)

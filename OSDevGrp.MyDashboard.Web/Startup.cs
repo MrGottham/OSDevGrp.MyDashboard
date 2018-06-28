@@ -38,6 +38,7 @@ namespace OSDevGrp.MyDashboard.Web
         {
             // Adds dependencies for the infrastructure. 
             services.AddTransient<IExceptionHandler, ExceptionHandler>();
+            services.AddSingleton<IRandomizer, Randomizer>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Adds dependencies for the repositories.
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
@@ -64,6 +65,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddTransient<IViewModelBuilder<DashboardViewModel, IDashboard>, DashboardViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>, RedditAuthenticatedUserToObjectViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>, RedditSubredditToObjectViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder<InformationViewModel, IRedditLink>, RedditLinkToInformationViewModelBuilder>();
             // Adds other services.
             services.AddMvc();
         }

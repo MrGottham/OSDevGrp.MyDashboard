@@ -22,6 +22,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         private Mock<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>> _dashboardSettingsViewModelBuilderMock;
         private Mock<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>> _redditAuthenticatedUserToObjectViewModelBuilderMock;
         private Mock<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>> _redditSubredditToObjectViewModelBuilder;
+        private Mock<IViewModelBuilder<InformationViewModel, IRedditLink>> _redditLinkToInformationViewModelBuilderMock;
         private Mock<IHtmlHelper> _htmlHelperMock;
         private Random _random;
 
@@ -35,6 +36,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             _dashboardSettingsViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>>();
             _redditAuthenticatedUserToObjectViewModelBuilderMock = new Mock<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>>();
             _redditSubredditToObjectViewModelBuilder = new Mock<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>>();
+            _redditLinkToInformationViewModelBuilderMock = new Mock<IViewModelBuilder<InformationViewModel, IRedditLink>>();
             _htmlHelperMock = new Mock<IHtmlHelper>();
             _random = new Random(DateTime.Now.Millisecond);
         }
@@ -116,6 +118,19 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertRedditLinksWasCalledOnDashboardOnce()
+        {
+            Mock<IDashboard> dashboardMock = CreateDashboardMock();
+
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut();
+
+            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboardMock.Object);
+            buildTask.Wait();
+
+            dashboardMock.Verify(m => m.RedditLinks, Times.Once);
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_AssertBuildAsyncWasCalledOnNewsToInformationViewModelBuilderForEachNewsInDashboard()
         {
             List<INews> newsCollection = CreateNewsCollection(_random.Next(50, 75)).ToList();
@@ -186,6 +201,20 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertBuildAsyncWasCalledOnRedditLinkToInformationViewModelBuilderForEachRedditLinkInDashboard()
+        {
+            List<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(_random.Next(50, 75)).ToList();
+            IDashboard dashboard = CreateDashboard(redditLinkCollection: redditLinkCollection);
+
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut();
+
+            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
+            buildTask.Wait();
+
+            redditLinkCollection.ForEach(redditLink => _redditLinkToInformationViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IRedditLink>(value => value == redditLink)), Times.Once));
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_AssertRulesWasCalledOnDashboard()
         {
             Mock<IDashboard> dashboardMock = CreateDashboardMock();
@@ -206,7 +235,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser();
             List<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(_random.Next(10, 25)).ToList();
-            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, dashboardSettings: dashboardSettings, redditAuthenticatedUser: redditAuthenticatedUser, redditSubredditCollection: redditSubredditCollection);
+            List<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(_random.Next(50, 75)).ToList();
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, dashboardSettings: dashboardSettings, redditAuthenticatedUser: redditAuthenticatedUser, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
 
             DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel();
             ObjectViewModel<IRedditAuthenticatedUser> objectViewModelForRedditAuthenticatedUser = CreateObjectViewModel<IRedditAuthenticatedUser>(redditAuthenticatedUser, DateTime.Now.AddDays(_random.Next(1, 365) * -1).AddMinutes(_random.Next(-120, 120)));
@@ -218,7 +248,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             DashboardViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Informations);
-            Assert.AreEqual(newsCollection.Count, result.Informations.Count());
+            Assert.AreEqual(newsCollection.Count + redditLinkCollection.Count, result.Informations.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(systemErrorCollection.Count, result.SystemErrors.Count());
             Assert.IsNotNull(result.Settings);
@@ -235,7 +265,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             IEnumerable<INews> newsCollection = CreateNewsCollection(1);
             IEnumerable<ISystemError> systemErrorCollection = CreateSystemErrorCollection(0);
             IEnumerable<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(0);
-            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection);
+            IEnumerable<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(0);
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
 
             string aggregateExceptionMessage = Guid.NewGuid().ToString();
             IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(aggregateExceptionMessage: aggregateExceptionMessage);
@@ -269,7 +300,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             IEnumerable<INews> newsCollection = CreateNewsCollection(0);
             IEnumerable<ISystemError> systemErrorCollection = CreateSystemErrorCollection(1);
             IEnumerable<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(0);
-            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection);
+            IEnumerable<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(0);
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
 
             string aggregateExceptionMessage = Guid.NewGuid().ToString();
             IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(aggregateExceptionMessage: aggregateExceptionMessage);
@@ -304,7 +336,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             IEnumerable<ISystemError> systemErrorCollection = CreateSystemErrorCollection(0);
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IEnumerable<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(0);
-            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, dashboardSettings: dashboardSettings, redditSubredditCollection: redditSubredditCollection);
+            IEnumerable<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(0);
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, dashboardSettings: dashboardSettings, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
 
             string aggregateExceptionMessage = Guid.NewGuid().ToString();
             IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(aggregateExceptionMessage: aggregateExceptionMessage);
@@ -339,7 +372,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             IEnumerable<ISystemError> systemErrorCollection = CreateSystemErrorCollection(0);
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser();
             IEnumerable<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(0);
-            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditAuthenticatedUser: redditAuthenticatedUser, redditSubredditCollection: redditSubredditCollection);
+            IEnumerable<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(0);
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditAuthenticatedUser: redditAuthenticatedUser, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
 
             string aggregateExceptionMessage = Guid.NewGuid().ToString();
             IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(aggregateExceptionMessage: aggregateExceptionMessage);
@@ -373,7 +407,43 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             IEnumerable<INews> newsCollection = CreateNewsCollection(0);
             IEnumerable<ISystemError> systemErrorCollection = CreateSystemErrorCollection(0);
             IEnumerable<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(1);
-            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection);
+            IEnumerable<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(0);
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
+
+            string aggregateExceptionMessage = Guid.NewGuid().ToString();
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(aggregateExceptionMessage: aggregateExceptionMessage);
+
+            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
+            buildTask.Wait();
+
+            DashboardViewModel result = buildTask.Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Informations);
+            Assert.AreEqual(0, result.Informations.Count());
+            Assert.IsNotNull(result.SystemErrors);
+            Assert.AreEqual(1, result.SystemErrors.Count());
+            Assert.IsNull(result.Settings);
+            Assert.IsNull(result.RedditAuthenticatedUser);
+            Assert.IsNotNull(result.RedditSubreddits);
+            Assert.AreEqual(0, result.RedditSubreddits.Count());
+            
+            SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
+            Assert.IsNotNull(systemErrorViewModel);
+            Assert.IsNotNull(systemErrorViewModel.SystemErrorIdentifier);
+            Assert.IsTrue(systemErrorViewModel.Timestamp >= DateTime.Now.AddSeconds(-3) && systemErrorViewModel.Timestamp <= DateTime.Now);
+            Assert.IsNotNull(systemErrorViewModel.Message);
+            Assert.AreEqual($"HtmlHelper.ConvertNewLines:{aggregateExceptionMessage}", systemErrorViewModel.Message);
+            Assert.IsNotNull(systemErrorViewModel.Details);
+        }
+
+        [TestMethod]
+        public void BuildAsync_WhenCalledAndRedditLinkToInformationViewModelBuilderThrowsAggregateException_AddsExceptionToSystemViewModelsInDashboardViewModel()
+        {
+            IEnumerable<INews> newsCollection = CreateNewsCollection(0);
+            IEnumerable<ISystemError> systemErrorCollection = CreateSystemErrorCollection(0);
+            IEnumerable<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(0);
+            IEnumerable<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(1);
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
 
             string aggregateExceptionMessage = Guid.NewGuid().ToString();
             IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(aggregateExceptionMessage: aggregateExceptionMessage);
@@ -407,7 +477,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             IEnumerable<INews> newsCollection = CreateNewsCollection(1);
             IEnumerable<ISystemError> systemErrorCollection = CreateSystemErrorCollection(0);
             IEnumerable<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(0);
-            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection);
+            IEnumerable<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(0);
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
 
             string aggregateExceptionMessage = Guid.NewGuid().ToString();
             IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(aggregateExceptionMessage: aggregateExceptionMessage);
@@ -470,6 +541,16 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                     return CreateObjectViewModel<IRedditSubreddit>(redditSubreddit, DateTime.Now.AddDays(_random.Next(1, 365) * -1).AddMinutes(_random.Next(-120, 120)));
                 }));
 
+            _redditLinkToInformationViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IRedditLink>()))
+                .Returns(Task.Run<InformationViewModel>(() => 
+                {
+                    if (string.IsNullOrWhiteSpace(aggregateExceptionMessage) == false)
+                    {
+                        throw new Exception(aggregateExceptionMessage);
+                    }
+                    return CreateInformationViewModel(DateTime.Now.AddMinutes(_random.Next(1, 30) * -1));
+                }));
+
             _htmlHelperMock.Setup(m => m.ConvertNewLines(It.IsAny<string>()))
                 .Returns<string>(value => $"HtmlHelper.ConvertNewLines:{value}");
 
@@ -479,15 +560,16 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 _dashboardSettingsViewModelBuilderMock.Object,
                 _redditAuthenticatedUserToObjectViewModelBuilderMock.Object,
                 _redditSubredditToObjectViewModelBuilder.Object,
+                _redditLinkToInformationViewModelBuilderMock.Object,
                 _htmlHelperMock.Object);
         }
 
-        private IDashboard CreateDashboard(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null, IDashboardRules dashboardRules = null)
+        private IDashboard CreateDashboard(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null, IEnumerable<IRedditLink> redditLinkCollection = null, IDashboardRules dashboardRules = null)
         {
-            return CreateDashboardMock(newsCollection, systemErrorCollection, dashboardSettings, redditAuthenticatedUser, redditSubredditCollection, dashboardRules).Object;
+            return CreateDashboardMock(newsCollection, systemErrorCollection, dashboardSettings, redditAuthenticatedUser, redditSubredditCollection, redditLinkCollection, dashboardRules).Object;
         }
 
-        private Mock<IDashboard> CreateDashboardMock(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null, IDashboardRules dashboardRules = null)
+        private Mock<IDashboard> CreateDashboardMock(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null, IEnumerable<IRedditLink> redditLinkCollection = null, IDashboardRules dashboardRules = null)
         {
             Mock<IDashboard> dashboardMock = new Mock<IDashboard>();
             dashboardMock.Setup(m => m.News)
@@ -500,6 +582,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 .Returns(redditAuthenticatedUser);
             dashboardMock.Setup(m => m.RedditSubreddits)
                 .Returns(redditSubredditCollection ?? CreateRedditSubredditCollection(_random.Next(10, 25)));
+            dashboardMock.Setup(m => m.RedditLinks)
+                .Returns(redditLinkCollection ?? CreateRedditLinkCollection(_random.Next(50, 100)));
             dashboardMock.Setup(m => m.Rules)
                 .Returns(dashboardRules ?? CreateDashboardRules());
             return dashboardMock;
@@ -550,6 +634,17 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 redditSubredditCollection.Add(redditSubredditMock.Object);
             }
             return redditSubredditCollection;
+        }
+
+        private IEnumerable<IRedditLink> CreateRedditLinkCollection(int numberOfRedditLinks)
+        {
+            IList<IRedditLink> redditLinksCollection = new List<IRedditLink>(numberOfRedditLinks);
+            while (redditLinksCollection.Count < numberOfRedditLinks)
+            {
+                Mock<IRedditLink> redditLinkMock = new Mock<IRedditLink>();
+                redditLinksCollection.Add(redditLinkMock.Object);
+            }
+            return redditLinksCollection;
         }
 
         private IDashboardRules CreateDashboardRules()

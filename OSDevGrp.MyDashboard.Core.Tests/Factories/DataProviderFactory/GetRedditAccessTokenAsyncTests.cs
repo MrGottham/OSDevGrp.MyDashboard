@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Factories;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
@@ -11,6 +13,18 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
     [TestClass]
     public class GetRedditAccessTokenAsyncTests
     {
+        #region Private variables
+
+        private Mock<IRandomizer> _randomizerMock;
+
+        #endregion
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _randomizerMock = new Mock<IRandomizer>();
+        }
+
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
         public void GetRedditAccessTokenAsync_WhenClientIdIsNull_ThrowsArgumentNullException()
@@ -210,7 +224,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
         private IDataProviderFactory CreateSut()
         {
-            return new OSDevGrp.MyDashboard.Core.Factories.DataProviderFactory();
+            return new OSDevGrp.MyDashboard.Core.Factories.DataProviderFactory(_randomizerMock.Object);
         }
     }
 }

@@ -19,13 +19,14 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         private readonly IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> _dashboardSettingsViewModelBuilder;
         private readonly IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> _redditAuthenticatedUserToObjectViewModelBuilder;
         private readonly IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> _redditSubredditToObjectViewModelBuilder;
+        private readonly IViewModelBuilder<InformationViewModel, IRedditLink> _redditLinkToInformationViewModelBuilder;
         private readonly IHtmlHelper _htmlHelper;
 
         #endregion
 
         #region Constructor
 
-        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> redditSubredditToObjectViewModelBuilder, IHtmlHelper htmlHelper)
+        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> redditSubredditToObjectViewModelBuilder, IViewModelBuilder<InformationViewModel, IRedditLink> redditLinkToInformationViewModelBuilder, IHtmlHelper htmlHelper)
         {
             if (newsToInformationViewModelBuilder == null) 
             {
@@ -47,6 +48,10 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 throw new ArgumentNullException(nameof(redditSubredditToObjectViewModelBuilder));
             }
+            if (redditLinkToInformationViewModelBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(redditLinkToInformationViewModelBuilder));
+            }
             if (htmlHelper == null)
             {
                 throw new ArgumentNullException(nameof(htmlHelper));
@@ -57,6 +62,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             _dashboardSettingsViewModelBuilder = dashboardSettingsViewModelBuilder;
             _redditAuthenticatedUserToObjectViewModelBuilder = redditAuthenticatedUserToObjectViewModelBuilder;
             _redditSubredditToObjectViewModelBuilder = redditSubredditToObjectViewModelBuilder;
+            _redditLinkToInformationViewModelBuilder = redditLinkToInformationViewModelBuilder;
             _htmlHelper = htmlHelper;
         }
 
@@ -75,7 +81,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
 
             try
             {
-                Task handleInformationViewModelsTask = HandleAsync<InformationViewModel>(
+                Task handleInformationViewModelsForNewsTask = HandleAsync<InformationViewModel>(
                     dashboard, 
                     m => GenerateViewModelBuilderTaskArrayForCollection(m, n => n.News, _newsToInformationViewModelBuilder),
                     viewModel => AddViewModelToViewModelCollection(viewModel, informationViewModelCollection, syncRoot),
@@ -95,17 +101,23 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                     m => GenerateViewModelBuilderTaskArrayForObject(m, n => n.RedditAuthenticatedUser, _redditAuthenticatedUserToObjectViewModelBuilder),
                     viewModel => objectViewModelForRedditAuthenticatedUser = viewModel,
                     exception => HandleException(exception, systemErrorViewModelCollection, syncRoot));
-                Task handleObjectViewModelForRedditSubredditTask = HandleAsync<ObjectViewModel<IRedditSubreddit>>(
+                Task handleObjectViewModelsForRedditSubredditTask = HandleAsync<ObjectViewModel<IRedditSubreddit>>(
                     dashboard,
                     m => GenerateViewModelBuilderTaskArrayForCollection(m, n => n.RedditSubreddits, _redditSubredditToObjectViewModelBuilder),
                     viewModel => AddViewModelToViewModelCollection(viewModel, objectViewModelForRedditSubredditCollection, syncRoot),
                     exception => HandleException(exception, systemErrorViewModelCollection, syncRoot));
-                Task.WaitAll(new[] {
-                    handleInformationViewModelsTask, 
+                Task handleInformationViewModelsForRedditLinkTask = HandleAsync<InformationViewModel>(
+                    dashboard, 
+                    m => GenerateViewModelBuilderTaskArrayForCollection(m, n => n.RedditLinks, _redditLinkToInformationViewModelBuilder),
+                    viewModel => AddViewModelToViewModelCollection(viewModel, informationViewModelCollection, syncRoot),
+                    exception => HandleException(exception, systemErrorViewModelCollection, syncRoot));
+               Task.WaitAll(new[] {
+                    handleInformationViewModelsForNewsTask, 
                     handleSystemErrorViewModelsTask, 
                     handleDashboardSettingsViewModelTask, 
                     handleObjectViewModelForRedditAuthenticatedUserTask, 
-                    handleObjectViewModelForRedditSubredditTask});
+                    handleObjectViewModelsForRedditSubredditTask,
+                    handleInformationViewModelsForRedditLinkTask});
             }
             catch (Exception ex)
             {

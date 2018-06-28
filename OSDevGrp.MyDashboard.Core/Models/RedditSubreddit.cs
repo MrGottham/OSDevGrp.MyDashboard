@@ -146,5 +146,26 @@ namespace OSDevGrp.MyDashboard.Core.Models
         protected string UrlAsString { get; set; }
 
         #endregion
+
+        #region Methods
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext streamingContext)
+        {
+            DisplayName = UnescapeRedditString(DisplayName);
+            DisplayNamePrefixed = UnescapeRedditString(DisplayNamePrefixed);
+            Title = UnescapeRedditString(Title);
+            HeaderTitle = UnescapeRedditString(HeaderTitle);
+            DescriptionAsText = UnescapeRedditString(DescriptionAsText);
+            DescriptionAsHtml = UnescapeRedditString(DescriptionAsHtml);
+            PublicDescriptionAsText = UnescapeRedditString(PublicDescriptionAsText);
+            PublicDescriptionAsHtml = UnescapeRedditString(PublicDescriptionAsHtml);
+            BannerImageUrlAsString = UnescapeRedditString(BannerImageUrlAsString);
+            HeaderImageUrlAsString = UnescapeRedditString(HeaderImageUrlAsString);
+            IconImageUrlAsString = UnescapeRedditString(IconImageUrlAsString);
+            UrlAsString = UnescapeRedditString(UrlAsString);
+        }
+
+        #endregion
     }
 }

@@ -183,6 +183,10 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                     getTask.Wait();
 
                     IRedditResponse<RedditList<RedditLink>> response = getTask.Result;
+                    foreach (RedditLink link in response.Data)
+                    {
+                        link.Subreddit = subreddit;
+                    }
 
                     return response.As<IRedditList<IRedditLink>>(response.Data.As<IRedditLink>());
                 }

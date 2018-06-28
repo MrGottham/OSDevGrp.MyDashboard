@@ -14,7 +14,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
         {
             get
             {
-                if (Uri.IsWellFormedUriString(UrlAsString, UriKind.Absolute) == false)
+                if (string.IsNullOrWhiteSpace(UrlAsString) || Uri.IsWellFormedUriString(UrlAsString, UriKind.Absolute) == false)
                 {
                     return null;
                 }
@@ -30,6 +30,16 @@ namespace OSDevGrp.MyDashboard.Core.Models
 
         [DataMember(Name = "height", IsRequired = true)]
         public int Height { get; protected set; }
+
+        #endregion
+
+        #region Methods
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext streamingContext)
+        {
+            UrlAsString = UnescapeRedditString(UrlAsString);
+        }
 
         #endregion
     }
