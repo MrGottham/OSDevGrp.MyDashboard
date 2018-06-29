@@ -2,7 +2,7 @@
 @using OSDevGrp.MyDashboard.Web.Models;
 @model ImageViewModel<InformationViewModel>
 
-<img class="d-block w-100" src="@Model.OriginalImageAsBase64" />
+<img class="d-block w-100" src="@Model.ImageAsBase64" />
 @if (string.IsNullOrWhiteSpace(@Model.ViewModel.Header) == false)
 {
     <div class="carousel-caption d-none d-md-block">
