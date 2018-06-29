@@ -13,8 +13,8 @@ namespace OSDevGrp.MyDashboard.Web.Models
     {
         #region Private constants
 
-        private const int MaxWidth = 400;
-        private const int MaxHeight = 250;
+        private const int MaxWidth = 448;
+        private const int MaxHeight = 268;
 
         #endregion
 

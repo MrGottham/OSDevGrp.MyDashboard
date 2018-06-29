@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
@@ -35,6 +36,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.HttpHelper
             catch (AggregateException aggregateException)
             {
                 aggregateException.Handle(ex => {
+                    if (ex is HttpRequestException)
+                    {
+                        return true;
+                    }
                     Assert.IsInstanceOfType(ex, typeof(Exception));
                     Assert.IsNotNull(ex.Message);
                     Assert.AreEqual($"Unable to perform the operation ({url.AbsoluteUri}): Not Found", ex.Message);
