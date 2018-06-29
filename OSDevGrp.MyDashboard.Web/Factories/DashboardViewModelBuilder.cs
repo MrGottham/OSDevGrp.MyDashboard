@@ -21,12 +21,13 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         private readonly IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> _redditSubredditToObjectViewModelBuilder;
         private readonly IViewModelBuilder<InformationViewModel, IRedditLink> _redditLinkToInformationViewModelBuilder;
         private readonly IHtmlHelper _htmlHelper;
+        private readonly IHttpHelper _httpHelper;
 
         #endregion
 
         #region Constructor
 
-        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> redditSubredditToObjectViewModelBuilder, IViewModelBuilder<InformationViewModel, IRedditLink> redditLinkToInformationViewModelBuilder, IHtmlHelper htmlHelper)
+        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> redditSubredditToObjectViewModelBuilder, IViewModelBuilder<InformationViewModel, IRedditLink> redditLinkToInformationViewModelBuilder, IHtmlHelper htmlHelper, IHttpHelper httpHelper)
         {
             if (newsToInformationViewModelBuilder == null) 
             {
@@ -56,6 +57,10 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 throw new ArgumentNullException(nameof(htmlHelper));
             }
+            if (httpHelper == null)
+            {
+                throw new ArgumentNullException(nameof(httpHelper));
+            }
 
             _newsToInformationViewModelBuilder = newsToInformationViewModelBuilder;
             _systemErrorViewModelBuilder = systemErrorViewModelBuilder;
@@ -64,6 +69,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             _redditSubredditToObjectViewModelBuilder = redditSubredditToObjectViewModelBuilder;
             _redditLinkToInformationViewModelBuilder = redditLinkToInformationViewModelBuilder;
             _htmlHelper = htmlHelper;
+            _httpHelper = httpHelper;
         }
 
         #endregion
@@ -123,10 +129,13 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 HandleException(ex, systemErrorViewModelCollection, syncRoot);
             }
-            
+
+            IEnumerable<ImageViewModel<InformationViewModel>> latestInformationsWithImage = GetLatestInformationsWithImage(informationViewModelCollection, systemErrorViewModelCollection, syncRoot);
+
             DashboardViewModel dashboardViewModel = new DashboardViewModel
             {
                 Informations = informationViewModelCollection.OrderByDescending(informationViewModel => informationViewModel.Timestamp).ToList(),
+                LatestInformationsWithImage = latestInformationsWithImage.OrderByDescending(latestInformationWithImage => latestInformationWithImage.ViewModel.Timestamp).ToList(),
                 SystemErrors = systemErrorViewModelCollection.OrderByDescending(systemErrorViewModel => systemErrorViewModel.Timestamp).ToList(),
                 Settings = dashboardSettingsViewModel,
                 RedditAuthenticatedUser = objectViewModelForRedditAuthenticatedUser,
@@ -241,6 +250,46 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 viewModelCollection.Add(viewModel);
             }
+        }
+
+        private IEnumerable<ImageViewModel<InformationViewModel>> GetLatestInformationsWithImage(IEnumerable<InformationViewModel> informationViewModelCollection, IList<SystemErrorViewModel> systemErrorViewModelCollection, object syncRoot)
+        {
+            if (informationViewModelCollection == null)
+            {
+                throw new ArgumentNullException(nameof(informationViewModelCollection));
+            }
+            if (systemErrorViewModelCollection == null)
+            {
+                throw new ArgumentNullException(nameof(systemErrorViewModelCollection));
+            }
+            if (syncRoot == null)
+            {
+                throw new ArgumentNullException(nameof(syncRoot));
+            }
+
+            try
+            {
+                Task<ImageViewModel<InformationViewModel>>[] getLatestInformationsWithImageTaskArray = informationViewModelCollection
+                    .Where(informationViewModel => string.IsNullOrWhiteSpace(informationViewModel.ImageUrl) == false && Uri.IsWellFormedUriString(informationViewModel.ImageUrl, UriKind.Absolute))
+                    .OrderByDescending(informationViewModel => informationViewModel.Timestamp)
+                    .Take(7)
+                    .Select(informationViewModel => Task.Run<ImageViewModel<InformationViewModel>>(async () => {
+                        byte[] image = await _httpHelper.ReadAsync(new Uri(informationViewModel.ImageUrl));
+                        return new ImageViewModel<InformationViewModel>(informationViewModel, image);
+                    }))
+                    .ToArray();
+                Task.WaitAll(getLatestInformationsWithImageTaskArray);
+
+                return getLatestInformationsWithImageTaskArray
+                    .Where(getLatestInformationsWithImageTask => getLatestInformationsWithImageTask.IsCompletedSuccessfully)
+                    .Select(getLatestInformationsWithImageTask => getLatestInformationsWithImageTask.Result)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex, systemErrorViewModelCollection, syncRoot);
+            }
+            return new List<ImageViewModel<InformationViewModel>>(0);
         }
 
         private void HandleException(Exception exception, IList<SystemErrorViewModel> systemErrorViewModelCollection, object syncRoot)

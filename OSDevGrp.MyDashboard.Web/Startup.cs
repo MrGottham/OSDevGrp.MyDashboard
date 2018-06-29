@@ -59,6 +59,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddTransient<IDashboardFactory, DashboardFactory>();
             // Adds dependencies for the view model builders.
             services.AddSingleton<IHtmlHelper, HtmlHelper>();
+            services.AddSingleton<IHttpHelper, HttpHelper>();
             services.AddTransient<IViewModelBuilder<InformationViewModel, INews>, NewsToInformationViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<SystemErrorViewModel, ISystemError>, SystemErrorViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>, DashboardSettingsViewModelBuilder>();

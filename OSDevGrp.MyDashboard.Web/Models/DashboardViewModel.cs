@@ -12,6 +12,8 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         public IEnumerable<InformationViewModel> Informations { get; set; }
 
+        public IEnumerable<ImageViewModel<InformationViewModel>> LatestInformationsWithImage { get; set; }
+
         public IEnumerable<InformationViewModel> InformationsWithImageUrl
         {
             get

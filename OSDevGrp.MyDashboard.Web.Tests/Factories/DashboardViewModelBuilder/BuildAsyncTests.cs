@@ -9,6 +9,7 @@ using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using OSDevGrp.MyDashboard.Web.Tests.Helpers;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
 {
@@ -24,6 +25,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         private Mock<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>> _redditSubredditToObjectViewModelBuilder;
         private Mock<IViewModelBuilder<InformationViewModel, IRedditLink>> _redditLinkToInformationViewModelBuilderMock;
         private Mock<IHtmlHelper> _htmlHelperMock;
+        private Mock<IHttpHelper> _httpHelperMock;
         private Random _random;
 
         #endregion
@@ -38,6 +40,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             _redditSubredditToObjectViewModelBuilder = new Mock<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>>();
             _redditLinkToInformationViewModelBuilderMock = new Mock<IViewModelBuilder<InformationViewModel, IRedditLink>>();
             _htmlHelperMock = new Mock<IHtmlHelper>();
+            _httpHelperMock = new Mock<IHttpHelper>();
             _random = new Random(DateTime.Now.Millisecond);
         }
 
@@ -215,6 +218,34 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         }
 
         [TestMethod]
+        public void BuildAsync_WhenCalled_AssertReadAsyncWasCalledOnHttpHelperForEachLatestInformationWithImageInDashboard()
+        {
+            List<INews> newsCollection = CreateNewsCollection(_random.Next(50, 75)).ToList();
+            List<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(_random.Next(50, 75)).ToList();
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, redditLinkCollection: redditLinkCollection);
+
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut();
+
+            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
+            buildTask.Wait();
+
+            int numberOfInformationsWithImage = Math.Min(buildTask.Result.Informations.Count(information => string.IsNullOrWhiteSpace(information.ImageUrl) == false), 7);
+            if (numberOfInformationsWithImage > 0)
+            {
+                _httpHelperMock.Verify(m => m.ReadAsync(It.IsAny<Uri>()), Times.Exactly(numberOfInformationsWithImage));
+            }
+            else
+            {
+                _httpHelperMock.Verify(m => m.ReadAsync(It.IsAny<Uri>()), Times.Never);
+            }
+
+            foreach (ImageViewModel<InformationViewModel> latestInformationWithImage in buildTask.Result.LatestInformationsWithImage)
+            {
+                _httpHelperMock.Verify(m => m.ReadAsync(It.Is<Uri>(value => string.Compare(latestInformationWithImage.ViewModel.ImageUrl, value.AbsoluteUri, false) == 0)), Times.Once);
+            }
+        }
+
+        [TestMethod]
         public void BuildAsync_WhenCalled_AssertRulesWasCalledOnDashboard()
         {
             Mock<IDashboard> dashboardMock = CreateDashboardMock();
@@ -249,6 +280,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Informations);
             Assert.AreEqual(newsCollection.Count + redditLinkCollection.Count, result.Informations.Count());
+            Assert.IsNotNull(result.LatestInformationsWithImage);
+            Assert.AreEqual(Math.Min(result.Informations.Count(information => string.IsNullOrWhiteSpace(information.ImageUrl) == false), 7), result.LatestInformationsWithImage.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(systemErrorCollection.Count, result.SystemErrors.Count());
             Assert.IsNotNull(result.Settings);
@@ -278,6 +311,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Informations);
             Assert.AreEqual(0, result.Informations.Count());
+            Assert.IsNotNull(result.LatestInformationsWithImage);
+            Assert.AreEqual(0, result.LatestInformationsWithImage.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(1, result.SystemErrors.Count());
             Assert.IsNull(result.Settings);
@@ -313,6 +348,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Informations);
             Assert.AreEqual(0, result.Informations.Count());
+            Assert.IsNotNull(result.LatestInformationsWithImage);
+            Assert.AreEqual(0, result.LatestInformationsWithImage.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(1, result.SystemErrors.Count());
             Assert.IsNull(result.Settings);
@@ -349,6 +386,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Informations);
             Assert.AreEqual(0, result.Informations.Count());
+            Assert.IsNotNull(result.LatestInformationsWithImage);
+            Assert.AreEqual(0, result.LatestInformationsWithImage.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(1, result.SystemErrors.Count());
             Assert.IsNull(result.Settings);
@@ -385,6 +424,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Informations);
             Assert.AreEqual(0, result.Informations.Count());
+            Assert.IsNotNull(result.LatestInformationsWithImage);
+            Assert.AreEqual(0, result.LatestInformationsWithImage.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(1, result.SystemErrors.Count());
             Assert.IsNull(result.Settings);
@@ -420,6 +461,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Informations);
             Assert.AreEqual(0, result.Informations.Count());
+            Assert.IsNotNull(result.LatestInformationsWithImage);
+            Assert.AreEqual(0, result.LatestInformationsWithImage.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(1, result.SystemErrors.Count());
             Assert.IsNull(result.Settings);
@@ -455,6 +498,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Informations);
             Assert.AreEqual(0, result.Informations.Count());
+            Assert.IsNotNull(result.LatestInformationsWithImage);
+            Assert.AreEqual(0, result.LatestInformationsWithImage.Count());
             Assert.IsNotNull(result.SystemErrors);
             Assert.AreEqual(1, result.SystemErrors.Count());
             Assert.IsNull(result.Settings);
@@ -492,17 +537,17 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         private IViewModelBuilder<DashboardViewModel, IDashboard> CreateSut(DashboardSettingsViewModel dashboardSettingsViewModel = null, ObjectViewModel<IRedditAuthenticatedUser> objectViewModelForRedditAuthenticatedUser = null, string aggregateExceptionMessage = null)
         {
             _newsToInformationViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<INews>()))
-                .Returns(Task.Run<InformationViewModel>(() => 
+                .Returns<INews>(news => Task.Run<InformationViewModel>(() => 
                 {
                     if (string.IsNullOrWhiteSpace(aggregateExceptionMessage) == false)
                     {
                         throw new Exception(aggregateExceptionMessage);
                     }
-                    return CreateInformationViewModel(DateTime.Now.AddMinutes(_random.Next(1, 30) * -1));
+                    return CreateInformationViewModel(DateTime.Now.AddMinutes(_random.Next(1, 30) * -1), _random.Next(100) > 50);
                 }));
 
             _systemErrorViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<ISystemError>()))
-                .Returns(Task.Run<SystemErrorViewModel>(() => 
+                .Returns<ISystemError>(systemError => Task.Run<SystemErrorViewModel>(() => 
                 {
                     if (string.IsNullOrWhiteSpace(aggregateExceptionMessage) == false)
                     {
@@ -512,7 +557,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 }));
 
             _dashboardSettingsViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
-                .Returns(Task.Run<DashboardSettingsViewModel>(() => 
+                .Returns<IDashboardSettings>(dashboardSettings => Task.Run<DashboardSettingsViewModel>(() => 
                 {
                     if (string.IsNullOrWhiteSpace(aggregateExceptionMessage) == false)
                     {
@@ -542,17 +587,19 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 }));
 
             _redditLinkToInformationViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IRedditLink>()))
-                .Returns(Task.Run<InformationViewModel>(() => 
+                .Returns<IRedditLink>(redditLink => Task.Run<InformationViewModel>(() => 
                 {
                     if (string.IsNullOrWhiteSpace(aggregateExceptionMessage) == false)
                     {
                         throw new Exception(aggregateExceptionMessage);
                     }
-                    return CreateInformationViewModel(DateTime.Now.AddMinutes(_random.Next(1, 30) * -1));
+                    return CreateInformationViewModel(DateTime.Now.AddMinutes(_random.Next(1, 30) * -1), _random.Next(100) > 50);
                 }));
 
             _htmlHelperMock.Setup(m => m.ConvertNewLines(It.IsAny<string>()))
                 .Returns<string>(value => $"HtmlHelper.ConvertNewLines:{value}");
+            _httpHelperMock.Setup(m => m.ReadAsync(It.IsAny<Uri>()))
+                .Returns(Task.Run<byte[]>(() => Convert.FromBase64String(ImageHelper.ImageAsBase64)));
 
             return new OSDevGrp.MyDashboard.Web.Factories.DashboardViewModelBuilder(
                 _newsToInformationViewModelBuilderMock.Object,
@@ -561,7 +608,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 _redditAuthenticatedUserToObjectViewModelBuilderMock.Object,
                 _redditSubredditToObjectViewModelBuilder.Object,
                 _redditLinkToInformationViewModelBuilderMock.Object,
-                _htmlHelperMock.Object);
+                _htmlHelperMock.Object,
+                _httpHelperMock.Object);
         }
 
         private IDashboard CreateDashboard(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null, IEnumerable<IRedditLink> redditLinkCollection = null, IDashboardRules dashboardRules = null)
@@ -653,11 +701,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             return dashboardRulesMock.Object;
         }
 
-        private InformationViewModel CreateInformationViewModel(DateTime timestamp)
+        private InformationViewModel CreateInformationViewModel(DateTime timestamp, bool hasImageUrl)
         {
             return new InformationViewModel
             {
-                Timestamp = timestamp
+                Timestamp = timestamp,
+                ImageUrl = hasImageUrl ? $"http://localhost/{Guid.NewGuid().ToString("D")}.png" : null
             };
         }
 

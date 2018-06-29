@@ -1,18 +1,18 @@
 @using System;
 @using OSDevGrp.MyDashboard.Web.Models;
-@model InformationViewModel
+@model ImageViewModel<InformationViewModel>
 
-<img class="d-block w-100" src="@Model.ImageUrl" />
-@if (string.IsNullOrWhiteSpace(@Model.Header) == false)
+<img class="d-block w-100" src="@Model.OriginalImageAsBase64" />
+@if (string.IsNullOrWhiteSpace(@Model.ViewModel.Header) == false)
 {
     <div class="carousel-caption d-none d-md-block">
-        @if (string.Compare(Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
+        @if (string.Compare(Model.ViewModel.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
         {
-            <h3><a class="text-primary" href="@Model.ExternalUrl">@Model.Header</a></h3>
+            <h3><a class="text-primary" href="@Model.ViewModel.ExternalUrl">@Model.ViewModel.Header</a></h3>
         }
         else
         {
-            <h5>@Model.Header</h5>
+            <h5>@Model.ViewModel.Header</h5>
         }
     </div>
 }

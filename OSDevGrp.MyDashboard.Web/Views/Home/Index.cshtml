@@ -8,10 +8,10 @@
 }
 
 <div class="row">
-    @if (Model.InformationsWithImageUrl != null && Model.InformationsWithImageUrl.Any() && Model.RedditAuthenticatedUser != null)
+    @if (Model.LatestInformationsWithImage != null && Model.LatestInformationsWithImage.Any() && Model.RedditAuthenticatedUser != null)
     {
         <div class="col-md-8">
-            @Html.Partial("_CarouselPartial", Model.InformationsWithImageUrl)
+            @Html.Partial("_CarouselPartial", Model.LatestInformationsWithImage)
         </div>
         <div class="col-md-4">
             <div class="card-deck mb-md-3">
@@ -19,12 +19,12 @@
             </div>
         </div>
     }
-    else if (Model.InformationsWithImageUrl != null && Model.InformationsWithImageUrl.Any())
+    else if (Model.LatestInformationsWithImage != null && Model.LatestInformationsWithImage.Any())
     {
         <div class="col-md-1">
         </div>
         <div class="col-md-10">
-            @Html.Partial("_CarouselPartial", Model.InformationsWithImageUrl)
+            @Html.Partial("_CarouselPartial", Model.LatestInformationsWithImage)
         </div>
         <div class="col-md-1">
         </div>
