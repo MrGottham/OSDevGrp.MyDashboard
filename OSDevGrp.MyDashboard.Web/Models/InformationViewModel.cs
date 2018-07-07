@@ -33,6 +33,15 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         public string ExternalUrl { get; set; }
 
+        public int AgeInDays
+        {
+            get
+            {
+                TimeSpan span = DateTime.Now - Timestamp;
+                return Convert.ToInt32(Math.Floor(span.TotalDays));
+            }
+        }
+
         #endregion
     }
 }

@@ -22,6 +22,13 @@
         }
     </div>
     <div class="card-footer">
-        <p class="text-left">@Model.Timestamp.ToString("dddd") @Model.Timestamp.ToShortTimeString() - @Html.Raw(Model.AuthorOrProvider)</p>
+        @if (Model.AgeInDays < 7)
+        {
+            <p class="text-left">@Model.Timestamp.ToString("dddd") @Model.Timestamp.ToShortTimeString() - @Html.Raw(Model.AuthorOrProvider)</p>
+        }
+        else
+        {
+            <p class="text-left">@Model.AgeInDays days ago - @Html.Raw(Model.AuthorOrProvider)</p>
+        }
     </div>
 </div>
