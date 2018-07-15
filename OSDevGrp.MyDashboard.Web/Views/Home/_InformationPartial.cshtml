@@ -10,7 +10,7 @@
     <div class="card-body">
         @if (string.Compare(@Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0 && string.IsNullOrWhiteSpace(Model.Header) == false)
         {
-            <h4 class="card-title"><a href="@Model.ExternalUrl">@Model.Header</a></h4>
+            <h4 class="card-title"><a href="#" onclick="javascript:openLink('@Model.ExternalUrl');">@Model.Header</a></h4>
         }
         else if (string.IsNullOrWhiteSpace(Model.Header) == false)
         {

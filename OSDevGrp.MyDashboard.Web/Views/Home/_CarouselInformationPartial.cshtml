@@ -8,7 +8,7 @@
     <div class="carousel-caption d-none d-md-block">
         @if (string.Compare(Model.ViewModel.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
         {
-            <h3><a class="text-primary" href="@Model.ViewModel.ExternalUrl">@Model.ViewModel.Header</a></h3>
+            <h3><a class="text-primary" href="#" onclick="javascript:openLink('@Model.ViewModel.ExternalUrl');">@Model.ViewModel.Header</a></h3>
         }
         else
         {
