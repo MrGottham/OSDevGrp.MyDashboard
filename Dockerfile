@@ -16,4 +16,6 @@ RUN dotnet publish -c Release -o out
 FROM microsoft/aspnetcore
 WORKDIR /app
 COPY --from=builder /src/OSDevGrp.MyDashboard.Web/out ./
+
+EXPOSE 80
 ENTRYPOINT ["dotnet", "OSDevGrp.MyDashboard.Web.dll"]
