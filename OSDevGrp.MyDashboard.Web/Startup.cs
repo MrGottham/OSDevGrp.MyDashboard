@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
@@ -36,6 +33,15 @@ namespace OSDevGrp.MyDashboard.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(opt =>
+            {
+                opt.CheckConsentNeeded = context => true;
+                opt.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
             // Adds dependencies for the infrastructure. 
             services.AddTransient<IExceptionHandler, ExceptionHandler>();
             services.AddSingleton<IRandomizer, Randomizer>();
@@ -67,8 +73,6 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>, RedditAuthenticatedUserToObjectViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>, RedditSubredditToObjectViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<InformationViewModel, IRedditLink>, RedditLinkToInformationViewModelBuilder>();
-            // Adds other services.
-            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,9 +85,12 @@ namespace OSDevGrp.MyDashboard.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
 
             app.UseMvc(routes =>
             {
@@ -91,6 +98,9 @@ namespace OSDevGrp.MyDashboard.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            // TODO: https://docs.microsoft.com/en-us/aspnet/core/migration/20_21?view=aspnetcore-3.1
+            // TODO: _Cookie....
         }
     }
 }

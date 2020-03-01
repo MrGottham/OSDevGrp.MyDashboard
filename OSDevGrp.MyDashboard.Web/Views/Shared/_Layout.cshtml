@@ -36,10 +36,13 @@
         </div>
     </nav>
     <div class="container body-content">
-        @RenderBody()
-        <hr />
+        <partial name="_CookieConsentPartial" />
+        <main role="main" class="pb-3">
+            @RenderBody()
+            <hr />
+        </main>
         <footer>
-            <p>&copy; 2018 - OS Development Group</p>
+            <p>My Dashboard &copy; 2020 - OS Development Group</p>
         </footer>
     </div>
 
