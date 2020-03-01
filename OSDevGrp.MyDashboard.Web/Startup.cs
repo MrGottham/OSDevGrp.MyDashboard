@@ -40,7 +40,7 @@ namespace OSDevGrp.MyDashboard.Web
             });
 
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // Adds dependencies for the infrastructure. 
             services.AddTransient<IExceptionHandler, ExceptionHandler>();
@@ -100,7 +100,13 @@ namespace OSDevGrp.MyDashboard.Web
             });
 
             // TODO: https://docs.microsoft.com/en-us/aspnet/core/migration/20_21?view=aspnetcore-3.1
-            // TODO: _Cookie....
+            // TODO: Update jQuery
+            // TODO: Update jQuery.validation
+            // TODO: Update bootstrap
+            // TODO: Change Layout page
+            // TODO: Modify Task.Wait
+            // TODO: Modify Task.WaitAll
+            // TODO: Update Docker files
         }
     }
 }
