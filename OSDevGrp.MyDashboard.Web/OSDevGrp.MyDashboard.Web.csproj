@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <IncludeOpenAPIAnalyzers>true</IncludeOpenAPIAnalyzers>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <UserSecretsId>36DCCFEA-32CB-4FE5-9941-6C40E67292C0</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0004" />
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.2.0" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

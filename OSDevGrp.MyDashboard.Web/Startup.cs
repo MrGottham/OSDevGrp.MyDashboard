@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
@@ -39,8 +39,10 @@ namespace OSDevGrp.MyDashboard.Web
                 opt.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+
+            services.AddHealthChecks();
 
             // Adds dependencies for the infrastructure. 
             services.AddTransient<IExceptionHandler, ExceptionHandler>();
@@ -76,7 +78,7 @@ namespace OSDevGrp.MyDashboard.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -90,13 +92,17 @@ namespace OSDevGrp.MyDashboard.Web
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseRouting();
+
             app.UseCookiePolicy();
 
-            app.UseMvc(routes =>
+            app.UseCors("default");
+
+            app.UseEndpoints(endpoints => 
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHealthChecks("/health");
             });
 
             // TODO: https://docs.microsoft.com/en-us/aspnet/core/migration/20_21?view=aspnetcore-3.1
@@ -104,9 +110,11 @@ namespace OSDevGrp.MyDashboard.Web
             // TODO: Update jQuery.validation
             // TODO: Update bootstrap
             // TODO: Change Layout page
+            // TODO: Update NuGet packages
             // TODO: Modify Task.Wait
             // TODO: Modify Task.WaitAll
             // TODO: Update Docker files
+            // TODO: Find Excpetions 
         }
     }
 }
