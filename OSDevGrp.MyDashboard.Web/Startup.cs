@@ -105,9 +105,6 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapHealthChecks("/health");
             });
 
-            // TODO: https://docs.microsoft.com/en-us/aspnet/core/migration/20_21?view=aspnetcore-3.1
-            // TODO: Update jQuery
-            // TODO: Update jQuery.validation
             // TODO: Update bootstrap
             // TODO: Change Layout page
             // TODO: Update NuGet packages
@@ -116,6 +113,7 @@ namespace OSDevGrp.MyDashboard.Web
             // TODO: Update Docker files
             // TODO: Find Excpetions 
             // TODO: IDateProtectionProvider
+            // TODO: TrustedDomainHelper
         }
     }
 }

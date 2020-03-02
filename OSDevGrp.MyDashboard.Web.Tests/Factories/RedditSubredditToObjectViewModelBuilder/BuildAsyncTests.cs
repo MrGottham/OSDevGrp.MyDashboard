@@ -428,7 +428,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditSubredditToObjectViewMo
             htmlBuilder.Append("<h5 class=\"card-title\">");
             if (url != null)
             {
-                htmlBuilder.Append($"<a href=\"#\" onclick=\"javascript:openLink('{url.AbsoluteUri}');\">{displayNamePrefixed}</a>");
+                htmlBuilder.Append($"<a href=\"#\" onclick=\"javascript:$().openLink('{url.AbsoluteUri}');\">{displayNamePrefixed}</a>");
             }
             else
             {
