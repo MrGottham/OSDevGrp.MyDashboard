@@ -218,6 +218,11 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 throw new ArgumentNullException(nameof(value));
             }
 
+            if (DateTime.TryParse(value, out DateTime result))
+            {
+                return result;
+            }
+
             return Rfc822DateTimeParser.Parse(value);
         }
 
