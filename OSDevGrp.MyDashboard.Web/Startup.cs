@@ -105,13 +105,13 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapHealthChecks("/health");
             });
 
-            // TODO: Update bootstrap
             // TODO: Change Layout page
             // TODO: Modify Task.Wait
             // TODO: Modify Task.WaitAll
             // TODO: Update Docker files
             // TODO: IDateProtectionProvider
             // TODO: TrustedDomainHelper
+            // TODO: Async load news
         }
     }
 }
