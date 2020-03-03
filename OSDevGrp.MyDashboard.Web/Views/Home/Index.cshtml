@@ -11,7 +11,7 @@
     @if (Model.LatestInformationsWithImage != null && Model.LatestInformationsWithImage.Any() && Model.RedditAuthenticatedUser != null)
     {
         <div class="col-md-8">
-            @Html.Partial("_CarouselPartial", Model.LatestInformationsWithImage)
+            @await Html.PartialAsync("_CarouselPartial", Model.LatestInformationsWithImage)
         </div>
         <div class="col-md-4">
             <div class="card-deck mb-md-3">
@@ -24,7 +24,7 @@
         <div class="col-md-1">
         </div>
         <div class="col-md-10">
-            @Html.Partial("_CarouselPartial", Model.LatestInformationsWithImage)
+            @await Html.PartialAsync("_CarouselPartial", Model.LatestInformationsWithImage)
         </div>
         <div class="col-md-1">
         </div>
@@ -47,14 +47,14 @@
             @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
             {
                 <div class="card-deck mb-md-3">
-                    @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo))
+                    @await Html.PartialAsync("_InformationPartial", Model.Informations.ElementAt(elementNo))
                     @if (elementNo + 1 < Model.Informations.Count())
                     {
-                        @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo + 1))
+                        @await Html.PartialAsync("_InformationPartial", Model.Informations.ElementAt(elementNo + 1))
                     }
                     @if (elementNo + 2 < Model.Informations.Count())
                     {
-                        @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo + 2))
+                        @await Html.PartialAsync("_InformationPartial", Model.Informations.ElementAt(elementNo + 2))
                     }
                 </div>
             }
@@ -63,7 +63,7 @@
     <div class="col-md-3">
         @if (Model.Settings != null)
         {
-            @Html.Partial("_DashboardSettingsPartial", Model.Settings)                        
+            @await Html.PartialAsync("_DashboardSettingsPartial", Model.Settings)                        
         }
         @if (Model.RedditSubreddits != null && Model.RedditSubreddits.Any())
         {
@@ -102,5 +102,5 @@
 
 @section Scripts
 {
-    @Html.Partial("_ValidationScriptsPartial")
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }
