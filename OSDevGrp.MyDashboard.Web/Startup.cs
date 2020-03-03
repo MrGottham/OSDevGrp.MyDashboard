@@ -107,7 +107,6 @@ namespace OSDevGrp.MyDashboard.Web
 
             // TODO: Update bootstrap
             // TODO: Change Layout page
-            // TODO: Update NuGet packages
             // TODO: Modify Task.Wait
             // TODO: Modify Task.WaitAll
             // TODO: Update Docker files
