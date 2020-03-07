@@ -39,12 +39,11 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_AssertNextWasCalledOnRandomizerForEachKnownNsfwSubreddit()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_AssertNextWasCalledOnRandomizerForEachKnownNsfwSubreddit()
         {
             IDataProviderFactory sut = CreateSut();
 
-            Task<IEnumerable<IRedditKnownSubreddit>> getKnownNsfwSubredditsTask = sut.GetKnownNsfwSubredditsAsync();
-            getKnownNsfwSubredditsTask.Wait();
+            await sut.GetKnownNsfwSubredditsAsync();
 
             _randomizerMock.Verify(m => m.Next(
                     It.Is<int>(value => value == 0),
@@ -53,93 +52,90 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGoneWildCurvy()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGoneWildCurvy()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gonewildcurvy");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gonewildcurvy");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGoneWildPlus()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGoneWildPlus()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gonewildplus");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gonewildplus");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsBigBoobsGW()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsBigBoobsGW()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("bigboobsgw");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("bigboobsgw");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsHomeGrownTits()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsHomeGrownTits()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("homegrowntits");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("homegrowntits");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsMilf()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsMilf()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("milf");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("milf");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGoneWild30Plus()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGoneWild30Plus()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gonewild30plus");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gonewild30plus");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsOhNoMomWentWild()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsOhNoMomWentWild()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("onmww");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("onmww");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsWouldYouFuckMyWife()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsWouldYouFuckMyWife()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("wouldyoufuckmywife");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("wouldyoufuckmywife");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsWifeSharing()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsWifeSharing()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("wifesharing");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("wifesharing");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGifsGoneWild()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGifsGoneWild()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gifsgonewild");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gifsgonewild");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGwNerdy()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGwNerdy()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gwnerdy");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gwnerdy");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsChubby()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsChubby()
         {
-            GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("chubby");  
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("chubby");  
         }
 
         [TestMethod]
-        public void GetKnownNsfwSubredditsAsync_WhenCalled_ReturnsSortedKnownNsfwSubreddits()
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ReturnsSortedKnownNsfwSubreddits()
         {
              IDataProviderFactory sut = CreateSut();
 
-            Task<IEnumerable<IRedditKnownSubreddit>> getKnownNsfwSubredditsTask = sut.GetKnownNsfwSubredditsAsync();
-            getKnownNsfwSubredditsTask.Wait();
-
-            IEnumerable<IRedditKnownSubreddit> result = getKnownNsfwSubredditsTask.Result;
+            IEnumerable<IRedditKnownSubreddit> result = await sut.GetKnownNsfwSubredditsAsync();
             for (int i = 1; i < result.Count(); i++)
             {
                 Assert.IsTrue(result.ElementAt(i - 1).Rank <= result.ElementAt(i).Rank);
             }
        }
 
-        private void GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName(string name)
+        private async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -148,10 +144,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
  
             IDataProviderFactory sut = CreateSut();
 
-            Task<IEnumerable<IRedditKnownSubreddit>> getKnownNsfwSubredditsTask = sut.GetKnownNsfwSubredditsAsync();
-            getKnownNsfwSubredditsTask.Wait();
-
-            IEnumerable<IRedditKnownSubreddit> knownNsfwSubreddits = getKnownNsfwSubredditsTask.Result;
+            IEnumerable<IRedditKnownSubreddit> knownNsfwSubreddits = await sut.GetKnownNsfwSubredditsAsync();
             Assert.IsNotNull(knownNsfwSubreddits);
             Assert.AreEqual(NumberOfKnownNsfwSubreddits, knownNsfwSubreddits.Count());
 

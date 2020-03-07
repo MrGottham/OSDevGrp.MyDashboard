@@ -42,15 +42,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
         [TestMethod]
         [ExpectedArgumentNullException("dashboardSettingsViewModel")]
-        public void Commit_WhenDashboardSettingsViewModelIsNull_ThrowsArgumentNullExcpetion()
+        public async Task Commit_WhenDashboardSettingsViewModelIsNull_ThrowsArgumentNullExcpetion()
         {
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(null);
+            await sut.Commit(null);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertHttpContextWasNotCalledOnHttpContextAccessor()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertHttpContextWasNotCalledOnHttpContextAccessor()
         {
             const bool useReddit = true;
             string redditAccessToken = CreateReddditAccessTokenAsBase64();
@@ -58,13 +58,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Never);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
         {
             const bool useReddit = true;
             string redditAccessToken = CreateReddditAccessTokenAsBase64();
@@ -72,7 +72,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
                     It.IsAny<string>(),
@@ -81,7 +81,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = true;
@@ -99,7 +99,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -117,7 +117,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
         {
             const bool useReddit = true;
             string redditAccessToken = CreateReddditAccessTokenAsBase64();
@@ -126,13 +126,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             IDashboard dashboard = CreateDashboard();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
         {
             const bool useReddit = true;
             string redditAccessToken = CreateReddditAccessTokenAsBase64();
@@ -140,14 +140,14 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void Called_WhenCalledWithUseOfRedditAndWithRedditAccessToken_ReturnsViewWithDashboardViewModel()
+        public async Task Called_WhenCalledWithUseOfRedditAndWithRedditAccessToken_ReturnsViewWithDashboardViewModel()
         {
             const bool useReddit = true;
             string redditAccessToken = CreateReddditAccessTokenAsBase64();
@@ -156,7 +156,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
 
-            IActionResult result = sut.Commit(dashboardSettingsViewModel);
+            IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -169,7 +169,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertHttpContextWasCalledOnHttpContextAccessor()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertHttpContextWasCalledOnHttpContextAccessor()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -177,13 +177,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Once);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnRedditAccessTokenProviderFactory()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnRedditAccessTokenProviderFactory()
         {
             const bool useReddit = true;
             bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
@@ -193,7 +193,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
                     It.Is<string>(value => string.Compare(value, dashboardSettingsViewModel.ToBase64(), StringComparison.Ordinal) == 0),
@@ -202,7 +202,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertBuildAsyncWasNotCalledOnDashboardFactory()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertBuildAsyncWasNotCalledOnDashboardFactory()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -210,13 +210,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.IsAny<IDashboardSettings>()), Times.Never);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertBuildAsyncWasNotCalledOnDashboardViewModelBuilder()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertBuildAsyncWasNotCalledOnDashboardViewModelBuilder()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -224,13 +224,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.IsAny<IDashboard>()), Times.Never);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -238,14 +238,14 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_ReturnsRedirectResultToAcquireRedditAccessTokenUrl()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_ReturnsRedirectResultToAcquireRedditAccessTokenUrl()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -254,7 +254,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Uri acquireRedditAuthorizationTokenUrl = new Uri($"https://reddit.com/{Guid.NewGuid().ToString("D")}");
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(acquireRedditAuthorizationTokenUrl: acquireRedditAuthorizationTokenUrl);
 
-            IActionResult result = sut.Commit(dashboardSettingsViewModel);
+            IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(RedirectResult));
 
@@ -264,7 +264,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -273,13 +273,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             AggregateException aggregateException = new AggregateException();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = true;
@@ -292,7 +292,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             AggregateException aggregateException = new AggregateException();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -305,7 +305,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -315,13 +315,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             AggregateException aggregateException = new AggregateException();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard, exception: aggregateException);
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
         }
 
         [TestMethod]
-        public void Called_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_ReturnsViewWithDashboardViewModel()
+        public async Task Called_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_ReturnsViewWithDashboardViewModel()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -331,7 +331,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             AggregateException aggregateException = new AggregateException();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel, exception: aggregateException);
 
-            IActionResult result = sut.Commit(dashboardSettingsViewModel);
+            IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -344,7 +344,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -353,13 +353,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Exception exception = new Exception();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = true;
@@ -373,7 +373,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Exception exception = new Exception();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -386,7 +386,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -396,13 +396,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Exception exception = new Exception();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard, exception: exception);
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
         }
 
         [TestMethod]
-        public void Called_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_ReturnsViewWithDashboardViewModel()
+        public async Task Called_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_ReturnsViewWithDashboardViewModel()
         {
             const bool useReddit = true;
             const string redditAccessToken = null;
@@ -412,7 +412,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Exception exception = new Exception();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel, exception: exception);
 
-            IActionResult result = sut.Commit(dashboardSettingsViewModel);
+            IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -425,27 +425,27 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithoutUseOfReddit_AssertHttpContextWasNotCalledOnHttpContextAccessor()
+        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertHttpContextWasNotCalledOnHttpContextAccessor()
         {
             const bool useReddit = false;
             DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Never);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithoutUseOfReddit_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
+        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
         {
             const bool useReddit = false;
             DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
                     It.IsAny<string>(),
@@ -454,7 +454,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithoutUseOfReddit_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             const bool useReddit = false;
@@ -465,7 +465,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -478,7 +478,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithoutUseOfReddit_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
         {
             const bool useReddit = false;
             DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
@@ -486,27 +486,27 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             IDashboard dashboard = CreateDashboard();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
         }
 
         [TestMethod]
-        public void Commit_WhenCalledWithoutUseOfReddit_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
+        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
         {
             const bool useReddit = false;
             DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Commit(dashboardSettingsViewModel);
+            await sut.Commit(dashboardSettingsViewModel);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void Called_WhenCalledWithoutUseOfReddit_ReturnsViewWithDashboardViewModel()
+        public async Task Called_WhenCalledWithoutUseOfReddit_ReturnsViewWithDashboardViewModel()
         {
             const bool useReddit = false;
             DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
@@ -514,7 +514,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
 
-            IActionResult result = sut.Commit(dashboardSettingsViewModel);
+            IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 

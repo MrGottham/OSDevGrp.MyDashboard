@@ -33,27 +33,24 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
         #region Methods
 
-        public Task<IEnumerable<ISystemError>> GetSystemErrorsAsync()
+        public async Task<IEnumerable<ISystemError>> GetSystemErrorsAsync()
         {
-            return Task.Run<IEnumerable<ISystemError>>(async () => 
+            try
             {
-                try
+                IEnumerable<ISystemError> systemErrors = await _exceptionRepository.GetSystemErrorsAsync();
+                if (systemErrors == null)
                 {
-                    IEnumerable<ISystemError> systemErrors = await _exceptionRepository.GetSystemErrorsAsync();
-                    if (systemErrors == null)
-                    {
-                        return new List<ISystemError>(0);
-                    }
-                    return systemErrors
-                        .OrderByDescending(systemError => systemError.Timestamp)
-                        .ToList();
+                    return new List<ISystemError>(0);
                 }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return new List<ISystemError>(0);
-            });
+                return systemErrors
+                    .OrderByDescending(systemError => systemError.Timestamp)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return new List<ISystemError>(0);
         }
         
         #endregion

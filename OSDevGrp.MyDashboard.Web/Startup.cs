@@ -45,7 +45,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddHealthChecks();
 
             // Adds dependencies for the infrastructure. 
-            services.AddTransient<IExceptionHandler, ExceptionHandler>();
+            services.AddScoped<IExceptionHandler, ExceptionHandler>();
             services.AddSingleton<IRandomizer, Randomizer>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Adds dependencies for the repositories.
@@ -53,10 +53,10 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddTransient<IRedditAccessTokenProviderFactory, RedditAccessTokenProviderFactory>();
             services.AddTransient<INewsRepository, NewsRepository>();
             services.AddTransient<IRedditRepository, RedditRepository>();
-            services.AddSingleton<IExceptionRepository, ExceptionRepository>();
+            services.AddScoped<IExceptionRepository, ExceptionRepository>();
             // Adds dependencies for the logic.
             services.AddTransient<INewsLogic, NewsLogic>();
-            services.AddSingleton<IRedditRateLimitLogic, RedditRateLimitLogic>();
+            services.AddScoped<IRedditRateLimitLogic, RedditRateLimitLogic>();
             services.AddTransient<IRedditFilterLogic, RedditFilterLogic>();
             services.AddTransient<IRedditLogic, RedditLogic>();
             services.AddTransient<ISystemErrorLogic, SystemErrorLogic>();
@@ -105,11 +105,13 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapHealthChecks("/health");
             });
 
-            // TODO: Modify Task.Wait
-            // TODO: Modify Task.WaitAll
             // TODO: Async load news
+            // TODO: Verify News channels
+            // TODO: Verify and Add Subreddits
             // TODO: IDateProtectionProvider
             // TODO: TrustedDomainHelper
+            // TODO: Make ServiceCollection Adder (don't do if implementing ExportNews)
+            // TODO: Build NuGet Package or ExportNews for OSDevGrp.OSIntranet 
             // TODO: Update Docker files
         }
     }

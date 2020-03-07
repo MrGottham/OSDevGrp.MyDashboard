@@ -29,121 +29,100 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.NewsLogic
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalled_ExpectNoError()
+        public async Task GetNewsAsync_WhenCalled_ExpectNoError()
         {
             INewsLogic sut = CreateSut();
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
+            await sut.GetNewsAsync(25);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalled_AssertGetNewsAsyncWasCalledOnNewRepository()
+        public async Task GetNewsAsync_WhenCalled_AssertGetNewsAsyncWasCalledOnNewRepository()
         {
             INewsLogic sut = CreateSut();
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
+            await sut.GetNewsAsync(25);
 
             _newRepositoryMock.Verify(m => m.GetNewsAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsNull_ReturnsEmptyCollection()
+        public async Task GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsNull_ReturnsEmptyCollection()
         {
             INewsLogic sut = CreateSut(getNewsAsyncReturnsNull: true);
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
-
-            IEnumerable<INews> result = getNewsTask.Result;
+            IEnumerable<INews> result = await sut.GetNewsAsync(25);
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Any());
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsEmptyCollection_ReturnsEmptyCollection()
+        public async Task GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsEmptyCollection_ReturnsEmptyCollection()
         {
             IEnumerable<INews> news = BuildNews(numberOfNews: 0);
             INewsLogic sut = CreateSut(news: news);
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
-
-            IEnumerable<INews> result = getNewsTask.Result;
+            IEnumerable<INews> result = await sut.GetNewsAsync(25);
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Any());
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsLessThanQueried_ReturnsCollectionWithAllElements()
+        public async Task GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsLessThanQueried_ReturnsCollectionWithAllElements()
         {
             IEnumerable<INews> news = BuildNews(numberOfNews: 24);
             INewsLogic sut = CreateSut(news: news);
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
-
-            IEnumerable<INews> result = getNewsTask.Result;
+            IEnumerable<INews> result = await sut.GetNewsAsync(25);
             Assert.IsNotNull(result);
             Assert.AreEqual(24, result.Count());
             Assert.IsTrue(result.All(item => news.Contains(item)));
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsEqualToQueried_ReturnsCollectionWithAllElements()
+        public async Task GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsEqualToQueried_ReturnsCollectionWithAllElements()
         {
             IEnumerable<INews> news = BuildNews(numberOfNews: 25);
             INewsLogic sut = CreateSut(news: news);
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
-
-            IEnumerable<INews> result = getNewsTask.Result;
+            IEnumerable<INews> result = await sut.GetNewsAsync(25);
             Assert.IsNotNull(result);
             Assert.AreEqual(25, result.Count());
             Assert.IsTrue(result.All(item => news.Contains(item)));
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsMoreThanQueried_ReturnsCollectionWithQueriedElements()
+        public async Task GetNewsAsync_WhenCalledAndGetNewsAsyncOnNewsRepositoryReturnsMoreThanQueried_ReturnsCollectionWithQueriedElements()
         {
             IEnumerable<INews> news = BuildNews(numberOfNews: 26);
             INewsLogic sut = CreateSut(news: news);
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
-
-            IEnumerable<INews> result = getNewsTask.Result;
+            IEnumerable<INews> result = await sut.GetNewsAsync(25);
             Assert.IsNotNull(result);
             Assert.AreEqual(25, result.Count());
             Assert.IsTrue(result.All(item => news.Contains(item)));
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetNewsAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             Exception exception = new Exception();
             INewsLogic sut = CreateSut(provokedException: exception);
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
+            await sut.GetNewsAsync(25);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(ex => ex == exception)), Times.Once);
         }
 
         [TestMethod]
-        public void GetNewsAsync_WhenCalledAndExceptionOccurs_ReturnsEmptyCollection()
+        public async Task GetNewsAsync_WhenCalledAndExceptionOccurs_ReturnsEmptyCollection()
         {
             Exception exception = new Exception();
             INewsLogic sut = CreateSut(provokedException: exception);
 
-            Task<IEnumerable<INews>> getNewsTask = sut.GetNewsAsync(25);
-            getNewsTask.Wait();
-
-            IEnumerable<INews> result = getNewsTask.Result;
+            IEnumerable<INews> result = await sut.GetNewsAsync(25);
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Any());
         }

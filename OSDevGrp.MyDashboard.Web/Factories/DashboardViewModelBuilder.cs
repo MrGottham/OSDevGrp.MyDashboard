@@ -117,13 +117,9 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                     m => GenerateViewModelBuilderTaskArrayForCollection(m, n => n.RedditLinks, _redditLinkToInformationViewModelBuilder),
                     viewModel => AddViewModelToViewModelCollection(viewModel, informationViewModelCollection, syncRoot),
                     exception => HandleException(exception, systemErrorViewModelCollection, syncRoot));
-               Task.WaitAll(new[] {
-                    handleInformationViewModelsForNewsTask, 
-                    handleSystemErrorViewModelsTask, 
-                    handleDashboardSettingsViewModelTask, 
-                    handleObjectViewModelForRedditAuthenticatedUserTask, 
-                    handleObjectViewModelsForRedditSubredditTask,
-                    handleInformationViewModelsForRedditLinkTask});
+               Task.WhenAll(new[] {handleInformationViewModelsForNewsTask, handleSystemErrorViewModelsTask, handleDashboardSettingsViewModelTask, handleObjectViewModelForRedditAuthenticatedUserTask, handleObjectViewModelsForRedditSubredditTask, handleInformationViewModelsForRedditLinkTask})
+                    .GetAwaiter()
+                    .GetResult();
             }
             catch (Exception ex)
             {
@@ -145,7 +141,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             return dashboardViewModel;
         }
 
-        private Task HandleAsync<TViewModel>(IDashboard dashboard, Func<IDashboard, Task<TViewModel>[]> taskArrayGenerator, Action<TViewModel> resultHandler, Action<Exception> exceptionHandler) where TViewModel : IViewModel
+        private async Task HandleAsync<TViewModel>(IDashboard dashboard, Func<IDashboard, Task<TViewModel>[]> taskArrayGenerator, Action<TViewModel> resultHandler, Action<Exception> exceptionHandler) where TViewModel : IViewModel
         {
             if (dashboard == null)
             {
@@ -164,23 +160,20 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 throw new ArgumentNullException(nameof(exceptionHandler));
             }
 
-            return Task.Run(() => 
+            try
             {
-                try
-                {
-                    Task<TViewModel>[] taskArray = taskArrayGenerator(dashboard);
-                    Task.WaitAll(taskArray);
+                Task<TViewModel>[] taskArray = taskArrayGenerator(dashboard);
+                await Task.WhenAll(taskArray);
 
-                    foreach (TViewModel viewModel in taskArray.Where(task => task.IsCompletedSuccessfully).Select(task => task.Result))
-                    {
-                        resultHandler(viewModel);
-                    }
-                }
-                catch (Exception ex)
+                foreach (TViewModel viewModel in taskArray.Where(task => task.IsCompletedSuccessfully).Select(task => task.Result))
                 {
-                    exceptionHandler(ex);
+                    resultHandler(viewModel);
                 }
-            });
+            }
+            catch (Exception ex)
+            {
+                exceptionHandler(ex);
+            }
         }
 
         private Task<TViewModel>[] GenerateViewModelBuilderTaskArrayForObject<TViewModel, TObject>(IDashboard dashboard, Func<IDashboard, TObject> objectGetter, IViewModelBuilder<TViewModel, TObject> viewModelBuilder) where TViewModel : class, IViewModel where TObject : class
@@ -278,7 +271,9 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                         return new ImageViewModel<InformationViewModel>(informationViewModel, image);
                     }))
                     .ToArray();
-                Task.WaitAll(getLatestInformationsWithImageTaskArray);
+                Task.WhenAll(getLatestInformationsWithImageTaskArray)
+                    .GetAwaiter()
+                    .GetResult();
 
                 return getLatestInformationsWithImageTaskArray
                     .Where(getLatestInformationsWithImageTask => getLatestInformationsWithImageTask.IsCompletedSuccessfully)

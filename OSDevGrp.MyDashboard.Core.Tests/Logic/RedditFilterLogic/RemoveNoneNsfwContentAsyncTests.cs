@@ -27,15 +27,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
 
         [TestMethod]
         [ExpectedArgumentNullException("filterableCollection")]
-        public void RemoveNoneNsfwContentAsync_WhenFilterableCollectionIsNull_ThrowsArgumentNullException()
+        public async Task RemoveNoneNsfwContentAsync_WhenFilterableCollectionIsNull_ThrowsArgumentNullException()
         {
             IRedditFilterLogic sut = CreateSut();
 
-            sut.RemoveNoneNsfwContentAsync((IEnumerable<IRedditFilterable>) null);
+            await sut.RemoveNoneNsfwContentAsync((IEnumerable<IRedditFilterable>) null);
         }
 
         [TestMethod]
-        public void RemoveNoneNsfwContentAsync_WhenCalled_AssertOver18WasCalledOnEachFilterableInCollection()
+        public async Task RemoveNoneNsfwContentAsync_WhenCalled_AssertOver18WasCalledOnEachFilterableInCollection()
         {
             Mock<IRedditFilterable> filterable1Mock = CreateFilterableMock();
             Mock<IRedditFilterable> filterable2Mock = CreateFilterableMock();
@@ -47,8 +47,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
             
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditFilterable>> removeNoneNsfwContentTask = sut.RemoveNoneNsfwContentAsync(filterableCollection);
-            removeNoneNsfwContentTask.Wait();
+            await sut.RemoveNoneNsfwContentAsync(filterableCollection);
 
             filterable1Mock.Verify(m => m.Over18, Times.Once);
             filterable2Mock.Verify(m => m.Over18, Times.Once);
@@ -56,7 +55,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
         }
 
         [TestMethod]
-        public void RemoveNoneNsfwContentAsync_WhenCalled_ReturnsFilteredCollection()
+        public async Task RemoveNoneNsfwContentAsync_WhenCalled_ReturnsFilteredCollection()
         {
             bool over18OnFilterable1 = _random.Next(1, 100) > 50;
             bool over18OnFilterable2 = _random.Next(1, 100) > 50;
@@ -71,10 +70,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
             
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditFilterable>> removeNoneNsfwContentTask = sut.RemoveNoneNsfwContentAsync(filterableCollection);
-            removeNoneNsfwContentTask.Wait();
+            IEnumerable<IRedditFilterable> result = await sut.RemoveNoneNsfwContentAsync(filterableCollection);
 
-            IEnumerable<IRedditFilterable> result = removeNoneNsfwContentTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(Convert.ToInt32(over18OnFilterable1) + Convert.ToInt32(over18OnFilterable2) + Convert.ToInt32(over18OnFilterable3), result.Count());
             Assert.AreEqual(over18OnFilterable1, result.Contains(filterable1));

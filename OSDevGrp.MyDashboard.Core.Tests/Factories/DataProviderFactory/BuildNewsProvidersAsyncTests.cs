@@ -6,7 +6,6 @@ using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
-using OSDevGrp.MyDashboard.Core.Factories;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 {
@@ -26,21 +25,20 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         }
 
         [TestMethod]
-        public void BuildNewsProvidersAsync_WhenCalled_ReturnsNewsProviders()
+        public async Task BuildNewsProvidersAsync_WhenCalled_ReturnsNewsProviders()
         {
             IDataProviderFactory sut = CreateSut();
 
-            Task<IEnumerable<INewsProvider>> newsProvidersTask = sut.BuildNewsProvidersAsync();
-            newsProvidersTask.Wait();
+            IEnumerable<INewsProvider> newsProviders = await sut.BuildNewsProvidersAsync();
 
-            Assert.IsNotNull(newsProvidersTask.Result);
-            Assert.AreEqual(5, newsProvidersTask.Result.Count());
+            Assert.IsNotNull(newsProviders);
+            Assert.AreEqual(5, newsProviders.Count());
             
-            AssertNewsProvider(newsProvidersTask.Result.ElementAt(0), "DR", "http://www.dr.dk/nyheder/service/feeds/allenyheder");
-            AssertNewsProvider(newsProvidersTask.Result.ElementAt(1), "TV 2", "http://feeds.tv2.dk/nyheder/rss");
-            AssertNewsProvider(newsProvidersTask.Result.ElementAt(2), "Børsen", "http://borsen.dk/rss");
-            AssertNewsProvider(newsProvidersTask.Result.ElementAt(3), "Computerworld", "https://www.computerworld.dk/rss/all");
-            AssertNewsProvider(newsProvidersTask.Result.ElementAt(4), "Version2", "https://www.version2.dk/it-nyheder/rss");
+            AssertNewsProvider(newsProviders.ElementAt(0), "DR", "http://www.dr.dk/nyheder/service/feeds/allenyheder");
+            AssertNewsProvider(newsProviders.ElementAt(1), "TV 2", "http://feeds.tv2.dk/nyheder/rss");
+            AssertNewsProvider(newsProviders.ElementAt(2), "Børsen", "http://borsen.dk/rss");
+            AssertNewsProvider(newsProviders.ElementAt(3), "Computerworld", "https://www.computerworld.dk/rss/all");
+            AssertNewsProvider(newsProviders.ElementAt(4), "Version2", "https://www.version2.dk/it-nyheder/rss");
         }
 
         private IDataProviderFactory CreateSut()

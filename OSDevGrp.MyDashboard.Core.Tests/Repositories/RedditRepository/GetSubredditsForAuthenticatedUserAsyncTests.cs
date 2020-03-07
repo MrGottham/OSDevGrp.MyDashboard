@@ -27,27 +27,26 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
         [TestMethod]
         [ExpectedArgumentNullException("accessToken")]
 
-        public void GetSubredditsForAuthenticatedUserAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
+        public async Task GetSubredditsForAuthenticatedUserAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
         {
             IRedditRepository sut = CreateSut();
 
-            sut.GetSubredditsForAuthenticatedUserAsync(null);
+            await sut.GetSubredditsForAuthenticatedUserAsync(null);
         }
 
         [TestMethod]
-        public void GetSubredditsForAuthenticatedUserAsync_WhenCalled_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetSubredditsForAuthenticatedUserAsync_WhenCalled_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
             IRedditRepository sut = CreateSut();
 
-            Task<IRedditResponse<IRedditList<IRedditSubreddit>>> getSubredditsTask = sut.GetSubredditsForAuthenticatedUserAsync(redditAccessToken);
-            getSubredditsTask.Wait();
+            await sut.GetSubredditsForAuthenticatedUserAsync(redditAccessToken);
 
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(aggregateException => 
-                    aggregateException != null &&
-                    aggregateException.InnerException != null &&
-                    aggregateException.InnerException.GetType() == typeof(UnauthorizedAccessException))),
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(exception => 
+                    exception != null &&
+                    exception.InnerException == null &&
+                    exception.GetType() == typeof(UnauthorizedAccessException))),
                 Times.Once());
         }
 

@@ -25,49 +25,47 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.ExceptionHandler
 
         [TestMethod]
         [ExpectedArgumentNullException("exception")]
-        public void HandleAsync_WhenExceptionIsNull_ThrowsArgumentNullException()
+        public async Task HandleAsync_WhenExceptionIsNull_ThrowsArgumentNullException()
         {
             Exception exception = null;
 
             IExceptionHandler sut = CreateSut();
             
-            sut.HandleAsync(exception);
+            await sut.HandleAsync(exception);
         }
 
         [TestMethod]
-        public void HandleAsync_WhenCalledWithException_AssertAddAsyncWasCalledOnExceptionRepository()
+        public async Task HandleAsync_WhenCalledWithException_AssertAddAsyncWasCalledOnExceptionRepository()
         {
             Exception exception = new Exception();
 
             IExceptionHandler sut = CreateSut();
             
-            Task handleTask = sut.HandleAsync(exception);
-            handleTask.Wait();
+            await sut.HandleAsync(exception);
 
             _exceptionRepositoryMock.Verify(m => m.AddAsync(It.Is<Exception>(ex => ex == exception)));
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("exception")]
-        public void HandleAsync_WhenAggregateExceptionIsNull_ThrowsArgumentNullException()
+        public async Task HandleAsync_WhenAggregateExceptionIsNull_ThrowsArgumentNullException()
         {
             AggregateException aggregateException = null;
 
             IExceptionHandler sut = CreateSut();
             
-            sut.HandleAsync(aggregateException);
+            await sut.HandleAsync(aggregateException);
         }
 
         [TestMethod]
-        public void HandleAsync_WhenCalledWithAggregateException_AssertAddAsyncWasCalledOnExceptionRepository()
+        public async Task HandleAsync_WhenCalledWithAggregateException_AssertAddAsyncWasCalledOnExceptionRepository()
         {
             Exception exception = new Exception();
             AggregateException aggregateException = new AggregateException(new [] {exception});
             
             IExceptionHandler sut = CreateSut();
             
-            Task handleTask = sut.HandleAsync(aggregateException);
-            handleTask.Wait();
+            await sut.HandleAsync(aggregateException);
 
             _exceptionRepositoryMock.Verify(m => m.AddAsync(It.Is<Exception>(ex => ex == exception)));
         }

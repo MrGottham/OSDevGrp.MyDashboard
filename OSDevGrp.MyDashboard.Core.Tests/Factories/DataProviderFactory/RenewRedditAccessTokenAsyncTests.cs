@@ -26,7 +26,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
-        public void RenewRedditAccessTokenAsync_WhenClientIdIsNull_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenClientIdIsNull_ThrowsArgumentNullException()
         {
             const string clientId = null;
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -34,12 +34,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
-        public void RenewRedditAccessTokenAsync_WhenClientIdIsEmpty_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenClientIdIsEmpty_ThrowsArgumentNullException()
         {
             string clientId = string.Empty;
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -47,12 +47,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
-        public void RenewRedditAccessTokenAsync_WhenClientIdIsWhitespace_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenClientIdIsWhitespace_ThrowsArgumentNullException()
         {
             const string clientId = " ";
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -60,12 +60,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
-        public void RenewRedditAccessTokenAsync_WhenClientIdIsWhitespaces_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenClientIdIsWhitespaces_ThrowsArgumentNullException()
         {
             const string clientId = "  ";
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -73,12 +73,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientSecret")]
-        public void RenewRedditAccessTokenAsync_WhenClientSecretIsNull_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenClientSecretIsNull_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             const string clientSecret = null;
@@ -86,12 +86,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientSecret")]
-        public void RenewRedditAccessTokenAsync_WhenClientSecretIsEmpty_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenClientSecretIsEmpty_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string clientSecret = string.Empty;
@@ -99,12 +99,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientSecret")]
-        public void RenewRedditAccessTokenAsync_WhenClientSecretIsWhitespace_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenClientSecretIsWhitespace_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             const string clientSecret = " ";
@@ -112,12 +112,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientSecret")]
-        public void RenewRedditAccessTokenAsync_WhenClientSecretIsWhitespaces_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenClientSecretIsWhitespaces_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             const string clientSecret = "  ";
@@ -125,12 +125,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("refreshToken")]
-        public void RenewRedditAccessTokenAsync_WhenRefreshTokenIsNull_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsNull_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -138,12 +138,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("refreshToken")]
-        public void RenewRedditAccessTokenAsync_WhenRefreshTokenIsEmpty_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsEmpty_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -151,12 +151,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("refreshToken")]
-        public void RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespace_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespace_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -164,12 +164,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("refreshToken")]
-        public void RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespaces_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespaces_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -177,12 +177,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         [TestMethod]
-        [ExpectedAggregateException(typeof(UnauthorizedAccessException), "You are not authorized to perform this operation against Reddit.")]
-        public void RenewRedditAccessTokenAsync_WhenCalled_ThrowsUnauthorizedAccessException()
+        [ExpectedUnauthorizedAccessException("You are not authorized to perform this operation against Reddit.")]
+        public async Task RenewRedditAccessTokenAsync_WhenCalled_ThrowsUnauthorizedAccessException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string clientSecret = Guid.NewGuid().ToString("D");
@@ -190,8 +190,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            Task<IRedditAccessToken> renewRedditAccessTokenTask = sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
-            renewRedditAccessTokenTask.Wait();
+            await sut.RenewRedditAccessTokenAsync(clientId, clientSecret, refreshToken);
         }
 
         private IDataProviderFactory CreateSut()

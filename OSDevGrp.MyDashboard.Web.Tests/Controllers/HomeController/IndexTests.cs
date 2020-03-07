@@ -40,33 +40,33 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalled_AssertHttpContextWasCalledOnHttpContextAccessor()
+        public async Task Index_WhenCalled_AssertHttpContextWasCalledOnHttpContextAccessor()
         {
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Index();
+            await sut.Index();
             
             _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Once);
         }
 
         [TestMethod]
-        public void Index_WhenCalled_AssertContainsKeyWasCalledOnRequestCookieCollectionWithCookieNameForDashboardSettingsViewModel()
+        public async Task Index_WhenCalled_AssertContainsKeyWasCalledOnRequestCookieCollectionWithCookieNameForDashboardSettingsViewModel()
         {
             Mock<IRequestCookieCollection> requestCookieCollectionMock = CreateRequestCookieCollectionMock();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(requestCookieCollection: requestCookieCollectionMock.Object);
 
-            sut.Index();
+            await sut.Index();
             
             requestCookieCollectionMock.Verify(m => m.ContainsKey(It.Is<string>(value => string.Compare(DashboardSettingsViewModel.CookieName, value, StringComparison.Ordinal) == 0)), Times.Once);
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesNotExist_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesNotExist_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             string dashboardSettingsViewModelAsBase64 = null; 
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
-            sut.Index();
+            await sut.Index();
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -79,7 +79,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithoutIncludeNsfwContent_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithoutIncludeNsfwContent_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
@@ -90,7 +90,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             string dashboardSettingsViewModelAsBase64 = BuildDashboardSettingsViewModelAsBase64(numberOfNews: numberOfNews, useReddit: useReddit, allowNsfwContent: allowNsfwContent, includeNsfwContent: includeNsfwContent, onlyNsfwContent: onlyNsfwContent, redditAccessToken: redditAccessTokenAsBase64);
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
-            sut.Index();
+            await sut.Index();
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -103,7 +103,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithIncludeNsfwContent_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithIncludeNsfwContent_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
@@ -114,7 +114,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             string dashboardSettingsViewModelAsBase64 = BuildDashboardSettingsViewModelAsBase64(numberOfNews: numberOfNews, useReddit: useReddit, allowNsfwContent: allowNsfwContent, includeNsfwContent: includeNsfwContent, onlyNsfwContent: onlyNsfwContent, redditAccessToken: redditAccessTokenAsBase64);
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
-            sut.Index();
+            await sut.Index();
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -127,7 +127,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithoutOnlyNsfwContent_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithoutOnlyNsfwContent_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
@@ -138,7 +138,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             string dashboardSettingsViewModelAsBase64 = BuildDashboardSettingsViewModelAsBase64(numberOfNews: numberOfNews, useReddit: useReddit, allowNsfwContent: allowNsfwContent, includeNsfwContent: includeNsfwContent, onlyNsfwContent: onlyNsfwContent, redditAccessToken: redditAccessTokenAsBase64);
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
-            sut.Index();
+            await sut.Index();
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -151,7 +151,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithOnlyNsfwContent_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithOnlyNsfwContent_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
@@ -162,7 +162,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             string dashboardSettingsViewModelAsBase64 = BuildDashboardSettingsViewModelAsBase64(numberOfNews: numberOfNews, useReddit: useReddit, allowNsfwContent: allowNsfwContent, includeNsfwContent: includeNsfwContent, onlyNsfwContent: onlyNsfwContent, redditAccessToken: redditAccessTokenAsBase64);
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
-            sut.Index();
+            await sut.Index();
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -175,7 +175,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithoutRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithoutRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
@@ -186,7 +186,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             string dashboardSettingsViewModelAsBase64 = BuildDashboardSettingsViewModelAsBase64(numberOfNews: numberOfNews, useReddit: useReddit, allowNsfwContent: allowNsfwContent, includeNsfwContent: includeNsfwContent, onlyNsfwContent: onlyNsfwContent, redditAccessToken: redditAccessTokenAsBase64);
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
-            sut.Index();
+            await sut.Index();
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -199,7 +199,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Index_WhenCalledAndCookieForDashboardSettingsViewModelDoesExistWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardFactory()
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
@@ -222,7 +222,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             string dashboardSettingsViewModelAsBase64 = BuildDashboardSettingsViewModelAsBase64(numberOfNews: numberOfNews, useReddit: useReddit, allowNsfwContent: allowNsfwContent, includeNsfwContent: includeNsfwContent, onlyNsfwContent: onlyNsfwContent, redditAccessToken: redditAccessTokenAsBase64);
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
-            sut.Index();
+            await sut.Index();
 
             _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
                     dashboardSettings != null &&
@@ -240,34 +240,34 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalled_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public async Task Index_WhenCalled_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
         {
             IDashboard dashboard = BuildDashboard();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
 
-            sut.Index();
+            await sut.Index();
 
             _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
         }
 
         [TestMethod]
-        public void Index_WhenCalled_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task Index_WhenCalled_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Index();
+            await sut.Index();
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void Index_WhenCalled_ReturnsViewWithDashboardViewModel()
+        public async Task Index_WhenCalled_ReturnsViewWithDashboardViewModel()
         {
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
 
-            IActionResult result = sut.Index();
+            IActionResult result = await sut.Index();
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -280,14 +280,14 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task Index_WhenCalledAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             AggregateException aggregateException = new AggregateException();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
 
             try
             {
-                sut.Index();
+                await sut.Index();
             }
             catch (Exception)
             {
@@ -298,23 +298,23 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
         [TestMethod]
         [ExpectedException(typeof(AggregateException), "My AggregateException")]
-        public void Index_WhenCalledAndAggregateExceptionOccurs_ThrowsAggregateException()
+        public async Task Index_WhenCalledAndAggregateExceptionOccurs_ThrowsAggregateException()
         {
             AggregateException aggregateException = new AggregateException("My AggregateException");
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
 
-            sut.Index();
+            await sut.Index();
         }
 
         [TestMethod]
-        public void Index_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task Index_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             Exception exception = new Exception();
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
 
             try
             {
-                sut.Index();
+                await sut.Index();
             }
             catch (Exception)
             {
@@ -325,12 +325,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
         [TestMethod]
         [ExpectedException(typeof(Exception), "My Exception")]
-        public void Index_WhenCalledAndExceptionOccurs_ThrowsException()
+        public async Task Index_WhenCalledAndExceptionOccurs_ThrowsException()
         {
             Exception exception = new Exception("My Exception");
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
 
-            sut.Index();
+            await sut.Index();
         }
 
         private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null, Exception exception = null, IRequestCookieCollection requestCookieCollection = null, string dashboardSettingsViewModelAsBase64 = null)

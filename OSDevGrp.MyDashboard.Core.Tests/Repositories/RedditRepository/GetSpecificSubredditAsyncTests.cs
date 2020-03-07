@@ -26,43 +26,42 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
 
         [TestMethod]
         [ExpectedArgumentNullException("accessToken")]
-        public void GetSpecificSubredditAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
+        public async Task GetSpecificSubredditAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
 
             IRedditRepository sut = CreateSut();
 
-            sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("knownSubreddit")]
-        public void GetSpecificSubredditAsync_WhenKnownSubredditIsNull_ThrowsArgumentNullException()
+        public async Task GetSpecificSubredditAsync_WhenKnownSubredditIsNull_ThrowsArgumentNullException()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             const IRedditKnownSubreddit knownSubreddit = null;
 
             IRedditRepository sut = CreateSut();
 
-            sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalled_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetSpecificSubredditAsync_WhenCalled_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
 
             IRedditRepository sut = CreateSut();
 
-            Task<IRedditResponse<IRedditSubreddit>> getSpecificSubredditTask = sut.GetSpecificSubredditAsync(redditAccessToken, knownSubreddit);
-            getSpecificSubredditTask.Wait();
+            await sut.GetSpecificSubredditAsync(redditAccessToken, knownSubreddit);
 
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(aggregateException => 
-                    aggregateException != null &&
-                    aggregateException.InnerException != null &&
-                    aggregateException.InnerException.GetType() == typeof(UnauthorizedAccessException))),
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(exception => 
+                    exception != null &&
+                    exception.InnerException == null &&
+                    exception.GetType() == typeof(UnauthorizedAccessException))),
                 Times.Once());
         }
 

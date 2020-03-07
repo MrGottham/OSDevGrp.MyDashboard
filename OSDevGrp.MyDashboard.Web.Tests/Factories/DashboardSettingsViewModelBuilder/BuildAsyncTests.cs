@@ -31,121 +31,113 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
 
         [TestMethod]
         [ExpectedArgumentNullExceptionAttribute("input")]
-        public void BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
         {
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            sut.BuildAsync(null);
+            await sut.BuildAsync(null);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertNumberOfNewsWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalled_AssertNumberOfNewsWasCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object);
 
             dashboardSettingsMock.Verify(m => m.NumberOfNews, Times.Once());
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertUseRedditWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalled_AssertUseRedditWasCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object);
 
             dashboardSettingsMock.Verify(m => m.UseReddit, Times.Once());
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertRedditAccessTokenWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalled_AssertRedditAccessTokenWasCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object);
 
             dashboardSettingsMock.Verify(m => m.RedditAccessToken, Times.Once());
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereRedditAccessTokenIsNotNull_AssertExpiresWasCalledOnRedditAccessToken()
+        public async Task BuildAsync_WhenCalledWhereRedditAccessTokenIsNotNull_AssertExpiresWasCalledOnRedditAccessToken()
         {
             Mock<IRedditAccessToken> redditAccessTokenMock = CreateRedditAccessTokenMock();
             IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessTokenMock.Object);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             redditAccessTokenMock.Verify(m => m.Expires, Times.Once());
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereRedditAccessTokenIsNotNull_AssertToBase64WasCalledOnRedditAccessToken()
+        public async Task BuildAsync_WhenCalledWhereRedditAccessTokenIsNotNull_AssertToBase64WasCalledOnRedditAccessToken()
         {
             Mock<IRedditAccessToken> redditAccessTokenMock = CreateRedditAccessTokenMock();
             IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessTokenMock.Object);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             redditAccessTokenMock.Verify(m => m.ToBase64(), Times.Once());
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertIncludeNsfwContentWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalled_AssertIncludeNsfwContentWasCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object);
 
             dashboardSettingsMock.Verify(m => m.IncludeNsfwContent, Times.Once());
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertOnlyNsfwContentWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalled_AssertOnlyNsfwContentWasCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettingsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object);
 
             dashboardSettingsMock.Verify(m => m.OnlyNsfwContent, Times.Once());
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertHttpContextWasCalledOnHttpContextAccessor()
+        public async Task BuildAsync_WhenCalled_AssertHttpContextWasCalledOnHttpContextAccessor()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertAppendWasCalledOnResponseCookies()
+        public async Task BuildAsync_WhenCalled_AssertAppendWasCalledOnResponseCookies()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
             IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
@@ -153,8 +145,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
             Mock<IResponseCookies> responseCookiesMock = CreateResponseCookiesMock();
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut(responseCookies: responseCookiesMock.Object);
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             responseCookiesMock.Verify(m => m.Append(
                     It.Is<string>(value => string.Compare(value, OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel.CookieName, StringComparison.Ordinal) == 0),
@@ -166,7 +157,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_ReturnsInitializedDashboardSettingsViewModel()
+        public async Task BuildAsync_WhenCalled_ReturnsInitializedDashboardSettingsViewModel()
         {
             int numberOfNews = _random.Next(25, 50);
             bool useReddit = _random.Next(100) > 50;
@@ -177,10 +168,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            DashboardSettingsViewModel result = await sut.BuildAsync(dashboardSettings);
 
-            DashboardSettingsViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(numberOfNews, result.NumberOfNews);
             Assert.AreEqual(useReddit, result.UseReddit);
@@ -209,23 +198,21 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereRedditAccessTokenIsNull_ReturnsInitializedDashboardSettingsViewModel()
+        public async Task BuildAsync_WhenCalledWhereRedditAccessTokenIsNull_ReturnsInitializedDashboardSettingsViewModel()
         {
             const IRedditAccessToken redditAccessToken = null;
             IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            DashboardSettingsViewModel result = await sut.BuildAsync(dashboardSettings);
 
-            DashboardSettingsViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNull(result.RedditAccessToken);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereRedditAccessTokenIsNotNull_ReturnsInitializedDashboardSettingsViewModel()
+        public async Task BuildAsync_WhenCalledWhereRedditAccessTokenIsNotNull_ReturnsInitializedDashboardSettingsViewModel()
         {
             string redditAccessTokenAsBase64 = Guid.NewGuid().ToString("D");
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken(redditAccessTokenAsBase64);
@@ -233,77 +220,67 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardSettingsViewModelBui
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            DashboardSettingsViewModel result = await sut.BuildAsync(dashboardSettings);
 
-            DashboardSettingsViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(redditAccessTokenAsBase64, result.RedditAccessToken);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereIncludeNsfwContentIsFalse_ReturnsInitializedDashboardSettingsViewModel()
+        public async Task BuildAsync_WhenCalledWhereIncludeNsfwContentIsFalse_ReturnsInitializedDashboardSettingsViewModel()
         {
             const bool includeNsfwContent = false;
             IDashboardSettings dashboardSettings = CreateDashboardSettings(includeNsfwContent: includeNsfwContent);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            DashboardSettingsViewModel result = await sut.BuildAsync(dashboardSettings);
 
-            DashboardSettingsViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IncludeNsfwContent.HasValue);
             Assert.IsNull(result.IncludeNsfwContent);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereIncludeNsfwContentIsTrue_ReturnsInitializedDashboardSettingsViewModel()
+        public async Task BuildAsync_WhenCalledWhereIncludeNsfwContentIsTrue_ReturnsInitializedDashboardSettingsViewModel()
         {
             const bool includeNsfwContent = true;
             IDashboardSettings dashboardSettings = CreateDashboardSettings(includeNsfwContent: includeNsfwContent);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            DashboardSettingsViewModel result = await sut.BuildAsync(dashboardSettings);
 
-            DashboardSettingsViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsTrue(result.IncludeNsfwContent.HasValue);
             Assert.IsTrue(result.IncludeNsfwContent.Value);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereOnlyNsfwContentIsFalse_ReturnsInitializedDashboardSettingsViewModel()
+        public async Task BuildAsync_WhenCalledWhereOnlyNsfwContentIsFalse_ReturnsInitializedDashboardSettingsViewModel()
         {
             const bool onlyNsfwContent = false;
             IDashboardSettings dashboardSettings = CreateDashboardSettings(onlyNsfwContent: onlyNsfwContent);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            DashboardSettingsViewModel result = await sut.BuildAsync(dashboardSettings);
 
-            DashboardSettingsViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsFalse(result.OnlyNsfwContent.HasValue);
             Assert.IsNull(result.OnlyNsfwContent);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereOnlyNsfwContentIsTrue_ReturnsInitializedDashboardSettingsViewModel()
+        public async Task BuildAsync_WhenCalledWhereOnlyNsfwContentIsTrue_ReturnsInitializedDashboardSettingsViewModel()
         {
             const bool onlyNsfwContent = true;
             IDashboardSettings dashboardSettings = CreateDashboardSettings(onlyNsfwContent: onlyNsfwContent);
 
             IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> sut = CreateSut();
 
-            Task<DashboardSettingsViewModel> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            DashboardSettingsViewModel result = await sut.BuildAsync(dashboardSettings);
 
-            DashboardSettingsViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsTrue(result.OnlyNsfwContent.HasValue);
             Assert.IsTrue(result.OnlyNsfwContent.Value);

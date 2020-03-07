@@ -30,95 +30,89 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.SystemErrorViewModelBuilder
 
         [TestMethod]
         [ExpectedArgumentNullExceptionAttribute("input")]
-        public void BuildAsync_WhenSystemErrorIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenSystemErrorIsNull_ThrowsArgumentNullException()
         {
             IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
 
-            sut.BuildAsync(null);
+            await sut.BuildAsync(null);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertIdentifierWasCalledOnSystemError()
+        public async Task BuildAsync_WhenCalled_AssertIdentifierWasCalledOnSystemError()
         {
             Mock<ISystemError> systemErrorMock = CreateSystemErrorMock();
 
             IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
 
-            Task<SystemErrorViewModel> buildTask = sut.BuildAsync(systemErrorMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(systemErrorMock.Object);
 
             systemErrorMock.Verify(m => m.Identifier, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertTimestampWasCalledOnSystemError()
+        public async Task BuildAsync_WhenCalled_AssertTimestampWasCalledOnSystemError()
         {
             Mock<ISystemError> systemErrorMock = CreateSystemErrorMock();
 
             IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
 
-            Task<SystemErrorViewModel> buildTask = sut.BuildAsync(systemErrorMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(systemErrorMock.Object);
 
             systemErrorMock.Verify(m => m.Timestamp, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertInformationWasCalledOnSystemError()
+        public async Task BuildAsync_WhenCalled_AssertInformationWasCalledOnSystemError()
         {
             Mock<ISystemError> systemErrorMock = CreateSystemErrorMock();
 
             IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
 
-            Task<SystemErrorViewModel> buildTask = sut.BuildAsync(systemErrorMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(systemErrorMock.Object);
 
             systemErrorMock.Verify(m => m.Information, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithInformation()
+        public async Task BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithInformation()
         {
             string information = Guid.NewGuid().ToString("D");
             ISystemError systemError = CreateSystemError(information: information);
 
             IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
 
-            Task<SystemErrorViewModel> buildTask = sut.BuildAsync(systemError);
-            buildTask.Wait();
+            await sut.BuildAsync(systemError);
 
             _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => string.Compare(value, information, false) == 0)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertDetailsWasCalledOnSystemError()
+        public async Task BuildAsync_WhenCalled_AssertDetailsWasCalledOnSystemError()
         {
             Mock<ISystemError> systemErrorMock = CreateSystemErrorMock();
 
             IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
 
-            Task<SystemErrorViewModel> buildTask = sut.BuildAsync(systemErrorMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(systemErrorMock.Object);
 
             systemErrorMock.Verify(m => m.Details, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithDetails()
+        public async Task BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithDetails()
         {
             string details = Guid.NewGuid().ToString("D");
             ISystemError systemError = CreateSystemError(details: details);
 
             IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
 
-            Task<SystemErrorViewModel> buildTask = sut.BuildAsync(systemError);
-            buildTask.Wait();
+            await sut.BuildAsync(systemError);
 
             _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => string.Compare(value, details, false) == 0)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_ReturnsInitializedSystemErrorViewModel()
+        public async Task BuildAsync_WhenCalled_ReturnsInitializedSystemErrorViewModel()
         {
             string identifier = Guid.NewGuid().ToString("D");
             DateTime timestamp = DateTime.Now.AddTicks(_random.Next(-5000, 5000));
@@ -128,10 +122,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.SystemErrorViewModelBuilder
 
             IViewModelBuilder<SystemErrorViewModel, ISystemError> sut = CreateSut();
 
-            Task<SystemErrorViewModel> buildTask = sut.BuildAsync(systemErrorMock);
-            buildTask.Wait();
+            SystemErrorViewModel result = await sut.BuildAsync(systemErrorMock);
 
-            SystemErrorViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.SystemErrorIdentifier);
             Assert.AreEqual(identifier, result.SystemErrorIdentifier);

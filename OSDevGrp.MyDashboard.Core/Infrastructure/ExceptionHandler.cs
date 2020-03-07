@@ -65,8 +65,7 @@ namespace OSDevGrp.MyDashboard.Core.Infrastructure
 
             try
             {
-                Task task = _exceptionRepository.AddAsync(exception);
-                task.Wait();
+                _exceptionRepository.AddAsync(exception).GetAwaiter().GetResult();
             }
             catch (AggregateException aggregateException)
             {

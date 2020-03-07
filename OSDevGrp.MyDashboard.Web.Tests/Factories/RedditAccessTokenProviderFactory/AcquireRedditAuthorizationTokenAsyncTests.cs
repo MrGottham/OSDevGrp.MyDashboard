@@ -27,80 +27,79 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
         [TestMethod]
         [ExpectedArgumentNullException("state")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenStateIsNull_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsNull_ThrowsArgumentNullException()
         {
             const string state = null;
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("state")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenStateIsEmpty_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsEmpty_ThrowsArgumentNullException()
         {
             string state = string.Empty;
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("state")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespace_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespace_ThrowsArgumentNullException()
         {
             const string state = " ";
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("state")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespaces_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespaces_ThrowsArgumentNullException()
         {
             const string state = "  ";
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("redirectUri")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenRedirectUriIsNull_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenRedirectUriIsNull_ThrowsArgumentNullException()
         {
             string state = Guid.NewGuid().ToString("D");
             const Uri redirectUri = null;
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
         }
 
         [TestMethod]
-        public void AcquireRedditAuthorizationTokenAsync_WhenCalled_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenCalled_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
         {
             string state = Guid.NewGuid().ToString("D");
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            Task<Uri> result = sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
-            result.Wait();
+            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
 
             _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Once);
         }
 
         [TestMethod]
-        public void AcquireRedditAuthorizationTokenAsync_WhenCalled_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnDataProviderFactory()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenCalled_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnDataProviderFactory()
         {
             string state = Guid.NewGuid().ToString("D");
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
@@ -108,8 +107,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
             string clientId = Guid.NewGuid().ToString("D");
             IRedditAccessTokenProviderFactory sut = CreateSut(clientId: clientId);
 
-            Task<Uri> result = sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
-            result.Wait();
+            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
 
             _dataProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
                     It.Is<string>(value => string.Compare(clientId, value, StringComparison.Ordinal) == 0),
@@ -128,7 +126,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
             IRedditAccessTokenProviderFactory sut = CreateSut(acquireRedditAuthorizationTokenTask: acquireRedditAuthorizationTokenTask);
 
             Task<Uri> result = sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
-            result.Wait();
 
             Assert.AreEqual(acquireRedditAuthorizationTokenTask, result);           
         }

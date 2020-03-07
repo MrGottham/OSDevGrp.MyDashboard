@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
-using OSDevGrp.MyDashboard.Core.Factories;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
@@ -26,7 +25,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenClientIdIsNull_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenClientIdIsNull_ThrowsArgumentNullException()
         {
             const string clientId = null;
             string state = Guid.NewGuid().ToString("D");
@@ -34,12 +33,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenClientIdIsEmpty_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenClientIdIsEmpty_ThrowsArgumentNullException()
         {
             string clientId = string.Empty;
             string state = Guid.NewGuid().ToString("D");
@@ -47,12 +46,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenClientIdIsWhitespace_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenClientIdIsWhitespace_ThrowsArgumentNullException()
         {
             const string clientId = " ";
             string state = Guid.NewGuid().ToString("D");
@@ -60,12 +59,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("clientId")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenClientIdIsWhitespaces_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenClientIdIsWhitespaces_ThrowsArgumentNullException()
         {
             const string clientId = "  ";
             string state = Guid.NewGuid().ToString("D");
@@ -73,12 +72,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("state")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenStateIsNull_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsNull_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             const string state = null;
@@ -86,12 +85,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("state")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenStateIsEmpty_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsEmpty_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string state = string.Empty;
@@ -99,12 +98,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("state")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespace_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespace_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             const string state = " ";
@@ -112,12 +111,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("state")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespaces_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespaces_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             const string state = "  ";
@@ -125,12 +124,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("redirectUri")]
-        public void AcquireRedditAuthorizationTokenAsync_WhenRedirectUrlIsNull_ThrowsArgumentNullException()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenRedirectUrlIsNull_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string state = Guid.NewGuid().ToString("D");
@@ -138,11 +137,11 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
+            await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
         }
 
         [TestMethod]
-        public void AcquireRedditAuthorizationTokenAsync_WhenCalled_ReturnsUriForAcquiringRedditAuthorization()
+        public async Task AcquireRedditAuthorizationTokenAsync_WhenCalled_ReturnsUriForAcquiringRedditAuthorization()
         {
             string clientId = Guid.NewGuid().ToString("D");
             string state = Guid.NewGuid().ToString("D");
@@ -153,11 +152,10 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            Task<Uri> acquireRedditAuthorizationTokenTask = sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
-            acquireRedditAuthorizationTokenTask.Wait();
+            Uri result = await sut.AcquireRedditAuthorizationTokenAsync(clientId, state, redirectUri);
 
-            Assert.IsNotNull(acquireRedditAuthorizationTokenTask.Result);
-            Assert.AreEqual(expectedUri.AbsoluteUri, acquireRedditAuthorizationTokenTask.Result.AbsoluteUri);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(expectedUri.AbsoluteUri, result.AbsoluteUri);
         }
 
         private IDataProviderFactory CreateSut()

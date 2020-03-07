@@ -27,15 +27,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
 
         [TestMethod]
         [ExpectedArgumentNullException("filterableCollection")]
-        public void RemoveUserBannedContentAsync_WhenFilterableCollectionIsNull_ThrowsArgumentNullException()
+        public async Task RemoveUserBannedContentAsync_WhenFilterableCollectionIsNull_ThrowsArgumentNullException()
         {
             IRedditFilterLogic sut = CreateSut();
 
-            sut.RemoveUserBannedContentAsync((IEnumerable<IRedditFilterable>) null);
+            await sut.RemoveUserBannedContentAsync((IEnumerable<IRedditFilterable>) null);
         }
 
         [TestMethod]
-        public void RemoveUserBannedContentAsync_WhenCalled_AssertUserBannedWasCalledOnEachFilterableInCollection()
+        public async Task RemoveUserBannedContentAsync_WhenCalled_AssertUserBannedWasCalledOnEachFilterableInCollection()
         {
             Mock<IRedditFilterable> filterable1Mock = CreateFilterableMock();
             Mock<IRedditFilterable> filterable2Mock = CreateFilterableMock();
@@ -47,8 +47,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
             
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditFilterable>> removeUserBannedContentTask = sut.RemoveUserBannedContentAsync(filterableCollection);
-            removeUserBannedContentTask.Wait();
+            await sut.RemoveUserBannedContentAsync(filterableCollection);
 
             filterable1Mock.Verify(m => m.UserBanned, Times.Once);
             filterable2Mock.Verify(m => m.UserBanned, Times.Once);
@@ -56,7 +55,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
         }
 
         [TestMethod]
-        public void RemoveUserBannedContentAsync_WhenCalled_ReturnsFilteredCollection()
+        public async Task RemoveUserBannedContentAsync_WhenCalled_ReturnsFilteredCollection()
         {
             bool userBannedOnFilterable1 = _random.Next(1, 100) > 50;
             bool userBannedOnFilterable2 = _random.Next(1, 100) > 50;
@@ -71,10 +70,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
             
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditFilterable>> removeUserBannedContentTask = sut.RemoveUserBannedContentAsync(filterableCollection);
-            removeUserBannedContentTask.Wait();
+            IEnumerable<IRedditFilterable> result = await sut.RemoveUserBannedContentAsync(filterableCollection);
 
-            IEnumerable<IRedditFilterable> result = removeUserBannedContentTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(Convert.ToInt32(!userBannedOnFilterable1) + Convert.ToInt32(!userBannedOnFilterable2) + Convert.ToInt32(!userBannedOnFilterable3), result.Count());
             Assert.AreNotEqual(userBannedOnFilterable1, result.Contains(filterable1));

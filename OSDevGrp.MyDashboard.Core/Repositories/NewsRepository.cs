@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -45,75 +44,69 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
 
         #region Methods
 
-        public Task<IEnumerable<INews>> GetNewsAsync()
+        public async Task<IEnumerable<INews>> GetNewsAsync()
         {
-            return Task.Run<IEnumerable<INews>>(async () => 
+            try
             {
-                try
+                IEnumerable<INewsProvider> newsProviders = await _dataProviderFactory.BuildNewsProvidersAsync();
+                if (newsProviders == null || newsProviders.Any() == false)
                 {
-                    IEnumerable<INewsProvider> newsProviders = await _dataProviderFactory.BuildNewsProvidersAsync();
-                    if (newsProviders == null || newsProviders.Any() == false)
-                    {
-                        return new List<INews>(0);
-                    }
+                    return new List<INews>(0);
+                }
 
-                    Task<IEnumerable<INews>>[] getNewsFromNewsProviderTasks = newsProviders.Select(GetNewsFromNewsProviderAsync).ToArray();
-                    Task.WaitAll(getNewsFromNewsProviderTasks);
+                Task<IEnumerable<INews>>[] getNewsFromNewsProviderTasks = newsProviders.Select(GetNewsFromNewsProviderAsync).ToArray();
+                await Task.WhenAll(getNewsFromNewsProviderTasks);
 
-                    return getNewsFromNewsProviderTasks
-                        .Where(task => task.IsFaulted == false)
-                        .SelectMany(task => task.Result)
-                        .OrderByDescending(news => news.Timestamp)
-                        .ToList();
-                }
-                catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return new List<INews>(0);
-            });
+                return getNewsFromNewsProviderTasks
+                    .Where(task => task.IsFaulted == false)
+                    .SelectMany(task => task.Result)
+                    .OrderByDescending(news => news.Timestamp)
+                    .ToList();
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return new List<INews>(0);
         }
 
-        private Task<IEnumerable<INews>> GetNewsFromNewsProviderAsync(INewsProvider newsProvider)
+        private async Task<IEnumerable<INews>> GetNewsFromNewsProviderAsync(INewsProvider newsProvider)
         {
             if (newsProvider == null)
             {
                 throw new ArgumentNullException(nameof(newsProvider));
             }
 
-            return Task.Run<IEnumerable<INews>>(async () => 
+            try
             {
-                try
+                using (HttpClient client = new HttpClient())
                 {
-                    using (HttpClient client = new HttpClient())
+                    using (HttpResponseMessage responseMessage = await client.GetAsync(newsProvider.Uri))
                     {
-                        using (HttpResponseMessage responseMessage = await client.GetAsync(newsProvider.Uri))
+                        if (responseMessage.IsSuccessStatusCode == false)
                         {
-                            if (responseMessage.IsSuccessStatusCode == false)
+                            return new List<INews>(0);
+                        }
+                        using (Stream responseStream = await responseMessage.Content.ReadAsStreamAsync())
+                        {
+                            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                            using (XmlReader xmlReader = XmlReader.Create(responseStream, xmlReaderSettings))
                             {
-                                return new List<INews>(0);
-                            }
-                            using (Stream responseStream = await responseMessage.Content.ReadAsStreamAsync())
-                            {
-                                XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-                                using (XmlReader xmlReader = XmlReader.Create(responseStream, xmlReaderSettings))
-                                {
-                                    return GenerateNews(newsProvider, xmlReader);
-                                }
+                                return GenerateNews(newsProvider, xmlReader);
                             }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return new List<INews>(0);
-            });
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return new List<INews>(0);
         }
 
         private IEnumerable<INews> GenerateNews(INewsProvider newsProvider, XmlReader xmlReader)
@@ -135,7 +128,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 }
                 catch (Exception ex)
                 {
-                    _exceptionHandler.HandleAsync(ex).Wait();
+                    _exceptionHandler.HandleAsync(ex).GetAwaiter().GetResult();
                 }
             }
 

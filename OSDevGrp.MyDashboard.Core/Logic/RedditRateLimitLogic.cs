@@ -84,43 +84,40 @@ namespace OSDevGrp.MyDashboard.Core.Logic
             }
         } 
 
-        public Task EnforceRateLimitAsync(int used, int remaining, DateTime? resetTime, DateTime receivedTime)
+        public async Task EnforceRateLimitAsync(int used, int remaining, DateTime? resetTime, DateTime receivedTime)
         {
-            return Task.Run(() =>
+            try
             {
-                try
+                lock (SyncRoot)
                 {
-                    lock (SyncRoot)
+                    if (LatestReceivedUtcTime.HasValue == false || LatestReceivedUtcTime < receivedTime.ToUniversalTime())
                     {
-                        if (LatestReceivedUtcTime.HasValue == false || LatestReceivedUtcTime < receivedTime.ToUniversalTime())
+                        if (resetTime.HasValue && resetTime.Value.ToUniversalTime() > ResetUtcTime)
                         {
-                            if (resetTime.HasValue && resetTime.Value.ToUniversalTime() > ResetUtcTime)
-                            {
-                                Used = used;
-                                Remaining = remaining;
-                                ResetUtcTime = resetTime.Value.ToUniversalTime();
-                            }
-                            if (Used < used)
-                            {
-                                Used = used;
-                            }
-                            if (Remaining > remaining)
-                            {
-                                Remaining = remaining;
-                            }
-                            LatestReceivedUtcTime = receivedTime.ToUniversalTime();
+                            Used = used;
+                            Remaining = remaining;
+                            ResetUtcTime = resetTime.Value.ToUniversalTime();
                         }
+                        if (Used < used)
+                        {
+                            Used = used;
+                        }
+                        if (Remaining > remaining)
+                        {
+                            Remaining = remaining;
+                        }
+                        LatestReceivedUtcTime = receivedTime.ToUniversalTime();
                     }
                 }
-                catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-            });
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
         }
 
         #endregion

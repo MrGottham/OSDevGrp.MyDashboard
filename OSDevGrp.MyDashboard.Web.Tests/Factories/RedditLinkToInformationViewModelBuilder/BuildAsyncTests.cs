@@ -31,175 +31,163 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
         [TestMethod]
         [ExpectedArgumentNullExceptionAttribute("input")]
-        public void BuildAsync_WhenSystemErrorIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenSystemErrorIsNull_ThrowsArgumentNullException()
         {
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            sut.BuildAsync(null);
+            await sut.BuildAsync(null);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertIdentifierWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalled_AssertIdentifierWasCalledOnRedditLink()
         {
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock();
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.Identifier, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertCreatedTimeWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalled_AssertCreatedTimeWasCalledOnRedditLink()
         {
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock();
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.CreatedTime, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertTitleWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalled_AssertTitleWasCalledOnRedditLink()
         {
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock();
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.Title, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertSelftextAsTextWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalled_AssertSelftextAsTextWasCalledOnRedditLink()
         {
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock();
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.SelftextAsText, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertSubredditWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalled_AssertSubredditWasCalledOnRedditLink()
         {
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock();
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.Subreddit, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithRedditSubreddit_AssertDisplayNamePrefixedWasCalledOnRedditSubreddit()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithRedditSubreddit_AssertDisplayNamePrefixedWasCalledOnRedditSubreddit()
         {
             Mock<IRedditSubreddit> redditSubredditMock = CreateRedditSubredditMock(Guid.NewGuid().ToString("D"));
             IRedditLink redditLink = CreateRedditLink(redditSubreddit: redditSubredditMock.Object);
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLink);
 
             redditSubredditMock.Verify(m => m.DisplayNamePrefixed, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertAuthorWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalled_AssertAuthorWasCalledOnRedditLink()
         {
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock();
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.Author, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertUrlWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalled_AssertUrlWasCalledOnRedditLink()
         {
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock();
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.Url, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertImagesWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalled_AssertImagesWasCalledOnRedditLink()
         {
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock();
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.Images, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNull_AssertThumbnailUrlWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNull_AssertThumbnailUrlWasCalledOnRedditLink()
         {
             const IEnumerable<IRedditImage> redditImages = null;
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock(redditImages: redditImages);
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.ThumbnailUrl, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmpty_AssertThumbnailUrlWasCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmpty_AssertThumbnailUrlWasCalledOnRedditLink()
         {
             IEnumerable<IRedditImage> redditImages = new List<IRedditImage>(0);
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock(redditImages: redditImages);
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.ThumbnailUrl, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmpty_AssertThumbnailUrlWasNotCalledOnRedditLink()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmpty_AssertThumbnailUrlWasNotCalledOnRedditLink()
         {
             IEnumerable<IRedditImage> redditImages = CreateRedditImageCollection();
             Mock<IRedditLink> redditLinkMock = CreateRedditLinkMock(redditImages: redditImages);
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLinkMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLinkMock.Object);
 
             redditLinkMock.Verify(m => m.ThumbnailUrl, Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmpty_AssertUrlWasCalledOnEachRedditImage()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmpty_AssertUrlWasCalledOnEachRedditImage()
         {
             Mock<IRedditImage> redditImage1Mock = CreateRedditImageMock(CreateImageUri());
             Mock<IRedditImage> redditImage2Mock = CreateRedditImageMock(CreateImageUri());
@@ -212,8 +200,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLink);
 
             redditImage1Mock.Verify(m => m.Url, Times.Exactly(3));
             redditImage2Mock.Verify(m => m.Url, Times.Exactly(2));
@@ -221,7 +208,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNullAndThumbnailUrlIsNull_AssertNextWasNotCalledOnRandomizer()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNullAndThumbnailUrlIsNull_AssertNextWasNotCalledOnRandomizer()
         {
             const IEnumerable<IRedditImage> redditImages = null;
             const Uri thumbnailUrl = null;
@@ -229,8 +216,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLink);
 
             _randomizerMock.Verify(m => m.Next(
                     It.IsAny<int>(), 
@@ -239,7 +225,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmptyAndThumbnailUrlIsNull_AssertNextWasNotCalledOnRandomizer()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmptyAndThumbnailUrlIsNull_AssertNextWasNotCalledOnRandomizer()
         {
             IEnumerable<IRedditImage> redditImages = new List<IRedditImage>(0);
             const Uri thumbnailUrl = null;
@@ -247,8 +233,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLink);
 
             _randomizerMock.Verify(m => m.Next(
                     It.IsAny<int>(), 
@@ -257,7 +242,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNullAndThumbnailUrlIsNotNull_AssertNextWasCalledOnRandomizer()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNullAndThumbnailUrlIsNotNull_AssertNextWasCalledOnRandomizer()
         {
             const IEnumerable<IRedditImage> redditImages = null;
             Uri thumbnailUrl = CreateImageUri();
@@ -265,8 +250,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLink);
 
             _randomizerMock.Verify(m => m.Next(
                     It.Is<int>(value => value == 0), 
@@ -275,7 +259,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmptyAndThumbnailUrlIsNotNull_AssertNextWasCalledOnRandomizer()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmptyAndThumbnailUrlIsNotNull_AssertNextWasCalledOnRandomizer()
         {
             IEnumerable<IRedditImage> redditImages = new List<IRedditImage>(0);
             Uri thumbnailUrl = CreateImageUri();
@@ -283,8 +267,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLink);
 
             _randomizerMock.Verify(m => m.Next(
                     It.Is<int>(value => value == 0), 
@@ -293,7 +276,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmptyAndThumbnailUrlIsNull_AssertNextWasCalledOnRandomizer()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmptyAndThumbnailUrlIsNull_AssertNextWasCalledOnRandomizer()
         {
             IEnumerable<IRedditImage> redditImages = CreateRedditImageCollection();
             const Uri thumbnailUrl = null;
@@ -301,8 +284,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLink);
 
             _randomizerMock.Verify(m => m.Next(
                     It.Is<int>(value => value == 0), 
@@ -311,7 +293,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmptyAndThumbnailUrlIsNotNull_AssertNextWasCalledOnRandomizer()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmptyAndThumbnailUrlIsNotNull_AssertNextWasCalledOnRandomizer()
         {
             IEnumerable<IRedditImage> redditImages = CreateRedditImageCollection();
             Uri thumbnailUrl = CreateImageUri();
@@ -319,8 +301,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            await sut.BuildAsync(redditLink);
 
             _randomizerMock.Verify(m => m.Next(
                     It.Is<int>(value => value == 0), 
@@ -329,7 +310,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -339,11 +320,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithTitle_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithTitle_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = Guid.NewGuid().ToString("D");
@@ -353,11 +334,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithoutTitle_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithoutTitle_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string selftextAsText = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -368,12 +349,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
             foreach (string title in new[] {null, string.Empty, " ", "  "})
             {
-                BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+                await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
             }
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithSelftextAsText_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithSelftextAsText_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -383,11 +364,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithoutSelftextAsText_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithoutSelftextAsText_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -398,12 +379,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
             foreach (string selftextAsText in new[] {null, string.Empty, " ", "  "})
             {
-                BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+                await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
             }
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithRedditSubredditWithDisplayNamePrefix_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithRedditSubredditWithDisplayNamePrefix_ReturnsInitializedInformationViewModel()
         {
             const bool hasRedditSubreddit = true;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -413,10 +394,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = Guid.NewGuid().ToString("D");
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
-        public void BuildAsync_WhenCalledWithRedditLinkWithRedditSubredditWithoutDisplayNamePrefix_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithRedditSubredditWithoutDisplayNamePrefix_ReturnsInitializedInformationViewModel()
         {
             const bool hasRedditSubreddit = true;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -427,12 +408,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             foreach (string redditSubredditDisplayNamePrefixed in new[] {null, string.Empty, " ", "  "})
             {
-                BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+                await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
             }
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithoutRedditSubreddit_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithoutRedditSubreddit_ReturnsInitializedInformationViewModel()
         {
             const bool hasRedditSubreddit = false;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -442,11 +423,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             const string redditSubredditDisplayNamePrefixed = null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithAuthorAndWithRedditSubredditWithDisplayNamePrefix_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithAuthorAndWithRedditSubredditWithDisplayNamePrefix_ReturnsInitializedInformationViewModel()
         {
             const bool hasRedditSubreddit = true;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -456,11 +437,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = Guid.NewGuid().ToString("D");
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithAuthorAndWithRedditSubredditWithoutDisplayNamePrefix_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithAuthorAndWithRedditSubredditWithoutDisplayNamePrefix_ReturnsInitializedInformationViewModel()
         {
             const bool hasRedditSubreddit = true;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -471,12 +452,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             foreach (string redditSubredditDisplayNamePrefixed in new[] {null, string.Empty, " ", "  "})
             {
-                BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+                await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
             }
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithAuthorAndWithoutRedditSubreddit_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithAuthorAndWithoutRedditSubreddit_ReturnsInitializedInformationViewModel()
         {
             const bool hasRedditSubreddit = false;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -486,11 +467,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             const string redditSubredditDisplayNamePrefixed = null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithoutAuthor_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithoutAuthor_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -501,12 +482,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             foreach (string author in new[] {null, string.Empty, " ", "  "})
             {
-                BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+                await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
             }
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithUrl_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithUrl_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -516,11 +497,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             Uri url = CreateUri();
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWithoutUrl_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWithoutUrl_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -530,11 +511,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = _random.Next(1, 100) > 50 ? CreateRedditImageCollection() : null;
             const Uri url = null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNullAndThumbnailUrlIsNull_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNullAndThumbnailUrlIsNull_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -544,11 +525,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             const IEnumerable<IRedditImage> redditImages = null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmptyAndThumbnailUrlIsNull_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmptyAndThumbnailUrlIsNull_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -558,11 +539,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = new List<IRedditImage>(0);
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNullAndThumbnailUrlIsNotNull_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNullAndThumbnailUrlIsNotNull_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -572,11 +553,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             const IEnumerable<IRedditImage> redditImages = null;
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmptyAndThumbnailUrlIsNotNull_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsEmptyAndThumbnailUrlIsNotNull_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -586,11 +567,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = new List<IRedditImage>(0);
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmptyAndThumbnailUrlIsNull_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmptyAndThumbnailUrlIsNull_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -600,11 +581,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = CreateRedditImageCollection();
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmptyAndThumbnailUrlIsNotNull_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWithRedditLinkWhereImagesIsNotEmptyAndThumbnailUrlIsNotNull_ReturnsInitializedInformationViewModel()
         {
             bool hasRedditSubreddit = _random.Next(1, 100) > 50;
             string title = _random.Next(1, 100) > 50 ? Guid.NewGuid().ToString("D") : null;
@@ -614,10 +595,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
             IEnumerable<IRedditImage> redditImages = CreateRedditImageCollection();
             Uri url = _random.Next(1, 100) > 50 ? CreateUri() : null;
             string redditSubredditDisplayNamePrefixed = hasRedditSubreddit ? Guid.NewGuid().ToString("D") : null;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasRedditSubreddit, title, selftextAsText, author, thumbnailUrl, redditImages, url, redditSubredditDisplayNamePrefixed);
         }
 
-        public void BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(bool hasRedditSubreddit, string title, string selftextAsText, string author, Uri thumbnailUrl, IEnumerable<IRedditImage> redditImages, Uri url, string redditSubredditDisplayNamePrefixed)
+        private async Task BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(bool hasRedditSubreddit, string title, string selftextAsText, string author, Uri thumbnailUrl, IEnumerable<IRedditImage> redditImages, Uri url, string redditSubredditDisplayNamePrefixed)
         {
             string identifier = Guid.NewGuid().ToString("D");
             DateTime createdTime = DateTime.Now.AddMinutes(_random.Next(60, 300) * -1);
@@ -635,10 +616,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditLinkToInformationViewMo
 
             IViewModelBuilder<InformationViewModel, IRedditLink> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(redditLink);
-            buildTask.Wait();
+            InformationViewModel result = await sut.BuildAsync(redditLink);
 
-            InformationViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.InformationIdentifier);
             Assert.AreEqual(identifier, result.InformationIdentifier);

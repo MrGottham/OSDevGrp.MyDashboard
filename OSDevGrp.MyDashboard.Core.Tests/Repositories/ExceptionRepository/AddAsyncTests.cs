@@ -11,24 +11,23 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
     {
         [TestMethod]
         [ExpectedArgumentNullException("exception")]
-        public void AddAsync_WhenExceptionIsNull_ThrowsArgumentNullException()
+        public async Task AddAsync_WhenExceptionIsNull_ThrowsArgumentNullException()
         {
             Exception exception = null;
 
             IExceptionRepository sut = CreateSut();
             
-            sut.AddAsync(exception);
+            await sut.AddAsync(exception);
         }
 
         [TestMethod]
-        public void AddAsync_WhenCalled_ExpectNoError()
+        public async Task AddAsync_WhenCalled_ExpectNoError()
         {
             Exception exception = new Exception();
 
             IExceptionRepository sut = CreateSut();
             
-            Task addTask = sut.AddAsync(exception);
-            addTask.Wait();
+            await sut.AddAsync(exception);
         }
 
         private IExceptionRepository CreateSut()

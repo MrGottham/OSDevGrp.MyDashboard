@@ -40,103 +40,95 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
         [TestMethod]
         [ExpectedArgumentNullException("accessToken")]
-        public void RenewAccessTokenAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
+        public async Task RenewAccessTokenAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
 
             IRedditLogic sut = CreateSut();
 
-            sut.RenewAccessTokenAsync(accessToken);
+            await sut.RenewAccessTokenAsync(accessToken);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalled_AssertExpiresWasCalledOnRedditAccessToken()
+        public async Task RenewAccessTokenAsync_WhenCalled_AssertExpiresWasCalledOnRedditAccessToken()
         {
             Mock<IRedditAccessToken> accessTokenMock = CreateRedditAccessTokenMock();
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessTokenMock.Object);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessTokenMock.Object);
 
             accessTokenMock.Verify(m => m.Expires, Times.Once);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRefreshTokenWasNotCalledOnRedditAccessToken()
+        public async Task RenewAccessTokenAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRefreshTokenWasNotCalledOnRedditAccessToken()
         {
             const bool hasExpired = false;
             Mock<IRedditAccessToken> accessTokenMock = CreateRedditAccessTokenMock(hasExpired: hasExpired);
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessTokenMock.Object);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessTokenMock.Object);
 
             accessTokenMock.Verify(m => m.RefreshToken, Times.Never);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRenewRedditAccessTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
+        public async Task RenewAccessTokenAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRenewRedditAccessTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
         {
             const bool hasExpired = false;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessToken);
 
             _redditAccessTokenProviderFactoryMock.Verify(m => m.RenewRedditAccessTokenAsync(It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task RenewAccessTokenAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             const bool hasExpired = false;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessToken);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithUnexpiredRedditAccessToken_ReturnsUnexpiredRedditAccessToken()
+        public async Task RenewAccessTokenAsync_WhenCalledWithUnexpiredRedditAccessToken_ReturnsUnexpiredRedditAccessToken()
         {
             const bool hasExpired = false;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
-
-            IRedditAccessToken result = renewAccessTokenTask.Result;
+            IRedditAccessToken result = await sut.RenewAccessTokenAsync(accessToken);
 
             Assert.AreEqual(accessToken, result);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessToken_AssertRefreshTokenWasCalledOnRedditAccessToken()
+        public async Task RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessToken_AssertRefreshTokenWasCalledOnRedditAccessToken()
         {
             const bool hasExpired = true;
             Mock<IRedditAccessToken> accessTokenMock = CreateRedditAccessTokenMock(hasExpired: hasExpired);
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessTokenMock.Object);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessTokenMock.Object);
 
             accessTokenMock.Verify(m => m.RefreshToken, Times.Once);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessToken_AssertRenewRedditAccessTokenAsyncWasCalledOnRedditAccessTokenProviderFactory()
+        public async Task RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessToken_AssertRenewRedditAccessTokenAsyncWasCalledOnRedditAccessTokenProviderFactory()
         {
             const bool hasExpired = true;
             string refreshToken = Guid.NewGuid().ToString("D");
@@ -144,29 +136,27 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessToken);
 
             _redditAccessTokenProviderFactoryMock.Verify(m => m.RenewRedditAccessTokenAsync(It.Is<string>(value => string.Compare(refreshToken, value, StringComparison.Ordinal) == 0)), Times.Once);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             const bool hasExpired = true;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessToken);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessToken_ReturnsRenewedRedditAccessToken()
+        public async Task RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessToken_ReturnsRenewedRedditAccessToken()
         {
             const bool hasExpired = true;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
@@ -174,16 +164,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IRedditAccessToken renewedAccessToken = CreateRedditAccessToken();
             IRedditLogic sut = CreateSut(renewedAccessToken: renewedAccessToken);
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
-
-            IRedditAccessToken result = renewAccessTokenTask.Result;
+            IRedditAccessToken result = await sut.RenewAccessTokenAsync(accessToken);
 
             Assert.AreEqual(renewedAccessToken, result);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessTokenAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessTokenAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             const bool hasExpired = true;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
@@ -191,14 +178,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(exception: aggregateException);
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessToken);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessTokenAndAggregateExceptionOccurs_ReturnsNull()
+        public async Task RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessTokenAndAggregateExceptionOccurs_ReturnsNull()
         {
             const bool hasExpired = true;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
@@ -206,16 +192,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(exception: aggregateException);
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
-
-            IRedditAccessToken result = renewAccessTokenTask.Result;
+            IRedditAccessToken result = await sut.RenewAccessTokenAsync(accessToken);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessTokenAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessTokenAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             const bool hasExpired = true;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
@@ -223,14 +206,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(exception: exception);
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
+            await sut.RenewAccessTokenAsync(accessToken);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
         }
 
         [TestMethod]
-        public void RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessTokenAndExceptionOccurs_ReturnsNull()
+        public async Task RenewAccessTokenAsync_WhenCalledWithExpiredRedditAccessTokenAndExceptionOccurs_ReturnsNull()
         {
             const bool hasExpired = true;
             IRedditAccessToken accessToken = CreateRedditAccessToken(hasExpired: hasExpired);
@@ -238,10 +220,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(exception: exception);
 
-            Task<IRedditAccessToken> renewAccessTokenTask = sut.RenewAccessTokenAsync(accessToken);
-            renewAccessTokenTask.Wait();
-
-            IRedditAccessToken result = renewAccessTokenTask.Result;
+            IRedditAccessToken result = await sut.RenewAccessTokenAsync(accessToken);
 
             Assert.IsNull(result);
         }

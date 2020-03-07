@@ -33,28 +33,25 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
         #region Methods
 
-        public Task<IEnumerable<INews>> GetNewsAsync(int numberOfNews)
+        public async Task<IEnumerable<INews>> GetNewsAsync(int numberOfNews)
         {
-            return Task.Run<IEnumerable<INews>>(async () => 
+            try
             {
-                try
+                IEnumerable<INews> news = await _newRepository.GetNewsAsync();
+                if (news == null)
                 {
-                    IEnumerable<INews> news = await _newRepository.GetNewsAsync();
-                    if (news == null)
-                    {
-                        return new List<INews>(0);
-                    }
-                    return news
-                        .OrderByDescending(m => m.Timestamp)
-                        .Take(numberOfNews)
-                        .ToList();
+                    return new List<INews>(0);
                 }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return new List<INews>(0);
-            });
+                return news
+                    .OrderByDescending(m => m.Timestamp)
+                    .Take(numberOfNews)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return new List<INews>(0);
         }
 
         #endregion

@@ -27,95 +27,89 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
 
         [TestMethod]
         [ExpectedArgumentNullExceptionAttribute("input")]
-        public void BuildAsync_WhenRedditAuthenticatedUserIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenRedditAuthenticatedUserIsNull_ThrowsArgumentNullException()
         {
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            sut.BuildAsync(null);
+            await sut.BuildAsync(null);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertIdentifierWasCalledOnRedditAuthenticatedUser()
+        public async Task BuildAsync_WhenCalled_AssertIdentifierWasCalledOnRedditAuthenticatedUser()
         {
             Mock<IRedditAuthenticatedUser> redditAuthenticatedUserMock = CreateRedditAuthenticatedUserMock();
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUserMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditAuthenticatedUserMock.Object);
 
             redditAuthenticatedUserMock.Verify(m => m.Identifier, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertCreatedTimeWasCalledOnRedditAuthenticatedUser()
+        public async Task BuildAsync_WhenCalled_AssertCreatedTimeWasCalledOnRedditAuthenticatedUser()
         {
             Mock<IRedditAuthenticatedUser> redditAuthenticatedUserMock = CreateRedditAuthenticatedUserMock();
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUserMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditAuthenticatedUserMock.Object);
 
             redditAuthenticatedUserMock.Verify(m => m.CreatedTime, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertUserNameWasCalledOnRedditAuthenticatedUser()
+        public async Task BuildAsync_WhenCalled_AssertUserNameWasCalledOnRedditAuthenticatedUser()
         {
             Mock<IRedditAuthenticatedUser> redditAuthenticatedUserMock = CreateRedditAuthenticatedUserMock();
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUserMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditAuthenticatedUserMock.Object);
 
             redditAuthenticatedUserMock.Verify(m => m.UserName, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertCommentKarmaWasCalledOnRedditAuthenticatedUser()
+        public async Task BuildAsync_WhenCalled_AssertCommentKarmaWasCalledOnRedditAuthenticatedUser()
         {
             int commentKarma = GetKarmaValue();
             Mock<IRedditAuthenticatedUser> redditAuthenticatedUserMock = CreateRedditAuthenticatedUserMock(commentKarma: commentKarma);
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUserMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditAuthenticatedUserMock.Object);
 
             redditAuthenticatedUserMock.Verify(m => m.CommentKarma, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertLinkKarmaWasCalledOnRedditAuthenticatedUser()
+        public async Task BuildAsync_WhenCalled_AssertLinkKarmaWasCalledOnRedditAuthenticatedUser()
         {
             int linkKarma = GetKarmaValue();
             Mock<IRedditAuthenticatedUser> redditAuthenticatedUserMock = CreateRedditAuthenticatedUserMock(linkKarma: linkKarma);
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUserMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditAuthenticatedUserMock.Object);
 
             redditAuthenticatedUserMock.Verify(m => m.LinkKarma, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertHasUnreadMailWasCalledOnRedditAuthenticatedUser()
+        public async Task BuildAsync_WhenCalled_AssertHasUnreadMailWasCalledOnRedditAuthenticatedUser()
         {
             Mock<IRedditAuthenticatedUser> redditAuthenticatedUserMock = CreateRedditAuthenticatedUserMock();
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUserMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(redditAuthenticatedUserMock.Object);
 
             redditAuthenticatedUserMock.Verify(m => m.HasUnreadMail, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_ReturnsInitializedObjectViewModel()
+        public async Task BuildAsync_WhenCalled_ReturnsInitializedObjectViewModel()
         {
             string identifier = Guid.NewGuid().ToString("D");
             DateTime createdTime = DateTime.Now.AddDays(_random.Next(1, 365) * -1).AddMinutes(_random.Next(-120, 120));
@@ -127,10 +121,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUser);
-            buildTask.Wait();
+            ObjectViewModel<IRedditAuthenticatedUser> result = await sut.BuildAsync(redditAuthenticatedUser);
 
-            ObjectViewModel<IRedditAuthenticatedUser> result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ObjectIdentifier);
             Assert.AreEqual(identifier, result.ObjectIdentifier);
@@ -142,7 +134,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditAuthenticatedUserWithCommentKarma_ReturnsInitializedObjectViewModelWithCorrectHtml()
+        public async Task BuildAsync_WhenCalledWithRedditAuthenticatedUserWithCommentKarma_ReturnsInitializedObjectViewModelWithCorrectHtml()
         {
             string userName = Guid.NewGuid().ToString("D");
             int commentKarma = GetKarmaValue(hasKarmaValue: true);
@@ -152,17 +144,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUser);
-            buildTask.Wait();
+            ObjectViewModel<IRedditAuthenticatedUser> result = await sut.BuildAsync(redditAuthenticatedUser);
 
-            ObjectViewModel<IRedditAuthenticatedUser> result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Html);
             Assert.AreEqual(GetExpectedHtml(userName, commentKarma, linkKarma, hasUnreadMail), result.Html);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditAuthenticatedUserWithoutCommentKarma_ReturnsInitializedObjectViewModelWithCorrectHtml()
+        public async Task BuildAsync_WhenCalledWithRedditAuthenticatedUserWithoutCommentKarma_ReturnsInitializedObjectViewModelWithCorrectHtml()
         {
             string userName = Guid.NewGuid().ToString("D");
             int commentKarma = GetKarmaValue(hasKarmaValue: false);
@@ -172,17 +162,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUser);
-            buildTask.Wait();
+            ObjectViewModel<IRedditAuthenticatedUser> result = await sut.BuildAsync(redditAuthenticatedUser);
 
-            ObjectViewModel<IRedditAuthenticatedUser> result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Html);
             Assert.AreEqual(GetExpectedHtml(userName, commentKarma, linkKarma, hasUnreadMail), result.Html);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditAuthenticatedUserWithLinkKarma_ReturnsInitializedObjectViewModelWithCorrectHtml()
+        public async Task BuildAsync_WhenCalledWithRedditAuthenticatedUserWithLinkKarma_ReturnsInitializedObjectViewModelWithCorrectHtml()
         {
             string userName = Guid.NewGuid().ToString("D");
             int commentKarma = GetKarmaValue();
@@ -192,17 +180,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUser);
-            buildTask.Wait();
+            ObjectViewModel<IRedditAuthenticatedUser> result = await sut.BuildAsync(redditAuthenticatedUser);
 
-            ObjectViewModel<IRedditAuthenticatedUser> result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Html);
             Assert.AreEqual(GetExpectedHtml(userName, commentKarma, linkKarma, hasUnreadMail), result.Html);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditAuthenticatedUserWithoutLinkKarma_ReturnsInitializedObjectViewModelWithCorrectHtml()
+        public async Task BuildAsync_WhenCalledWithRedditAuthenticatedUserWithoutLinkKarma_ReturnsInitializedObjectViewModelWithCorrectHtml()
         {
             string userName = Guid.NewGuid().ToString("D");
             int commentKarma = GetKarmaValue();
@@ -212,17 +198,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUser);
-            buildTask.Wait();
+            ObjectViewModel<IRedditAuthenticatedUser> result = await sut.BuildAsync(redditAuthenticatedUser);
 
-            ObjectViewModel<IRedditAuthenticatedUser> result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Html);
             Assert.AreEqual(GetExpectedHtml(userName, commentKarma, linkKarma, hasUnreadMail), result.Html);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditAuthenticatedUserWithUnreadMail_ReturnsInitializedObjectViewModelWithCorrectHtml()
+        public async Task BuildAsync_WhenCalledWithRedditAuthenticatedUserWithUnreadMail_ReturnsInitializedObjectViewModelWithCorrectHtml()
         {
             string userName = Guid.NewGuid().ToString("D");
             int commentKarma = GetKarmaValue();
@@ -232,17 +216,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUser);
-            buildTask.Wait();
+            ObjectViewModel<IRedditAuthenticatedUser> result = await sut.BuildAsync(redditAuthenticatedUser);
 
-            ObjectViewModel<IRedditAuthenticatedUser> result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Html);
             Assert.AreEqual(GetExpectedHtml(userName, commentKarma, linkKarma, hasUnreadMail), result.Html);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithRedditAuthenticatedUserWithoutUnreadMail_ReturnsInitializedObjectViewModelWithCorrectHtml()
+        public async Task BuildAsync_WhenCalledWithRedditAuthenticatedUserWithoutUnreadMail_ReturnsInitializedObjectViewModelWithCorrectHtml()
         {
             string userName = Guid.NewGuid().ToString("D");
             int commentKarma = GetKarmaValue();
@@ -252,10 +234,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAuthenticatedUserToObje
 
             IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> sut = CreateSut();
 
-            Task<ObjectViewModel<IRedditAuthenticatedUser>> buildTask = sut.BuildAsync(redditAuthenticatedUser);
-            buildTask.Wait();
+            ObjectViewModel<IRedditAuthenticatedUser> result = await sut.BuildAsync(redditAuthenticatedUser);
 
-            ObjectViewModel<IRedditAuthenticatedUser> result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Html);
             Assert.AreEqual(GetExpectedHtml(userName, commentKarma, linkKarma, hasUnreadMail), result.Html);

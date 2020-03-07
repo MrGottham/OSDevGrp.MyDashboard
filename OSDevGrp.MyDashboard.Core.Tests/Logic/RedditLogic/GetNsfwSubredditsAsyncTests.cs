@@ -42,32 +42,31 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
         [TestMethod]
         [ExpectedArgumentNullException("accessToken")]
-        public void GetNsfwSubredditsAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
+        public async Task GetNsfwSubredditsAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
             int numberOfSubreddits = _random.Next(1, 10);
 
             IRedditLogic sut = CreateSut();
 
-            sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalled_AssertGetKnownNsfwSubredditsAsyncWasCalledOnDataProviderFactory()
+        public async Task GetNsfwSubredditsAsync_WhenCalled_AssertGetKnownNsfwSubredditsAsyncWasCalledOnDataProviderFactory()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
 
             IRedditLogic sut = CreateSut();
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _dataProviderFactoryMock.Verify(m => m.GetKnownNsfwSubredditsAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalled_AssertRankWasCalledOnEachKnownNsfwSubreddit()
+        public async Task GetNsfwSubredditsAsync_WhenCalled_AssertRankWasCalledOnEachKnownNsfwSubreddit()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 5);
@@ -87,8 +86,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             };
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             knownNsfwSubreddit1.Verify(m => m.Rank, Times.Once);
             knownNsfwSubreddit2.Verify(m => m.Rank, Times.Once);
@@ -98,7 +96,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalled_AssertNameWasCalledOnEachKnownNsfwSubreddit()
+        public async Task GetNsfwSubredditsAsync_WhenCalled_AssertNameWasCalledOnEachKnownNsfwSubreddit()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 5);
@@ -118,8 +116,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             };
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             knownNsfwSubreddit1.Verify(m => m.Name, Times.Once);
             knownNsfwSubreddit2.Verify(m => m.Name, Times.Once);
@@ -129,7 +126,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalled_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogic()
+        public async Task GetNsfwSubredditsAsync_WhenCalled_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -139,14 +136,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IEnumerable<IRedditKnownSubreddit> knownNsfwSubredditCollection = CreateRedditKnownSubredditCollection(numberOfSubreddits: numberOfKnownNsfwSubreddits);
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == numberOfSubredditsToGet)), Times.Exactly(numberOfSubredditsToGet > 1 ? 1 : 2));
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertWillExceedRateLimitWasCalledOnlyOnceOnRedditRateLimitLogic()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertWillExceedRateLimitWasCalledOnlyOnceOnRedditRateLimitLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -154,14 +150,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.IsAny<int>()), Times.Once);
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertGetSpecificSubredditAsyncWasNotCalledOnRedditRepository()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertGetSpecificSubredditAsyncWasNotCalledOnRedditRepository()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -169,8 +164,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _redditRepositoryMock.Verify(m => m.GetSpecificSubredditAsync(
                     It.IsAny<IRedditAccessToken>(),
@@ -179,7 +173,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertEnforceRateLimitAsyncWasNotCalledOnRedditRateLimitLogic()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertEnforceRateLimitAsyncWasNotCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -187,8 +181,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _redditRateLimitLogicMock.Verify(m => m.EnforceRateLimitAsync(
                     It.IsAny<int>(),
@@ -199,7 +192,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -207,15 +200,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_ReturnsEmptySubredditCollection()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasExceeded_ReturnsEmptySubredditCollection()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -223,16 +215,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            IEnumerable<IRedditSubreddit> result = await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
-            IEnumerable<IRedditSubreddit> result = getNsfwSubredditsTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count());
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogicForEachKnownNsfwSubredditToGet()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogicForEachKnownNsfwSubredditToGet()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -243,14 +233,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection, willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == 1)), Times.Exactly(numberOfSubredditsToGet + Convert.ToInt32(numberOfSubredditsToGet == 1)));
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetSpecificSubredditAsyncWasCalledOnRedditRepositoryForEachKnownNsfwSubredditToGet()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetSpecificSubredditAsyncWasCalledOnRedditRepositoryForEachKnownNsfwSubredditToGet()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -266,8 +255,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection, willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _redditRepositoryMock.Verify(m => m.GetSpecificSubredditAsync(
                     It.Is<IRedditAccessToken>(value => value == accessToken),
@@ -276,7 +264,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertEnforceRateLimitAsyncWasCalledOnRedditRateLimitLogicForEachKnownNsfwSubredditToGet()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertEnforceRateLimitAsyncWasCalledOnRedditRateLimitLogicForEachKnownNsfwSubredditToGet()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -292,8 +280,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IRedditResponse<IRedditSubreddit> redditResponse = CreateRedditResponse(rateLimitUsed, rateLimitRemaining, rateLimitResetTime, receivedTime);
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection, willExceedRateLimit: willExceedRateLimit, redditResponse: redditResponse);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _redditRateLimitLogicMock.Verify(m => m.EnforceRateLimitAsync(
                     It.Is<int>(value => value == rateLimitUsed),
@@ -304,7 +291,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -312,15 +299,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_ReturnsSubredditCollection()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceeded_ReturnsSubredditCollection()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -331,17 +317,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(knownNsfwSubredditCollection: knownNsfwSubredditCollection, willExceedRateLimit: willExceedRateLimit);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            IEnumerable<IRedditSubreddit> result = await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
-            IEnumerable<IRedditSubreddit> result = getNsfwSubredditsTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(numberOfSubredditsToGet, result.Count());
             Assert.IsTrue(result.All(subreddit => subreddit != null));
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -350,14 +334,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: aggregateException);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_ReturnsEmptySubredditCollection()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_ReturnsEmptySubredditCollection()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -366,16 +349,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: aggregateException);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            IEnumerable<IRedditSubreddit> result = await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
-            IEnumerable<IRedditSubreddit> result = getNsfwSubredditsTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count());
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -384,14 +365,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: exception);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
         }
 
         [TestMethod]
-        public void GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_ReturnsEmptySubredditCollection()
+        public async Task GetNsfwSubredditsAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_ReturnsEmptySubredditCollection()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();;
             int numberOfSubreddits = _random.Next(1, 10);
@@ -400,10 +380,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: exception);
 
-            Task<IEnumerable<IRedditSubreddit>> getNsfwSubredditsTask = sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
-            getNsfwSubredditsTask.Wait();
+            IEnumerable<IRedditSubreddit> result = await sut.GetNsfwSubredditsAsync(accessToken, numberOfSubreddits);
 
-            IEnumerable<IRedditSubreddit> result = getNsfwSubredditsTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count());
         }

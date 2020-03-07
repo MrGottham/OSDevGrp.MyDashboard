@@ -40,50 +40,47 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
         [TestMethod]
         [ExpectedArgumentNullException("accessToken")]
-        public void GetAuthenticatedUserAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
+        public async Task GetAuthenticatedUserAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             IRedditLogic sut = CreateSut();
 
-            sut.GetAuthenticatedUserAsync(null);
+            await sut.GetAuthenticatedUserAsync(null);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalled_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogic()
+        public async Task GetAuthenticatedUserAsync_WhenCalled_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == 1)), Times.Once);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertGetAuthenticatedUserAsyncWasNotCalledOnRedditRepository()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertGetAuthenticatedUserAsyncWasNotCalledOnRedditRepository()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _redditRepositoryMock.Verify(m => m.GetAuthenticatedUserAsync(It.IsAny<IRedditAccessToken>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertEnforceRateLimitAsyncWasNotCalledOnRedditRateLimitLogic()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertEnforceRateLimitAsyncWasNotCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _redditRateLimitLogicMock.Verify(m => m.EnforceRateLimitAsync(
                     It.IsAny<int>(),
@@ -94,50 +91,47 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasExceeded_ReturnsNull()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasExceeded_ReturnsNull()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            IRedditAuthenticatedUser getAuthenticatedUser = await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
-            Assert.IsNull(getAuthenticatedUserTask.Result);
+            Assert.IsNull(getAuthenticatedUser);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetAuthenticatedUserAsyncWasCalledOnRedditRepository()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetAuthenticatedUserAsyncWasCalledOnRedditRepository()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _redditRepositoryMock.Verify(m => m.GetAuthenticatedUserAsync(It.Is<IRedditAccessToken>(value => value == redditAccessToken)), Times.Once);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertEnforceRateLimitAsyncWasCalledOnRedditRateLimitLogic()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertEnforceRateLimitAsyncWasCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
@@ -149,8 +143,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IRedditResponse<IRedditAuthenticatedUser> redditResponse = CreateRedditResponse(rateLimitUsed, rateLimitRemaining, rateLimitResetTime, receivedTime);
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, redditResponse: redditResponse);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _redditRateLimitLogicMock.Verify(m => m.EnforceRateLimitAsync(
                     It.Is<int>(value => value == rateLimitUsed),
@@ -161,22 +154,21 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceeded_ReturnsRedditAuthenticatedUserFromRedditRepository()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceeded_ReturnsRedditAuthenticatedUserFromRedditRepository()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
@@ -185,14 +177,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IRedditResponse<IRedditAuthenticatedUser> redditResponse = CreateRedditResponse(redditAuthenticatedUser: redditAuthenticatedUser);
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, redditResponse: redditResponse);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            IRedditAuthenticatedUser getAuthenticatedUser = await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
-            Assert.AreEqual(redditAuthenticatedUser, getAuthenticatedUserTask.Result);
+            Assert.AreEqual(redditAuthenticatedUser, getAuthenticatedUser);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
@@ -200,14 +191,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: aggregateException);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_ReturnsNull()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_ReturnsNull()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
@@ -215,14 +205,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: aggregateException);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            IRedditAuthenticatedUser getAuthenticatedUser = await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
-            Assert.IsNull(getAuthenticatedUserTask.Result);
+            Assert.IsNull(getAuthenticatedUser);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
@@ -230,14 +219,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: exception);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
         }
 
         [TestMethod]
-        public void GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_ReturnsNull()
+        public async Task GetAuthenticatedUserAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_ReturnsNull()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
 
@@ -245,10 +233,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: exception);
 
-            Task<IRedditAuthenticatedUser> getAuthenticatedUserTask = sut.GetAuthenticatedUserAsync(redditAccessToken);
-            getAuthenticatedUserTask.Wait();
+            IRedditAuthenticatedUser getAuthenticatedUser = await sut.GetAuthenticatedUserAsync(redditAccessToken);
 
-            Assert.IsNull(getAuthenticatedUserTask.Result);
+            Assert.IsNull(getAuthenticatedUser);
         }
 
         private IRedditLogic CreateSut(bool willExceedRateLimit = false, IRedditResponse<IRedditAuthenticatedUser> redditResponse = null, Exception exception = null)

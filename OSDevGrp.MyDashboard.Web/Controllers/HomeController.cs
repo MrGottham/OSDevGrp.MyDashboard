@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -62,7 +60,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         #region Methods
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             IDashboardSettings defaultDashboardSettings = new DashboardSettings
             {
@@ -75,12 +73,12 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             DashboardSettingsViewModel dashboardSettingsViewModel = DashboardSettingsViewModel.Create(_httpContextAccessor.HttpContext);
             
-            return GenerateDashboardView(dashboardSettingsViewModel == null ? defaultDashboardSettings : dashboardSettingsViewModel.ToDashboardSettings());
+            return await GenerateDashboardViewAsync(dashboardSettingsViewModel == null ? defaultDashboardSettings : dashboardSettingsViewModel.ToDashboardSettings());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Commit(DashboardSettingsViewModel dashboardSettingsViewModel)
+        public async Task<IActionResult> Commit(DashboardSettingsViewModel dashboardSettingsViewModel)
         {
             if (dashboardSettingsViewModel == null)
             {
@@ -94,13 +92,13 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             if (dashboardSettingsViewModel.UseReddit && string.IsNullOrWhiteSpace(dashboardSettingsViewModel.RedditAccessToken))
             {
-                return AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModel, _httpContextAccessor.HttpContext);
+                return await AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModel, _httpContextAccessor.HttpContext);
             }
             
-            return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
+            return await GenerateDashboardViewAsync(dashboardSettingsViewModel.ToDashboardSettings());
         }
 
-        public IActionResult RedditCallback(string code, string state, string error = null)
+        public async Task<IActionResult> RedditCallback(string code, string state, string error = null)
         {
             if (string.IsNullOrWhiteSpace(code))
             {
@@ -116,14 +114,14 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             if (string.IsNullOrWhiteSpace(error) == false)
             {
-                return HandleErrorFromReddit(error, dashboardSettings);
+                return await HandleErrorFromRedditAsync(error, dashboardSettings);
             }
 
-            IRedditAccessToken redditAccessToken = GetRedditAccessToken(code, _httpContextAccessor.HttpContext);
+            IRedditAccessToken redditAccessToken = await GetRedditAccessTokenAsync(code, _httpContextAccessor.HttpContext);
             dashboardSettings.UseReddit = redditAccessToken != null;
             dashboardSettings.RedditAccessToken = redditAccessToken;
 
-            return GenerateDashboardView(dashboardSettings);
+            return await GenerateDashboardViewAsync(dashboardSettings);
         }
 
         [HttpPost]
@@ -142,7 +140,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        private IActionResult GenerateDashboardView(IDashboardSettings dashboardSettings)
+        private async Task<IActionResult> GenerateDashboardViewAsync(IDashboardSettings dashboardSettings)
         {
             if (dashboardSettings == null)
             {
@@ -151,27 +149,25 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             try
             {
-                Task<IDashboard> buildDashboardTask = _dashboardFactory.BuildAsync(dashboardSettings);
-                buildDashboardTask.Wait();
+                IDashboard dashboard = await _dashboardFactory.BuildAsync(dashboardSettings);
 
-                Task<DashboardViewModel> buildDashboardViewModelTask = _dashboardViewModelBuilder.BuildAsync(buildDashboardTask.Result);
-                buildDashboardViewModelTask.Wait();
+                DashboardViewModel dashboardViewModel = await _dashboardViewModelBuilder.BuildAsync(dashboard);
 
-                return View("Index", buildDashboardViewModelTask.Result);
+                return View("Index", dashboardViewModel);
             }
             catch (AggregateException aggregateException)
             {
-                _exceptionHandler.HandleAsync(aggregateException).Wait();
+                await _exceptionHandler.HandleAsync(aggregateException);
                 throw;
             }
             catch (Exception ex)
             {
-                _exceptionHandler.HandleAsync(ex).Wait();
+                await _exceptionHandler.HandleAsync(ex);
                 throw;
             }
         }
 
-        private IActionResult AcquireRedditAuthorizationTokenAsync(DashboardSettingsViewModel dashboardSettingsViewModel, HttpContext httpContext)
+        private async Task<IActionResult> AcquireRedditAuthorizationTokenAsync(DashboardSettingsViewModel dashboardSettingsViewModel, HttpContext httpContext)
         {
             if (dashboardSettingsViewModel == null)
             {
@@ -187,25 +183,24 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
                 string dashboardSettingsViewModelAsBase64 = dashboardSettingsViewModel.ToBase64();
                 Uri redirectUrl = GetRedditCallbackUri(httpContext);
 
-                Task<Uri> acquireRedditAccessTokenTask = _redditAccessTokenProviderFactory.AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModelAsBase64, redirectUrl);
-                acquireRedditAccessTokenTask.Wait();
+                Uri acquireRedditAccessToken = await _redditAccessTokenProviderFactory.AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModelAsBase64, redirectUrl);
                 
-                return Redirect(acquireRedditAccessTokenTask.Result.AbsoluteUri);
+                return Redirect(acquireRedditAccessToken.AbsoluteUri);
             }
             catch (AggregateException aggregateException)
             {
-                _exceptionHandler.HandleAsync(aggregateException).Wait();
+                await _exceptionHandler.HandleAsync(aggregateException);
             }
             catch (Exception ex)
             {
-                _exceptionHandler.HandleAsync(ex).Wait();
+                await _exceptionHandler.HandleAsync(ex);
             }
             dashboardSettingsViewModel.UseReddit = false;
             dashboardSettingsViewModel.RedditAccessToken = null;
-            return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
+            return await GenerateDashboardViewAsync(dashboardSettingsViewModel.ToDashboardSettings());
         }
 
-        private IRedditAccessToken GetRedditAccessToken(string code, HttpContext httpContext)
+        private async Task<IRedditAccessToken> GetRedditAccessTokenAsync(string code, HttpContext httpContext)
         {
             if (string.IsNullOrWhiteSpace(code))
             {
@@ -220,23 +215,22 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 Uri redirectUrl = GetRedditCallbackUri(httpContext);
 
-                Task<IRedditAccessToken> getRedditAccessTokenTask = _redditAccessTokenProviderFactory.GetRedditAccessTokenAsync(code, redirectUrl);
-                getRedditAccessTokenTask.Wait();
+                IRedditAccessToken getRedditAccessToken = await _redditAccessTokenProviderFactory.GetRedditAccessTokenAsync(code, redirectUrl);
 
-                return getRedditAccessTokenTask.Result;
+                return getRedditAccessToken;
             }
             catch (AggregateException aggregateException)
             {
-                _exceptionHandler.HandleAsync(aggregateException).Wait();
+                await _exceptionHandler.HandleAsync(aggregateException);
             }
             catch (Exception ex)
             {
-                _exceptionHandler.HandleAsync(ex).Wait();
+                await _exceptionHandler.HandleAsync(ex);
             }
             return null;
         }
 
-        private IActionResult HandleErrorFromReddit(string error, IDashboardSettings dashboardSettings)
+        private async Task<IActionResult> HandleErrorFromRedditAsync(string error, IDashboardSettings dashboardSettings)
         {
             if (string.IsNullOrWhiteSpace(error))
             {
@@ -253,12 +247,12 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             }
             catch (Exception ex)
             {
-                _exceptionHandler.HandleAsync(ex).Wait();
+                await _exceptionHandler.HandleAsync(ex);
             }
 
             dashboardSettings.UseReddit = false;
             dashboardSettings.RedditAccessToken = null;
-            return GenerateDashboardView(dashboardSettings);
+            return await GenerateDashboardViewAsync(dashboardSettings);
         }
 
         private Uri GetRedditCallbackUri(HttpContext httpContext)

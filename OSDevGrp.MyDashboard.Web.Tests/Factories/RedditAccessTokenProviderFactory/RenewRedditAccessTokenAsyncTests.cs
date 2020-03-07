@@ -28,76 +28,74 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
         [TestMethod]
         [ExpectedArgumentNullException("refreshToken")]
-        public void RenewRedditAccessTokenAsync_WhenRefreshTokenIsNull_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsNull_ThrowsArgumentNullException()
         {
             const string refreshToken = null;
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(refreshToken);
+            await sut.RenewRedditAccessTokenAsync(refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("refreshToken")]
-        public void RenewRedditAccessTokenAsync_WhenRefreshTokenIsEmpty_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsEmpty_ThrowsArgumentNullException()
         {
             string refreshToken = string.Empty;
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(refreshToken);
+            await sut.RenewRedditAccessTokenAsync(refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("refreshToken")]
-        public void RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespace_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespace_ThrowsArgumentNullException()
         {
             const string refreshToken = " ";
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(refreshToken);
+            await sut.RenewRedditAccessTokenAsync(refreshToken);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("refreshToken")]
-        public void RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespaces_ThrowsArgumentNullException()
+        public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespaces_ThrowsArgumentNullException()
         {
             const string refreshToken = "  ";
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.RenewRedditAccessTokenAsync(refreshToken);
+            await sut.RenewRedditAccessTokenAsync(refreshToken);
         }
 
         [TestMethod]
-        public void RenewRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
+        public async Task RenewRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
         {
             string refreshToken = Guid.NewGuid().ToString("D");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            Task<IRedditAccessToken> result = sut.RenewRedditAccessTokenAsync(refreshToken);
-            result.Wait();
+            await sut.RenewRedditAccessTokenAsync(refreshToken);
 
             _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Once);
         }
 
         [TestMethod]
-        public void RenewRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientSecretWasCalledOnConfiguration()
+        public async Task RenewRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientSecretWasCalledOnConfiguration()
         {
             string refreshToken = Guid.NewGuid().ToString("D");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            Task<IRedditAccessToken> result = sut.RenewRedditAccessTokenAsync(refreshToken);
-            result.Wait();
+            await sut.RenewRedditAccessTokenAsync(refreshToken);
 
             _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientSecret", value, StringComparison.Ordinal) == 0)], Times.Once);
         }
 
         [TestMethod]
-        public void RenewRedditAccessTokenAsync_WhenCalled_AssertRenewRedditAccessTokenAsyncWasCalledOnDataProviderFactory()
+        public async Task RenewRedditAccessTokenAsync_WhenCalled_AssertRenewRedditAccessTokenAsyncWasCalledOnDataProviderFactory()
         {
             string refreshToken = Guid.NewGuid().ToString("D");
 
@@ -105,8 +103,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
             string clientSecret = Guid.NewGuid().ToString("D");
             IRedditAccessTokenProviderFactory sut = CreateSut(clientId: clientId, clientSecret: clientSecret);
 
-            Task<IRedditAccessToken> result = sut.RenewRedditAccessTokenAsync(refreshToken);
-            result.Wait();
+            await sut.RenewRedditAccessTokenAsync(refreshToken);
 
             _dataProviderFactoryMock.Verify(m => m.RenewRedditAccessTokenAsync(
                     It.Is<string>(value => string.Compare(clientId, value, StringComparison.Ordinal) == 0),
@@ -124,7 +121,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
             IRedditAccessTokenProviderFactory sut = CreateSut(renewRedditAccessTokenTask: renewRedditAccessTokenTask);
 
             Task<IRedditAccessToken> result = sut.RenewRedditAccessTokenAsync(refreshToken);
-            result.Wait();
 
             Assert.AreEqual(renewRedditAccessTokenTask, result);           
         }
