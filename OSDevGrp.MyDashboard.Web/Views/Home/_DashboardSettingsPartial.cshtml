@@ -1,43 +1,48 @@
-@using System;
-@using OSDevGrp.MyDashboard.Web.Models;
+@inject IContentHelper contentHelper
 @model DashboardSettingsViewModel;
-
-<h2>Settings</h2>
-<form asp-controller="Home" asp-action="Commit" method="post">
-    @if (string.IsNullOrWhiteSpace(Model.RedditAccessToken) == false)
-    {
-        <input asp-for="RedditAccessToken" type="hidden" />
-    }
-    <div class="card mb-md-3">
-        <div class="card-body">
-            <div class="form-group">
-                <label asp-for="NumberOfNews"></label>
-                <input asp-for="NumberOfNews" class="form-control" />
-                <span asp-validation-for="NumberOfNews" class="text-danger"></span>
-            </div>
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input asp-for="UseReddit" class="form-check-input" /> @Html.LabelFor(m => m.UseReddit)
-                </label>
-            </div>
-            @if (Model.AllowNsfwContent)
-            {
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input asp-for="NotNullableIncludeNsfwContent" class="form-check-input" /> @Html.LabelFor(m => m.IncludeNsfwContent)
-                    </label>
+<div class="row" data-url="@Model.GetSettingsUrl(contentHelper)">
+    <h2>Settings</h2>
+    <form asp-controller="Home" asp-action="Commit" method="post">
+        @if (Model.AllowNsfwContent)
+        {
+            <input asp-for="AllowNsfwContent" type="hidden" />
+        }
+        @if (string.IsNullOrWhiteSpace(Model.RedditAccessToken) == false)
+        {
+            <input asp-for="RedditAccessToken" type="hidden" />
+        }
+        <input asp-for="ExportData" type="hidden" />
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group">
+                    <label asp-for="NumberOfNews"></label>
+                    <input asp-for="NumberOfNews" class="form-control" />
+                    <span asp-validation-for="NumberOfNews" class="text-danger"></span>
                 </div>
                 <div class="form-check">
                     <label class="form-check-label">
-                    <input asp-for="NotNullableOnlyNsfwContent" class="form-check-input" /> @Html.LabelFor(m => m.OnlyNsfwContent)
+                        <input asp-for="UseReddit" class="form-check-input" /> @Html.LabelFor(m => m.UseReddit)
                     </label>
                 </div>
-            }
-            <div class="text-center">
-                <div class="btn-group">
-                    <button type="submit" class="btn btn-primary">Commit</button>
+                @if (Model.AllowNsfwContent)
+                {
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input asp-for="NotNullableIncludeNsfwContent" class="form-check-input" /> @Html.LabelFor(m => m.IncludeNsfwContent)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input asp-for="NotNullableOnlyNsfwContent" class="form-check-input" /> @Html.LabelFor(m => m.OnlyNsfwContent)
+                        </label>
+                    </div>
+                }
+                <div class="text-center">
+                    <div class="btn-group">
+                        <button id="commit" type="submit" class="btn btn-primary">Commit</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>

@@ -16,7 +16,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             Uri url = redditSubreddit.Url;
             Uri imageUrl = redditSubreddit.BannerImageUrl ?? redditSubreddit.HeaderImageUrl;
 
-            StringBuilder htmlBuilder = new StringBuilder("<div class=\"card mb-md-3\">");
+            StringBuilder htmlBuilder = new StringBuilder("<div class=\"card mb-3\">");
             if (imageUrl != null)
             {
                 htmlBuilder.Append($"<img class=\"card-img-top img-fluid\" src=\"{imageUrl.AbsoluteUri}\" />");

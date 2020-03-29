@@ -1,26 +1,25 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
-using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 {
     [TestClass]
-    public class SystemErrorTests
+    public class SystemErrorTests : TestBase
     {
         #region Private variables
 
         private Mock<IDashboardFactory> _dashboardFactoryMock;
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
         private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
-        private Mock<IExceptionHandler> _exceptionHandlerMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<IContentHelper> _contentHelperMock;
+        private Mock<ICookieHelper> _cookieHelperMock;
 
         #endregion
 
@@ -30,8 +29,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardFactoryMock = new Mock<IDashboardFactory>();
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
             _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
-            _exceptionHandlerMock = new Mock<IExceptionHandler>();
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _contentHelperMock = new Mock<IContentHelper>();
+            _cookieHelperMock = new Mock<ICookieHelper>();
         }
 
         [TestMethod]
@@ -68,8 +67,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
                 _redditAccessTokenProviderFactoryMock.Object,
-                _exceptionHandlerMock.Object,
-                _httpContextAccessorMock.Object);
+                _contentHelperMock.Object,
+                _cookieHelperMock.Object);
         }
     }
 }

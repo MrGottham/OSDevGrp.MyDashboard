@@ -22,12 +22,13 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         private readonly IViewModelBuilder<InformationViewModel, IRedditLink> _redditLinkToInformationViewModelBuilder;
         private readonly IHtmlHelper _htmlHelper;
         private readonly IHttpHelper _httpHelper;
+        private readonly ICookieHelper _cookieHelper;
 
         #endregion
 
         #region Constructor
 
-        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> redditSubredditToObjectViewModelBuilder, IViewModelBuilder<InformationViewModel, IRedditLink> redditLinkToInformationViewModelBuilder, IHtmlHelper htmlHelper, IHttpHelper httpHelper)
+        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> redditSubredditToObjectViewModelBuilder, IViewModelBuilder<InformationViewModel, IRedditLink> redditLinkToInformationViewModelBuilder, IHtmlHelper htmlHelper, IHttpHelper httpHelper, ICookieHelper cookieHelper)
         {
             if (newsToInformationViewModelBuilder == null) 
             {
@@ -61,6 +62,10 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 throw new ArgumentNullException(nameof(httpHelper));
             }
+            if (cookieHelper == null)
+            {
+                throw new ArgumentNullException(nameof(cookieHelper));
+            }
 
             _newsToInformationViewModelBuilder = newsToInformationViewModelBuilder;
             _systemErrorViewModelBuilder = systemErrorViewModelBuilder;
@@ -70,6 +75,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             _redditLinkToInformationViewModelBuilder = redditLinkToInformationViewModelBuilder;
             _htmlHelper = htmlHelper;
             _httpHelper = httpHelper;
+            _cookieHelper = cookieHelper;
         }
 
         #endregion
@@ -137,7 +143,10 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 RedditAuthenticatedUser = objectViewModelForRedditAuthenticatedUser,
                 RedditSubreddits = objectViewModelForRedditSubredditCollection.OrderByDescending(objectViewModelForRedditSubreddit => objectViewModelForRedditSubreddit.Object.Subscribers).ToList()
             };
-            dashboardViewModel.ApplyRules(dashboard.Rules);
+            dashboardViewModel.ApplyRules(dashboard.Rules, _cookieHelper);
+
+            _cookieHelper.ToCookie(dashboardViewModel);
+
             return dashboardViewModel;
         }
 

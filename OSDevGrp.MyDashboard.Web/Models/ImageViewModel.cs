@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
@@ -9,6 +10,7 @@ using SixLabors.Primitives;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
+    [Serializable]
     public class ImageViewModel<TViewModel> : IViewModel where TViewModel : IViewModel
     {
         #region Private constants
@@ -18,7 +20,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         #endregion
 
-        #region Constructor
+        #region Constructors
 
         public ImageViewModel(TViewModel viewModel, byte[] image)
         {
@@ -54,6 +56,10 @@ namespace OSDevGrp.MyDashboard.Web.Models
                     TransformedImageAsBase64 = targetImage.ToBase64String(imageFormat);
                 }
             }
+        }
+
+        protected ImageViewModel(SerializationInfo info, StreamingContext context)
+        {
         }
 
         #endregion

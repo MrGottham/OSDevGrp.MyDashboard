@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,24 +35,36 @@ namespace OSDevGrp.MyDashboard.Web
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<CookiePolicyOptions>(opt =>
             {
                 opt.CheckConsentNeeded = context => true;
                 opt.MinimumSameSitePolicy = SameSiteMode.None;
+                opt.Secure = CookieSecurePolicy.Always;
             });
+
+            services.AddDataProtection()
+                .SetApplicationName("OSDevGrp.MyDashboard.Web")
+                .SetDefaultKeyLifetime(new TimeSpan(30, 0, 0, 0));
 
             services.AddControllersWithViews();
             services.AddRazorPages();
 
             services.AddHealthChecks();
 
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(factory => 
+            {
+                IActionContextAccessor actionContextAccessor = factory.GetRequiredService<IActionContextAccessor>();
+                return factory.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(actionContextAccessor.ActionContext);
+            });
+            services.AddMemoryCache();
+
             // Adds dependencies for the infrastructure. 
             services.AddScoped<IExceptionHandler, ExceptionHandler>();
             services.AddSingleton<IRandomizer, Randomizer>();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Adds dependencies for the repositories.
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
             services.AddTransient<IRedditAccessTokenProviderFactory, RedditAccessTokenProviderFactory>();
@@ -68,6 +85,8 @@ namespace OSDevGrp.MyDashboard.Web
             // Adds dependencies for the view model builders.
             services.AddSingleton<IHtmlHelper, HtmlHelper>();
             services.AddSingleton<IHttpHelper, HttpHelper>();
+            services.AddScoped<IContentHelper, ContentHelper>();
+            services.AddScoped<ICookieHelper, CookieHelper>();
             services.AddTransient<IViewModelBuilder<InformationViewModel, INews>, NewsToInformationViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<SystemErrorViewModel, ISystemError>, SystemErrorViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>, DashboardSettingsViewModelBuilder>();
@@ -105,13 +124,11 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapHealthChecks("/health");
             });
 
-            // TODO: Async load news
+            // TODO: LoggerFactory
+            // TODO: Randomizer (initialize)
             // TODO: Verify News channels
             // TODO: Verify and Add Subreddits
-            // TODO: IDateProtectionProvider
-            // TODO: TrustedDomainHelper
-            // TODO: Make ServiceCollection Adder (don't do if implementing ExportNews)
-            // TODO: Build NuGet Package or ExportNews for OSDevGrp.OSIntranet 
+            // TODO: ExportDashboard + RedditAccessToken as header
             // TODO: Update Docker files
         }
     }

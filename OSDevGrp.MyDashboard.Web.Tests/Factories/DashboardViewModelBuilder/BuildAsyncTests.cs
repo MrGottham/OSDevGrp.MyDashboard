@@ -26,6 +26,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         private Mock<IViewModelBuilder<InformationViewModel, IRedditLink>> _redditLinkToInformationViewModelBuilderMock;
         private Mock<IHtmlHelper> _htmlHelperMock;
         private Mock<IHttpHelper> _httpHelperMock;
+        private Mock<ICookieHelper> _cookieHelperMock;
         private Random _random;
 
         #endregion
@@ -41,6 +42,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             _redditLinkToInformationViewModelBuilderMock = new Mock<IViewModelBuilder<InformationViewModel, IRedditLink>>();
             _htmlHelperMock = new Mock<IHtmlHelper>();
             _httpHelperMock = new Mock<IHttpHelper>();
+            _cookieHelperMock = new Mock<ICookieHelper>();
             _random = new Random(DateTime.Now.Millisecond);
         }
 
@@ -245,6 +247,26 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
         }
 
         [TestMethod]
+        public async Task BuildAsync_WhenCalled_AssertToCookieWasCalledOnCookieHelperWithDashboardViewModel()
+        {
+            List<INews> newsCollection = CreateNewsCollection(_random.Next(50, 75)).ToList();
+            List<ISystemError> systemErrorCollection = CreateSystemErrorCollection(_random.Next(10, 15)).ToList();
+            IDashboardSettings dashboardSettings = CreateDashboardSettings();
+            IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser();
+            List<IRedditSubreddit> redditSubredditCollection = CreateRedditSubredditCollection(_random.Next(10, 25)).ToList();
+            List<IRedditLink> redditLinkCollection = CreateRedditLinkCollection(_random.Next(50, 75)).ToList();
+            IDashboard dashboard = CreateDashboard(newsCollection: newsCollection, systemErrorCollection: systemErrorCollection, dashboardSettings: dashboardSettings, redditAuthenticatedUser: redditAuthenticatedUser, redditSubredditCollection: redditSubredditCollection, redditLinkCollection: redditLinkCollection);
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel();
+            ObjectViewModel<IRedditAuthenticatedUser> objectViewModelForRedditAuthenticatedUser = CreateObjectViewModel<IRedditAuthenticatedUser>(redditAuthenticatedUser, DateTime.Now.AddDays(_random.Next(1, 365) * -1).AddMinutes(_random.Next(-120, 120)));
+            IViewModelBuilder<DashboardViewModel, IDashboard> sut = CreateSut(dashboardSettingsViewModel: dashboardSettingsViewModel, objectViewModelForRedditAuthenticatedUser: objectViewModelForRedditAuthenticatedUser);
+
+            DashboardViewModel result = await sut.BuildAsync(dashboard);
+
+            _cookieHelperMock.Verify(m => m.ToCookie(It.Is<DashboardViewModel>(value => value == result)), Times.Once);
+        }
+
+        [TestMethod]
         public async Task BuildAsync_WhenCalled_ReturnsInitializedDashboardViewModel()
         {
             List<INews> newsCollection = CreateNewsCollection(_random.Next(50, 75)).ToList();
@@ -301,7 +323,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNull(result.RedditAuthenticatedUser);
             Assert.IsNotNull(result.RedditSubreddits);
             Assert.AreEqual(0, result.RedditSubreddits.Count());
-            
+
             SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
             Assert.IsNotNull(systemErrorViewModel);
             Assert.IsNotNull(systemErrorViewModel.SystemErrorIdentifier);
@@ -336,7 +358,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNull(result.RedditAuthenticatedUser);
             Assert.IsNotNull(result.RedditSubreddits);
             Assert.AreEqual(0, result.RedditSubreddits.Count());
-            
+
             SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
             Assert.IsNotNull(systemErrorViewModel);
             Assert.IsNotNull(systemErrorViewModel.SystemErrorIdentifier);
@@ -372,7 +394,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNull(result.RedditAuthenticatedUser);
             Assert.IsNotNull(result.RedditSubreddits);
             Assert.AreEqual(0, result.RedditSubreddits.Count());
-            
+
             SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
             Assert.IsNotNull(systemErrorViewModel);
             Assert.IsNotNull(systemErrorViewModel.SystemErrorIdentifier);
@@ -408,7 +430,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNull(result.RedditAuthenticatedUser);
             Assert.IsNotNull(result.RedditSubreddits);
             Assert.AreEqual(0, result.RedditSubreddits.Count());
-            
+
             SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
             Assert.IsNotNull(systemErrorViewModel);
             Assert.IsNotNull(systemErrorViewModel.SystemErrorIdentifier);
@@ -443,7 +465,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNull(result.RedditAuthenticatedUser);
             Assert.IsNotNull(result.RedditSubreddits);
             Assert.AreEqual(0, result.RedditSubreddits.Count());
-            
+
             SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
             Assert.IsNotNull(systemErrorViewModel);
             Assert.IsNotNull(systemErrorViewModel.SystemErrorIdentifier);
@@ -478,7 +500,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
             Assert.IsNull(result.RedditAuthenticatedUser);
             Assert.IsNotNull(result.RedditSubreddits);
             Assert.AreEqual(0, result.RedditSubreddits.Count());
-            
+
             SystemErrorViewModel systemErrorViewModel = result.SystemErrors.First();
             Assert.IsNotNull(systemErrorViewModel);
             Assert.IsNotNull(systemErrorViewModel.SystemErrorIdentifier);
@@ -580,7 +602,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 _redditSubredditToObjectViewModelBuilder.Object,
                 _redditLinkToInformationViewModelBuilderMock.Object,
                 _htmlHelperMock.Object,
-                _httpHelperMock.Object);
+                _httpHelperMock.Object,
+                _cookieHelperMock.Object);
         }
 
         private IDashboard CreateDashboard(IEnumerable<INews> newsCollection = null, IEnumerable<ISystemError> systemErrorCollection = null, IDashboardSettings dashboardSettings = null, IRedditAuthenticatedUser redditAuthenticatedUser = null, IEnumerable<IRedditSubreddit> redditSubredditCollection = null, IEnumerable<IRedditLink> redditLinkCollection = null, IDashboardRules dashboardRules = null)

@@ -4,13 +4,26 @@ using OSDevGrp.MyDashboard.Core.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
+    [Serializable]
     [DataContract]
     public abstract class RedditCreatedThingBase : RedditThingBase, IRedditCreatedThing
     {
+        #region Constructors
+
+        protected RedditCreatedThingBase()
+        {
+        }
+
+        protected RedditCreatedThingBase(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion
+
         #region Properties
 
         [IgnoreDataMember]
-
         public virtual DateTime CreatedTime
         { 
             get

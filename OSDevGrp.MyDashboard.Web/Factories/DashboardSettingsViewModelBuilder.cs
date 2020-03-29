@@ -1,6 +1,6 @@
 using System;
-using Microsoft.AspNetCore.Http;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Factories
@@ -9,20 +9,20 @@ namespace OSDevGrp.MyDashboard.Web.Factories
     {
         #region Private variables
 
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICookieHelper _cookieHelper;
 
         #endregion
 
         #region Constructor
 
-        public DashboardSettingsViewModelBuilder(IHttpContextAccessor httpContextAccessor)
+        public DashboardSettingsViewModelBuilder(ICookieHelper cookieHelper)
         {
-            if (httpContextAccessor == null)
+            if (cookieHelper == null)
             {
-                throw new ArgumentNullException(nameof(httpContextAccessor));
+                throw new ArgumentNullException(nameof(cookieHelper));
             }
 
-            _httpContextAccessor = httpContextAccessor;
+            _cookieHelper = cookieHelper;
         }
 
         #endregion 
@@ -31,17 +31,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
 
         protected override DashboardSettingsViewModel Build(IDashboardSettings dashboardSettings)
         {
-            DateTime cookieExpireTime = DateTime.Now.AddMinutes(15);
-
             IRedditAccessToken redditAccessToken = dashboardSettings.RedditAccessToken;
-            if (redditAccessToken != null)
-            {
-                DateTime redditAccessTokenExpireTime = redditAccessToken.Expires;
-                if (redditAccessTokenExpireTime < cookieExpireTime)
-                {
-                    cookieExpireTime = redditAccessTokenExpireTime;
-                }
-            }
 
             bool includeNsfwContent = dashboardSettings.IncludeNsfwContent;
             bool onlyNsfwContent = dashboardSettings.OnlyNsfwContent;
@@ -55,7 +45,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 RedditAccessToken = redditAccessToken != null ? redditAccessToken.ToBase64() : null
             };
 
-            dashboardSettingsViewModel.ToCookie(_httpContextAccessor.HttpContext, cookieExpireTime);
+            _cookieHelper.ToCookie(dashboardSettingsViewModel);
 
             return dashboardSettingsViewModel;
         }

@@ -1,30 +1,28 @@
 using System;
-using System.Runtime.Serialization;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
-using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 {
     [TestClass]
-    public class CommitTests
+    public class CommitTests : TestBase
     {
         #region Private variables
 
         private Mock<IDashboardFactory> _dashboardFactoryMock;
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
         private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
-        private Mock<IExceptionHandler> _exceptionHandlerMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<IContentHelper> _contentHelperMock;
+        private Mock<ICookieHelper> _cookieHelperMock;
         private Random _random;
 
         #endregion
@@ -35,8 +33,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardFactoryMock = new Mock<IDashboardFactory>();
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
             _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
-            _exceptionHandlerMock = new Mock<IExceptionHandler>();
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _contentHelperMock = new Mock<IContentHelper>();
+            _cookieHelperMock = new Mock<ICookieHelper>();
             _random = new Random(DateTime.Now.Millisecond);
         }
 
@@ -50,209 +48,74 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertHttpContextWasNotCalledOnHttpContextAccessor()
+        public async Task Commit_WhenCalledWithInvalidDashboardSettingsViewModel_ReturnsRedirectToActionResult()
         {
-            const bool useReddit = true;
-            string redditAccessToken = CreateReddditAccessTokenAsBase64();
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(false);
 
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Never);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
-        {
-            const bool useReddit = true;
-            string redditAccessToken = CreateReddditAccessTokenAsBase64();
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<Uri>()),
-                Times.Never);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardFactory()
-        {
-            int numberOfNews = _random.Next(25, 50);
-            const bool useReddit = true;
-            bool allowNsfwContent = _random.Next(100) > 50;
-            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            string accessToken = Guid.NewGuid().ToString("D");
-            string tokenType = Guid.NewGuid().ToString("D");
-            int expiresIn = _random.Next(60, 300);
-            string scope = Guid.NewGuid().ToString("D");
-            string refreshToken = Guid.NewGuid().ToString("D");
-            DateTime received = DateTime.UtcNow;
-            string redditAccessToken = CreateReddditAccessTokenAsBase64(accessToken, tokenType, expiresIn, scope, refreshToken, received);
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken);
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
-                    dashboardSettings != null &&
-                    dashboardSettings.NumberOfNews == numberOfNews &&
-                    dashboardSettings.UseReddit == true &&
-                    dashboardSettings.RedditAccessToken != null &&
-                    string.Compare(dashboardSettings.RedditAccessToken.AccessToken, accessToken, StringComparison.Ordinal) == 0 &&
-                    string.Compare(dashboardSettings.RedditAccessToken.TokenType, tokenType, StringComparison.Ordinal) == 0 &&
-                    string.Compare(dashboardSettings.RedditAccessToken.Expires.ToString(), received.ToLocalTime().AddSeconds(expiresIn).ToString(), StringComparison.Ordinal) == 0 &&
-                    string.Compare(dashboardSettings.RedditAccessToken.Scope, scope, StringComparison.Ordinal) == 0 &&
-                    string.Compare(dashboardSettings.RedditAccessToken.RefreshToken, refreshToken, StringComparison.Ordinal) == 0 &&
-                    dashboardSettings.IncludeNsfwContent == (includeNsfwContent != null && includeNsfwContent.Value) &&
-                    dashboardSettings.OnlyNsfwContent == (onlyNsfwContent != null && onlyNsfwContent.Value))),
-                Times.Once);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
-        {
-            const bool useReddit = true;
-            string redditAccessToken = CreateReddditAccessTokenAsBase64();
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
-
-            IDashboard dashboard = CreateDashboard();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
-        {
-            const bool useReddit = true;
-            string redditAccessToken = CreateReddditAccessTokenAsBase64();
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
-        }
-
-        [TestMethod]
-        public async Task Called_WhenCalledWithUseOfRedditAndWithRedditAccessToken_ReturnsViewWithDashboardViewModel()
-        {
-            const bool useReddit = true;
-            string redditAccessToken = CreateReddditAccessTokenAsBase64();
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
-
-            DashboardViewModel dashboardViewModel = new DashboardViewModel();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
 
             IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(ViewResult));
+            Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
 
-            ViewResult viewResult = (ViewResult) result;
-            Assert.IsNotNull(viewResult);
-            Assert.IsNotNull(viewResult.ViewName);
-            Assert.AreEqual("Index", viewResult.ViewName);
-            Assert.IsNotNull(viewResult.Model);
-            Assert.AreEqual(dashboardViewModel, viewResult.Model);
+            RedirectToActionResult redirectToActionResult = (RedirectToActionResult) result;
+            Assert.IsNotNull(redirectToActionResult);
+            Assert.IsNotNull(redirectToActionResult.ActionName);
+            Assert.AreEqual("Index", redirectToActionResult.ActionName);
+            Assert.IsNotNull(redirectToActionResult.ControllerName);
+            Assert.AreEqual("HomeController", redirectToActionResult.ControllerName);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertHttpContextWasCalledOnHttpContextAccessor()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithoutRedditAccessToken_AssertToBase64StringWasCalledOnContentHelperWithDashboardSettingsViewModel()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
-
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: null);
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Once);
+            _contentHelperMock.Verify(m => m.ToBase64String(It.Is<DashboardSettingsViewModel>(value => value == dashboardSettingsViewModel)), Times.Once);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnRedditAccessTokenProviderFactory()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithoutRedditAccessToken_AssertAbsoluteUrlWasCalledOnContentHelper()
         {
-            const bool useReddit = true;
-            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, includeNsfwContent: includeNsfwContent, onlyNsfwContent: onlyNsfwContent, redditAccessToken: redditAccessToken);
-
             OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: null);
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
-                    It.Is<string>(value => string.Compare(value, dashboardSettingsViewModel.ToBase64(), StringComparison.Ordinal) == 0),
-                    It.Is<Uri>(value => value == new Uri("http://localhost:5000/Home/RedditCallback"))),
+            _contentHelperMock.Verify(m => m.AbsoluteUrl(
+                    It.Is<string>(value => string.CompareOrdinal(value, "RedditCallback") == 0),
+                    It.Is<string>(value => string.CompareOrdinal(value, "Home") == 0 )), 
                 Times.Once);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertBuildAsyncWasNotCalledOnDashboardFactory()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithoutRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnRedditAccessTokenProviderFactory()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            string dashboardSettingsViewModelAsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("D")));
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: null);
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.IsAny<IDashboardSettings>()), Times.Never);
+            _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
+                    It.Is<string>(value => string.CompareOrdinal(value, dashboardSettingsViewModelAsBase64) == 0), 
+                    It.Is<Uri>(value => value != null && string.CompareOrdinal(value.AbsoluteUri, $"http://localhost/Home/RedditCallback") == 0)), 
+                Times.Once);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertBuildAsyncWasNotCalledOnDashboardViewModelBuilder()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithoutRedditAccessToken_ReturnsRedirectResultToUrlFromAcquireRedditAuthorizationTokenAsyncOnRedditAccessTokenProviderFactory()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            Uri acquireRedditAuthorizationTokenUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}/{Guid.NewGuid().ToString("D")}");
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(acquireRedditAuthorizationTokenUri: acquireRedditAuthorizationTokenUri);
 
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.IsAny<IDashboard>()), Times.Never);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
-        {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessToken_ReturnsRedirectResultToAcquireRedditAccessTokenUrl()
-        {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
-
-            Uri acquireRedditAuthorizationTokenUrl = new Uri($"https://reddit.com/{Guid.NewGuid().ToString("D")}");
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(acquireRedditAuthorizationTokenUrl: acquireRedditAuthorizationTokenUrl);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: null);
 
             IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
@@ -260,76 +123,52 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             RedirectResult redirectResult = (RedirectResult) result;
             Assert.IsNotNull(redirectResult);
-            Assert.AreEqual(acquireRedditAuthorizationTokenUrl.AbsoluteUri, redirectResult.Url);
+            Assert.IsNotNull(redirectResult.Url);
+            Assert.AreEqual(redirectResult.Url, acquireRedditAuthorizationTokenUri.AbsoluteUri);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithRedditAccessToken_AssertToBase64StringWasNotCalledOnContentHelperWithDashboardSettingsViewModel()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            AggregateException aggregateException = new AggregateException();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: BuildRedditAccessTokenAsBase64(_random));
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
+            _contentHelperMock.Verify(m => m.ToBase64String(It.IsAny<DashboardSettingsViewModel>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithRedditAccessToken_AssertAbsoluteUrlWasNotCalledOnContentHelper()
         {
-            int numberOfNews = _random.Next(25, 50);
-            const bool useReddit = true;
-            bool allowNsfwContent = _random.Next(100) > 50;
-            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            AggregateException aggregateException = new AggregateException();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: aggregateException);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: BuildRedditAccessTokenAsBase64(_random));
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
-                    dashboardSettings != null &&
-                    dashboardSettings.NumberOfNews == numberOfNews &&
-                    dashboardSettings.UseReddit == false &&
-                    dashboardSettings.RedditAccessToken == null &&
-                    dashboardSettings.IncludeNsfwContent == (includeNsfwContent != null && includeNsfwContent.Value) &&
-                    dashboardSettings.OnlyNsfwContent == (onlyNsfwContent != null && onlyNsfwContent.Value))),
-                Times.Once);
+            _contentHelperMock.Verify(m => m.AbsoluteUrl(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            IDashboard dashboard = CreateDashboard();
-            AggregateException aggregateException = new AggregateException();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard, exception: aggregateException);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: BuildRedditAccessTokenAsBase64(_random));
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+            _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(It.IsAny<string>(), It.IsAny<Uri>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task Called_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndAggregateExceptionOccurs_ReturnsViewWithDashboardViewModel()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithRedditAccessToken_ReturnsViewResultWithDashboardSettingsViewModel()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            DashboardViewModel dashboardViewModel = new DashboardViewModel();
-            AggregateException aggregateException = new AggregateException();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel, exception: aggregateException);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: BuildRedditAccessTokenAsBase64(_random));
 
             IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
@@ -340,77 +179,51 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.IsNotNull(viewResult.ViewName);
             Assert.AreEqual("Index", viewResult.ViewName);
             Assert.IsNotNull(viewResult.Model);
-            Assert.AreEqual(dashboardViewModel, viewResult.Model);
+            Assert.AreEqual(dashboardSettingsViewModel, viewResult.Model);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithoutUseOfReddit_AssertToBase64StringWasNotCalledOnContentHelperWithDashboardSettingsViewModel()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            Exception exception = new Exception();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: false);
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
+            _contentHelperMock.Verify(m => m.ToBase64String(It.IsAny<DashboardSettingsViewModel>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardFactory()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithoutUseOfReddit_AssertAbsoluteUrlWasNotCalledOnContentHelper()
         {
-            int numberOfNews = _random.Next(25, 50);
-            const bool useReddit = true;
-            bool allowNsfwContent = _random.Next(100) > 50;
-            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-
-            Exception exception = new Exception();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(exception: exception);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: false);
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
-                    dashboardSettings != null &&
-                    dashboardSettings.NumberOfNews == numberOfNews &&
-                    dashboardSettings.UseReddit == false &&
-                    dashboardSettings.RedditAccessToken == null &&
-                    dashboardSettings.IncludeNsfwContent == (includeNsfwContent != null && includeNsfwContent.Value) &&
-                    dashboardSettings.OnlyNsfwContent == (onlyNsfwContent != null && onlyNsfwContent.Value))),
-                Times.Once);
+            _contentHelperMock.Verify(m => m.AbsoluteUrl(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task Commit_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithoutUseOfReddit_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            IDashboard dashboard = CreateDashboard();
-            Exception exception = new Exception();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard, exception: exception);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: false);
 
             await sut.Commit(dashboardSettingsViewModel);
 
-            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
+            _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(It.IsAny<string>(), It.IsAny<Uri>()), Times.Never);
         }
 
         [TestMethod]
-        public async Task Called_WhenCalledWithUseOfRedditAndWithoutRedditAccessTokenAndExceptionOccurs_ReturnsViewWithDashboardViewModel()
+        public async Task Commit_WhenDashboardSettingsViewModelIsWithoutUseOfReddit_ReturnsViewResultWithDashboardSettingsViewModel()
         {
-            const bool useReddit = true;
-            const string redditAccessToken = null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit, redditAccessToken: redditAccessToken);
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
 
-            DashboardViewModel dashboardViewModel = new DashboardViewModel();
-            Exception exception = new Exception();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel, exception: exception);
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: false);
 
             IActionResult result = await sut.Commit(dashboardSettingsViewModel);
             Assert.IsNotNull(result);
@@ -421,217 +234,32 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.IsNotNull(viewResult.ViewName);
             Assert.AreEqual("Index", viewResult.ViewName);
             Assert.IsNotNull(viewResult.Model);
-            Assert.AreEqual(dashboardViewModel, viewResult.Model);
+            Assert.AreEqual(dashboardSettingsViewModel, viewResult.Model);
         }
 
-        [TestMethod]
-        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertHttpContextWasNotCalledOnHttpContextAccessor()
+        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(bool modelIsValid = true, string dashboardSettingsViewModelAsBase64 = null, Uri acquireRedditAuthorizationTokenUri = null)
         {
-            const bool useReddit = false;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
+            _contentHelperMock.Setup(m => m.ToBase64String(It.IsAny<DashboardSettingsViewModel>()))
+                .Returns(dashboardSettingsViewModelAsBase64 ?? Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("D"))));
+            _contentHelperMock.Setup(m => m.AbsoluteUrl(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns<string, string>((action, controller) => new Uri($"http://localhost/{controller}/{action}").AbsoluteUri);
 
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            _redditAccessTokenProviderFactoryMock.Setup(m => m.AcquireRedditAuthorizationTokenAsync(It.IsAny<string>(), It.IsAny<Uri>()))
+                .Returns(Task.Run(() => acquireRedditAuthorizationTokenUri ?? new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}/{Guid.NewGuid().ToString("D")}")));
 
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Never);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
-        {
-            const bool useReddit = false;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _redditAccessTokenProviderFactoryMock.Verify(m => m.AcquireRedditAuthorizationTokenAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<Uri>()),
-                Times.Never);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertBuildAsyncWasCalledOnDashboardFactory()
-        {
-            int numberOfNews = _random.Next(25, 50);
-            const bool useReddit = false;
-            bool allowNsfwContent = _random.Next(100) > 50;
-            bool? includeNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            bool? onlyNsfwContent = _random.Next(100) > 50 ? _random.Next(100) > 50 : (bool?) null;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent);
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _dashboardFactoryMock.Verify(m => m.BuildAsync(It.Is<IDashboardSettings>(dashboardSettings =>
-                    dashboardSettings != null &&
-                    dashboardSettings.NumberOfNews == numberOfNews &&
-                    dashboardSettings.UseReddit == false &&
-                    dashboardSettings.RedditAccessToken == null &&
-                    dashboardSettings.IncludeNsfwContent == (includeNsfwContent != null && includeNsfwContent.Value) &&
-                    dashboardSettings.OnlyNsfwContent == (onlyNsfwContent != null && onlyNsfwContent.Value))),
-                Times.Once);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertBuildAsyncWasCalledOnDashboardViewModelBuilder()
-        {
-            const bool useReddit = false;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
-
-            IDashboard dashboard = CreateDashboard();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboard: dashboard);
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _dashboardViewModelBuilderMock.Verify(m => m.BuildAsync(It.Is<IDashboard>(value => value == dashboard)), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task Commit_WhenCalledWithoutUseOfReddit_AssertHandleAsyncWasNotCalledOnExceptionHandlerMock()
-        {
-            const bool useReddit = false;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
-
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
-
-            await sut.Commit(dashboardSettingsViewModel);
-
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
-        }
-
-        [TestMethod]
-        public async Task Called_WhenCalledWithoutUseOfReddit_ReturnsViewWithDashboardViewModel()
-        {
-            const bool useReddit = false;
-            DashboardSettingsViewModel dashboardSettingsViewModel = CreateDashboardSettingsViewModel(useReddit: useReddit);
-
-            DashboardViewModel dashboardViewModel = new DashboardViewModel();
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardViewModel: dashboardViewModel);
-
-            IActionResult result = await sut.Commit(dashboardSettingsViewModel);
-            Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(ViewResult));
-
-            ViewResult viewResult = (ViewResult) result;
-            Assert.IsNotNull(viewResult);
-            Assert.IsNotNull(viewResult.ViewName);
-            Assert.AreEqual("Index", viewResult.ViewName);
-            Assert.IsNotNull(viewResult.Model);
-            Assert.AreEqual(dashboardViewModel, viewResult.Model);
-        }
-
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(IDashboard dashboard = null, DashboardViewModel dashboardViewModel = null, Uri acquireRedditAuthorizationTokenUrl = null, Exception exception = null)
-        {
-            _dashboardFactoryMock.Setup(m => m.BuildAsync(It.IsAny<IDashboardSettings>()))
-                .Returns(Task.Run<IDashboard>(() => dashboard ?? CreateDashboard()));
-
-            _dashboardViewModelBuilderMock.Setup(m => m.BuildAsync(It.IsAny<IDashboard>()))
-                .Returns(Task.Run<DashboardViewModel>(() => dashboardViewModel ?? new DashboardViewModel()));
-
-            if (exception != null)
-            {
-                _redditAccessTokenProviderFactoryMock.Setup(m => m.AcquireRedditAuthorizationTokenAsync(It.IsAny<string>(), It.IsAny<Uri>()))
-                    .Throws(exception);
-            }
-            else
-            {
-                _redditAccessTokenProviderFactoryMock.Setup(m => m.AcquireRedditAuthorizationTokenAsync(It.IsAny<string>(), It.IsAny<Uri>()))
-                    .Returns(Task.Run<Uri>(() => acquireRedditAuthorizationTokenUrl ?? new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}")));
-            }
-
-            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<AggregateException>()))
-                .Returns(Task.Run(() => { }));
-            _exceptionHandlerMock.Setup(m => m.HandleAsync(It.IsAny<Exception>()))
-                .Returns(Task.Run(() => { }));
-            
-            HttpContext httpContext = new DefaultHttpContext();
-            httpContext.Request.Scheme = "http";
-            httpContext.Request.Host = new HostString("localhost", 5000);
-            _httpContextAccessorMock.Setup(m => m.HttpContext)
-                .Returns(httpContext);
-            
-            return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
+            OSDevGrp.MyDashboard.Web.Controllers.HomeController homeController = new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
                 _redditAccessTokenProviderFactoryMock.Object,
-                _exceptionHandlerMock.Object,
-                _httpContextAccessorMock.Object);
-        }
+                _contentHelperMock.Object,
+                _cookieHelperMock.Object);
 
-        private DashboardSettingsViewModel CreateDashboardSettingsViewModel(int? numberOfNews = null, bool? useReddit = null, bool? allowNsfwContent = null, bool? includeNsfwContent = null, bool? onlyNsfwContent = null, string redditAccessToken = null)
-        {
-            return new DashboardSettingsViewModel
+            if (modelIsValid == false)
             {
-                NumberOfNews = numberOfNews ?? _random.Next(25, 50),
-                UseReddit = useReddit ?? _random.Next(100) > 50,
-                AllowNsfwContent = allowNsfwContent ?? _random.Next(100) > 50,
-                IncludeNsfwContent = includeNsfwContent,
-                OnlyNsfwContent = onlyNsfwContent,
-                RedditAccessToken = redditAccessToken
-            };
-        }
- 
-        private IDashboard CreateDashboard()
-        {
-            Mock<IDashboard> dashboardMock = new Mock<IDashboard>();
-            return dashboardMock.Object;
-        }
-
-        private string CreateReddditAccessTokenAsBase64(string accessToken = null, string tokenType = null, int? expiresIn = null, string scope = null, string refreshToken = null, DateTime? received = null)
-        {
-            return CreateReddditAccessToken(accessToken, tokenType, expiresIn, scope, refreshToken, received).ToBase64();
-        }
- 
-        private IRedditAccessToken CreateReddditAccessToken(string accessToken = null, string tokenType = null, int? expiresIn = null, string scope = null, string refreshToken = null, DateTime? received = null)
-        {
-            return new MyRedditAccessToken(
-                accessToken ?? Guid.NewGuid().ToString("D"),
-                tokenType ?? Guid.NewGuid().ToString("D"),
-                expiresIn ?? _random.Next(60, 300),
-                scope ?? Guid.NewGuid().ToString("D"),
-                refreshToken ?? Guid.NewGuid().ToString("D"),
-                received ?? DateTime.UtcNow);
-        }
-
-        [DataContract]
-        private class MyRedditAccessToken : RedditAccessToken
-        {
-            #region Constructor
-
-            public MyRedditAccessToken(string accessToken, string tokenType, int expiresIn, string scope, string refreshToken, DateTime received)
-            {
-                if (string.IsNullOrWhiteSpace(accessToken))
-                {
-                    throw new ArgumentNullException(nameof(accessToken));
-                }
-                if (string.IsNullOrWhiteSpace(tokenType))
-                {
-                    throw new ArgumentNullException(nameof(tokenType));
-                }
-                if (string.IsNullOrWhiteSpace(scope))
-                {
-                    throw new ArgumentNullException(nameof(scope));
-                }
-                if (string.IsNullOrWhiteSpace(refreshToken))
-                {
-                    throw new ArgumentNullException(nameof(refreshToken));
-                }
-
-                AccessToken = accessToken;
-                TokenType = tokenType;
-                ExpiresIn = expiresIn;
-                Scope = scope;
-                RefreshToken = refreshToken;
-                Received = received;
+                homeController.ModelState.AddModelError(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"));
             }
 
-            #endregion
+            return homeController;
         }
     }
 }

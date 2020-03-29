@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
@@ -67,7 +66,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             return Task.Run(() => 
             {
                 const string scope = "identity privatemessages mysubreddits read";
-                return new Uri($"https://www.reddit.com/api/v1/authorize?client_id={clientId}&response_type=code&state={state}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope={scope}");
+                return new Uri($"https://www.reddit.com/api/v1/authorize?client_id={Uri.EscapeDataString(clientId)}&response_type=code&state={Uri.EscapeDataString(state)}&redirect_uri={redirectUri.AbsoluteUri}&duration=permanent&scope={Uri.EscapeDataString(scope)}");
             });
         }
 
