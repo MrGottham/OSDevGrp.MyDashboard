@@ -7,23 +7,22 @@ namespace OSDevGrp.MyDashboard.Core.Infrastructure
     {
         #region Private variables
 
-        private static Random _random;
-        private static readonly object SyncRoot = new object();
+        private readonly Random _random;
 
         #endregion
 
-        #region Properties
+        #region Constructor
 
-        private Random Random
+        public Randomizer(ISeedGenerator seedGenerator)
         {
-            get
+            if (seedGenerator == null)
             {
-                lock (SyncRoot)
-                {
-                    return _random ?? (_random = new Random(DateTime.Now.Millisecond));
-                }
+                throw new ArgumentNullException(nameof(seedGenerator));
             }
+
+            _random = new Random(seedGenerator.Generate());
         }
+
         #endregion
 
         #region Methods
@@ -35,7 +34,7 @@ namespace OSDevGrp.MyDashboard.Core.Infrastructure
                 throw new ArgumentException("The maximum value cannot be lower than the minimum value.", nameof(maxValue));
             }
 
-            return Random.Next(minValue, maxValue);
+            return _random.Next(minValue, maxValue);
         }
 
         #endregion

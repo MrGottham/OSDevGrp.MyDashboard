@@ -64,6 +64,7 @@ namespace OSDevGrp.MyDashboard.Web
 
             // Adds dependencies for the infrastructure. 
             services.AddScoped<IExceptionHandler, ExceptionHandler>();
+            services.AddSingleton<ISeedGenerator, SeedGenerator>();
             services.AddSingleton<IRandomizer, Randomizer>();
             // Adds dependencies for the repositories.
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
@@ -124,7 +125,6 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapHealthChecks("/health");
             });
 
-            // TODO: Randomizer (initialize)
             // TODO: Verify News channels
             // TODO: Verify and Add Subreddits
             // TODO: ExportDashboard + RedditAccessToken as header
