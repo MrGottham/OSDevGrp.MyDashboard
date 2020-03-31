@@ -16,7 +16,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
             Exception exception = null;
 
             IExceptionRepository sut = CreateSut();
-            
+
             await sut.AddAsync(exception);
         }
 
@@ -26,7 +26,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
             Exception exception = new Exception();
 
             IExceptionRepository sut = CreateSut();
-            
+
             await sut.AddAsync(exception);
         }
 

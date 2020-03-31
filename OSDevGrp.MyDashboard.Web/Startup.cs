@@ -124,7 +124,6 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapHealthChecks("/health");
             });
 
-            // TODO: LoggerFactory
             // TODO: Randomizer (initialize)
             // TODO: Verify News channels
             // TODO: Verify and Add Subreddits

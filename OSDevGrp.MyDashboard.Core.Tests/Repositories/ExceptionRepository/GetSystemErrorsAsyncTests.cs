@@ -19,7 +19,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
             Exception thirdException = new Exception(Guid.NewGuid().ToString("D"));
 
             IExceptionRepository sut = CreateSut();
-            
+
             await sut.AddAsync(firstException);
             await sut.AddAsync(secondException);
             await sut.AddAsync(thirdException);
@@ -41,7 +41,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
             Exception thirdException = new Exception();
 
             IExceptionRepository sut = CreateSut();
-            
+
             await sut.AddAsync(firstException);
             await sut.AddAsync(secondException);
             await sut.AddAsync(thirdException);
