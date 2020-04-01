@@ -125,8 +125,6 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapHealthChecks("/health");
             });
 
-            // TODO: Verify News channels
-            // TODO: Verify and Add Subreddits
             // TODO: ExportDashboard + RedditAccessToken as header
             // TODO: Update Docker files
         }

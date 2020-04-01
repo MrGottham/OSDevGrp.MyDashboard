@@ -38,9 +38,9 @@ namespace OSDevGrp.MyDashboard.Core.Factories
         {
             IEnumerable<INewsProvider> newsProviders = new List<INewsProvider>
             {
-                new NewsProvider("DR", new Uri("http://www.dr.dk/nyheder/service/feeds/allenyheder")),
-                new NewsProvider("TV 2", new Uri("http://feeds.tv2.dk/nyheder/rss")),
-                new NewsProvider("Børsen", new Uri("http://borsen.dk/rss")),
+                new NewsProvider("DR", new Uri("https://www.dr.dk/nyheder/service/feeds/allenyheder")),
+                new NewsProvider("TV 2 Lorry", new Uri("https://www.tv2lorry.dk/rss")),
+                new NewsProvider("Børsen", new Uri("https://borsen.dk/rss")),
                 new NewsProvider("Computerworld", new Uri("https://www.computerworld.dk/rss/all")),
                 new NewsProvider("Version2", new Uri("https://www.version2.dk/it-nyheder/rss"))
             };
@@ -159,14 +159,19 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 new RedditKnownSubreddit("gonewildplus", CalculateRank()),
                 new RedditKnownSubreddit("bigboobsgw", CalculateRank()),
                 new RedditKnownSubreddit("homegrowntits", CalculateRank()),
+                new RedditKnownSubreddit("hugehangers", CalculateRank()),
+                new RedditKnownSubreddit("cleavagegw", CalculateRank()),
                 new RedditKnownSubreddit("milf", CalculateRank()),
                 new RedditKnownSubreddit("gonewild30plus", CalculateRank()),
+                new RedditKnownSubreddit("40plusgonewild", CalculateRank()),
+                new RedditKnownSubreddit("gonewild50plus", CalculateRank()),
                 new RedditKnownSubreddit("onmww", CalculateRank()),
                 new RedditKnownSubreddit("wouldyoufuckmywife", CalculateRank()),
                 new RedditKnownSubreddit("wifesharing", CalculateRank()),
                 new RedditKnownSubreddit("gifsgonewild", CalculateRank()),
                 new RedditKnownSubreddit("gwnerdy", CalculateRank()),
-                new RedditKnownSubreddit("chubby", CalculateRank())
+                new RedditKnownSubreddit("chubby", CalculateRank()),
+                new RedditKnownSubreddit("swingersgw", CalculateRank())
             };
 
             return Task.Run<IEnumerable<IRedditKnownSubreddit>>(() => knownNsfwSubreddits);
