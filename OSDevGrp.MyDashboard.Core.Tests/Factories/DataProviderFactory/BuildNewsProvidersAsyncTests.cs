@@ -34,9 +34,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
             Assert.IsNotNull(newsProviders);
             Assert.AreEqual(5, newsProviders.Count());
             
-            AssertNewsProvider(newsProviders.ElementAt(0), "DR", "http://www.dr.dk/nyheder/service/feeds/allenyheder");
-            AssertNewsProvider(newsProviders.ElementAt(1), "TV 2", "http://feeds.tv2.dk/nyheder/rss");
-            AssertNewsProvider(newsProviders.ElementAt(2), "Børsen", "http://borsen.dk/rss");
+            AssertNewsProvider(newsProviders.ElementAt(0), "DR", "https://www.dr.dk/nyheder/service/feeds/allenyheder");
+            AssertNewsProvider(newsProviders.ElementAt(1), "TV 2 Lorry", "https://www.tv2lorry.dk/rss");
+            AssertNewsProvider(newsProviders.ElementAt(2), "Børsen", "https://borsen.dk/rss");
             AssertNewsProvider(newsProviders.ElementAt(3), "Computerworld", "https://www.computerworld.dk/rss/all");
             AssertNewsProvider(newsProviders.ElementAt(4), "Version2", "https://www.version2.dk/it-nyheder/rss");
         }

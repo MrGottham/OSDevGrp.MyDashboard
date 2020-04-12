@@ -15,7 +15,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
     {
         #region Private constants
 
-        private const int NumberOfKnownNsfwSubreddits = 12;
+        private const int NumberOfKnownNsfwSubreddits = 17;
 
         #endregion
 
@@ -76,6 +76,18 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         }
 
         [TestMethod]
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsHugeHangers()
+        {
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("hugehangers");  
+        }
+
+        [TestMethod]
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsCleavageGW()
+        {
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("cleavagegw");  
+        }
+
+        [TestMethod]
         public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsMilf()
         {
             await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("milf");  
@@ -85,6 +97,18 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGoneWild30Plus()
         {
             await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gonewild30plus");  
+        }
+
+        [TestMethod]
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContains40PlusGoneWild()
+        {
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("40plusgonewild");  
+        }
+
+        [TestMethod]
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsGoneWild50Plus()
+        {
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("gonewild50plus");  
         }
 
         [TestMethod]
@@ -121,6 +145,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsChubby()
         {
             await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("chubby");  
+        }
+
+        [TestMethod]
+        public async Task GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsSwingersGW()
+        {
+            await GetKnownNsfwSubredditsAsync_WhenCalled_ExpectKnownNsfwSubredditsContainsName("swingersgw");  
         }
 
         [TestMethod]
