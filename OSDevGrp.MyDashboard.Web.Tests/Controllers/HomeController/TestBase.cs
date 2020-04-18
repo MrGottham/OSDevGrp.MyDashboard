@@ -121,5 +121,10 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 RedditSubreddits = new List<ObjectViewModel<IRedditSubreddit>> {redditSubredditObjectViewModel}
             };
         }
+
+        protected static DashboardExportModel BuildDashboardExportModel()
+        {
+            return new DashboardExportModel(new DashboardItemExportModel[0]);
+        }
     }
 }

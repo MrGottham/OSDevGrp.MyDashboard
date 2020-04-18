@@ -88,13 +88,18 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddSingleton<IHttpHelper, HttpHelper>();
             services.AddScoped<IContentHelper, ContentHelper>();
             services.AddScoped<ICookieHelper, CookieHelper>();
-            services.AddTransient<IViewModelBuilder<InformationViewModel, INews>, NewsToInformationViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<SystemErrorViewModel, ISystemError>, SystemErrorViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>, DashboardSettingsViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, NewsToInformationViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, RedditAuthenticatedUserToObjectViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, RedditSubredditToObjectViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, RedditLinkToInformationViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, SystemErrorViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, DashboardSettingsViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<DashboardViewModel, IDashboard>, DashboardViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>, RedditAuthenticatedUserToObjectViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>, RedditSubredditToObjectViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<InformationViewModel, IRedditLink>, RedditLinkToInformationViewModelBuilder>();
+            services.AddTransient<IModelExporter, NewsModelExporter>();
+            services.AddTransient<IModelExporter, RedditAuthenticatedUserModelExporter>();
+            services.AddTransient<IModelExporter, RedditSubredditModelExporter>();
+            services.AddTransient<IModelExporter, RedditLinkModelExporter>();
+            services.AddTransient<IModelExporter<DashboardExportModel, IDashboard>, DashboardModelExporter>(); 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -125,7 +130,6 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapHealthChecks("/health");
             });
 
-            // TODO: ExportDashboard + RedditAccessToken as header
             // TODO: Update Docker files
         }
     }

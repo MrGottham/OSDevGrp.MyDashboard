@@ -595,12 +595,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardViewModelBuilder
                 .Returns(Task.Run<byte[]>(() => Convert.FromBase64String(ImageHelper.ImageAsBase64)));
 
             return new OSDevGrp.MyDashboard.Web.Factories.DashboardViewModelBuilder(
-                _newsToInformationViewModelBuilderMock.Object,
-                _systemErrorViewModelBuilderMock.Object,
-                _dashboardSettingsViewModelBuilderMock.Object,
-                _redditAuthenticatedUserToObjectViewModelBuilderMock.Object,
-                _redditSubredditToObjectViewModelBuilder.Object,
-                _redditLinkToInformationViewModelBuilderMock.Object,
+                new IViewModelBuilder[] 
+                {
+                    _newsToInformationViewModelBuilderMock.Object,
+                    _systemErrorViewModelBuilderMock.Object,
+                    _dashboardSettingsViewModelBuilderMock.Object,
+                    _redditAuthenticatedUserToObjectViewModelBuilderMock.Object,
+                    _redditSubredditToObjectViewModelBuilder.Object,
+                    _redditLinkToInformationViewModelBuilderMock.Object
+                },
                 _htmlHelperMock.Object,
                 _httpHelperMock.Object,
                 _cookieHelperMock.Object);

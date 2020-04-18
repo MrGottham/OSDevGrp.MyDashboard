@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
@@ -17,6 +19,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         private readonly IDashboardFactory _dashboardFactory;
         private readonly IViewModelBuilder<DashboardViewModel, IDashboard> _dashboardViewModelBuilder;
+        private readonly IModelExporter<DashboardExportModel, IDashboard> _dashboardModelExporter;
         private readonly IRedditAccessTokenProviderFactory _redditAccessTokenProviderFactory;
         private readonly IContentHelper _contentHelper;
         private readonly ICookieHelper _cookieHelper;
@@ -25,7 +28,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         #region Constructor
 
-        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IRedditAccessTokenProviderFactory redditAccessTokenProviderFactory, IContentHelper contentHelper, ICookieHelper cookieHelper)
+        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IModelExporter<DashboardExportModel, IDashboard> dashboardModelExporter, IRedditAccessTokenProviderFactory redditAccessTokenProviderFactory, IContentHelper contentHelper, ICookieHelper cookieHelper)
         {
             if (dashboardFactory == null)
             {
@@ -34,6 +37,10 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             if (dashboardViewModelBuilder == null)
             {
                 throw new ArgumentNullException(nameof(dashboardViewModelBuilder));
+            }
+            if (dashboardModelExporter == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardModelExporter));
             }
             if (redditAccessTokenProviderFactory == null)
             {
@@ -50,6 +57,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             _dashboardFactory = dashboardFactory;
             _dashboardViewModelBuilder = dashboardViewModelBuilder;
+            _dashboardModelExporter = dashboardModelExporter;
             _redditAccessTokenProviderFactory = redditAccessTokenProviderFactory;
             _contentHelper = contentHelper;
             _cookieHelper = cookieHelper;
@@ -213,7 +221,55 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
         [HttpGet]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
+        }
+
+        [HttpGet("/api/export")]
+        public async Task<IActionResult> Export(int numberOfNews = 100, [FromHeader]string redditAccessToken = null, bool includeNsfwContent = false, bool onlyNsfwContent = false)
+        {
+            if (numberOfNews < 0)
+            {
+                return BadRequest($"The submitted value for '{nameof(numberOfNews)}' cannot be lower than 0.");
+            }
+            if (numberOfNews > 250)
+            {
+                return BadRequest($"The submitted value for '{nameof(numberOfNews)}' cannot be greater than 250.");
+            }
+
+            IRedditAccessToken token = null;
+            if (string.IsNullOrWhiteSpace(redditAccessToken) == false)
+            {
+                try
+                {
+                    token = RedditAccessToken.Create(redditAccessToken);
+                }
+                catch (SerializationException)
+                {
+                    return BadRequest($"The submitted value for '{nameof(redditAccessToken)}' is invalid.");
+                }
+                catch (FormatException)
+                {
+                    return BadRequest($"The submitted value for '{nameof(redditAccessToken)}' is invalid.");
+                }
+            }
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = new DashboardSettingsViewModel
+            {
+                NumberOfNews = numberOfNews,
+                UseReddit = token != null,
+                AllowNsfwContent = token != null ? includeNsfwContent || onlyNsfwContent : false,
+                IncludeNsfwContent = token != null ? includeNsfwContent : false,
+                NotNullableIncludeNsfwContent = token != null ? includeNsfwContent : false,
+                OnlyNsfwContent = token != null ? onlyNsfwContent : false,
+                NotNullableOnlyNsfwContent = token != null ? onlyNsfwContent : false,
+                RedditAccessToken = token?.ToBase64(),
+                ExportData = true
+            };
+            IDashboard dashboard = await _dashboardFactory.BuildAsync(dashboardSettingsViewModel.ToDashboardSettings());
+
+            DashboardExportModel dashboardExportModel = await _dashboardModelExporter.ExportAsync(dashboard);
+
+            return Ok(dashboardExportModel);
         }
 
         private async Task<IActionResult> AcquireRedditAuthorizationTokenAsync(DashboardSettingsViewModel dashboardSettingsViewModel)

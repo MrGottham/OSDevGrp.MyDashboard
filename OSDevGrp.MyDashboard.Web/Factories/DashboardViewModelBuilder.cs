@@ -28,31 +28,11 @@ namespace OSDevGrp.MyDashboard.Web.Factories
 
         #region Constructor
 
-        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> redditSubredditToObjectViewModelBuilder, IViewModelBuilder<InformationViewModel, IRedditLink> redditLinkToInformationViewModelBuilder, IHtmlHelper htmlHelper, IHttpHelper httpHelper, ICookieHelper cookieHelper)
+        public DashboardViewModelBuilder(IEnumerable<IViewModelBuilder> viewModelBuilderCollection, IHtmlHelper htmlHelper, IHttpHelper httpHelper, ICookieHelper cookieHelper)
         {
-            if (newsToInformationViewModelBuilder == null) 
+            if (viewModelBuilderCollection == null) 
             {
-                throw new ArgumentNullException(nameof(newsToInformationViewModelBuilder));
-            }
-            if (systemErrorViewModelBuilder == null) 
-            {
-                throw new ArgumentNullException(nameof(systemErrorViewModelBuilder));
-            }
-            if (dashboardSettingsViewModelBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(dashboardSettingsViewModelBuilder));
-            }
-            if (redditAuthenticatedUserToObjectViewModelBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(redditAuthenticatedUserToObjectViewModelBuilder));
-            }
-            if (redditSubredditToObjectViewModelBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(redditSubredditToObjectViewModelBuilder));
-            }
-            if (redditLinkToInformationViewModelBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(redditLinkToInformationViewModelBuilder));
+                throw new ArgumentNullException(nameof(viewModelBuilderCollection));
             }
             if (htmlHelper == null)
             {
@@ -67,12 +47,14 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 throw new ArgumentNullException(nameof(cookieHelper));
             }
 
-            _newsToInformationViewModelBuilder = newsToInformationViewModelBuilder;
-            _systemErrorViewModelBuilder = systemErrorViewModelBuilder;
-            _dashboardSettingsViewModelBuilder = dashboardSettingsViewModelBuilder;
-            _redditAuthenticatedUserToObjectViewModelBuilder = redditAuthenticatedUserToObjectViewModelBuilder;
-            _redditSubredditToObjectViewModelBuilder = redditSubredditToObjectViewModelBuilder;
-            _redditLinkToInformationViewModelBuilder = redditLinkToInformationViewModelBuilder;
+            IViewModelBuilder[] viewModelBuilderArray = viewModelBuilderCollection.ToArray();
+
+            _newsToInformationViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<InformationViewModel, INews>>().Single();
+            _systemErrorViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<SystemErrorViewModel, ISystemError>>().Single();
+            _dashboardSettingsViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>>().Single();
+            _redditAuthenticatedUserToObjectViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>>().Single();
+            _redditSubredditToObjectViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>>().Single();
+            _redditLinkToInformationViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<InformationViewModel, IRedditLink>>().Single();
             _htmlHelper = htmlHelper;
             _httpHelper = httpHelper;
             _cookieHelper = cookieHelper;

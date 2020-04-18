@@ -19,6 +19,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
         private Mock<IDashboardFactory> _dashboardFactoryMock;
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
+        private Mock<IModelExporter<DashboardExportModel, IDashboard>> _dashboardModelExporterMock;
         private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
         private Mock<IContentHelper> _contentHelperMock;
         private Mock<ICookieHelper> _cookieHelperMock;
@@ -31,6 +32,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         {
             _dashboardFactoryMock = new Mock<IDashboardFactory>();
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
+            _dashboardModelExporterMock = new Mock<IModelExporter<DashboardExportModel, IDashboard>>();
             _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
             _contentHelperMock = new Mock<IContentHelper>();
             _cookieHelperMock = new Mock<ICookieHelper>();
@@ -218,6 +220,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
+                _dashboardModelExporterMock.Object,
                 _redditAccessTokenProviderFactoryMock.Object,
                 _contentHelperMock.Object,
                 _cookieHelperMock.Object);
