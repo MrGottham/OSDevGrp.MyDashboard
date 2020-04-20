@@ -1,5 +1,8 @@
 using System;
+using System.Diagnostics;
+using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
 
@@ -10,19 +13,25 @@ namespace OSDevGrp.MyDashboard.Core.Infrastructure
         #region Private variables
 
         private readonly IExceptionRepository _exceptionRepository;
+        private readonly ILoggerFactory _loggerFactory;
 
         #endregion
 
         #region Constructor
 
-        public ExceptionHandler(IExceptionRepository exceptionRepository)
+        public ExceptionHandler(IExceptionRepository exceptionRepository, ILoggerFactory loggerFactory)
         {
             if (exceptionRepository == null)
             {
                 throw new ArgumentNullException(nameof(exceptionRepository));
             }
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
 
             _exceptionRepository = exceptionRepository;
+            _loggerFactory = loggerFactory;
         }
 
         #endregion
@@ -36,7 +45,13 @@ namespace OSDevGrp.MyDashboard.Core.Infrastructure
                 throw new ArgumentNullException(nameof(exception));
             }
 
-            return Task.Run(() => AddToRepository(exception));
+            StackFrame stackFrame = new StackTrace().GetFrame(1);
+
+            return Task.Run(() => 
+            {
+                AddToRepository(exception);
+                LogException(stackFrame, exception);
+            });
         }
 
         public Task HandleAsync(AggregateException exception)
@@ -46,11 +61,14 @@ namespace OSDevGrp.MyDashboard.Core.Infrastructure
                 throw new ArgumentNullException(nameof(exception));
             }
 
+            StackFrame stackFrame = new StackTrace().GetFrame(1);
+
             return Task.Run(() => 
             {
                 exception.Handle(ex => 
                 {
                     AddToRepository(ex);
+                    LogException(stackFrame, ex);
                     return true;
                 });
             });
@@ -65,16 +83,33 @@ namespace OSDevGrp.MyDashboard.Core.Infrastructure
 
             try
             {
-                Task task = _exceptionRepository.AddAsync(exception);
-                task.Wait();
+                _exceptionRepository.AddAsync(exception).GetAwaiter().GetResult();
             }
             catch (AggregateException aggregateException)
             {
                 aggregateException.Handle(ex => true);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogException(new StackTrace().GetFrame(0), ex);
             }
+        }
+
+        private void LogException(StackFrame stackFrame, Exception exception)
+        {
+            if (stackFrame == null)
+            {
+                throw new ArgumentNullException(nameof(stackFrame));
+            }
+            if (exception == null)
+            {
+                throw new ArgumentNullException(nameof(exception));
+            }
+
+            MethodBase methodBase = stackFrame.GetMethod();
+
+            ILogger logger = _loggerFactory.CreateLogger(methodBase.DeclaringType?.Namespace ?? GetType().Namespace);
+            logger.LogError(exception, $"{methodBase.Name}: {exception.Message}");
         }
 
         #endregion

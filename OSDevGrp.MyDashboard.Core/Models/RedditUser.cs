@@ -4,9 +4,23 @@ using OSDevGrp.MyDashboard.Core.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
+    [Serializable]
     [DataContract]
     public class RedditUser : RedditCreatedThingBase, IRedditUser
     {
+        #region Constructors
+
+        public RedditUser()
+        {
+        }
+
+        protected RedditUser(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion
+
         #region Properties
 
         [IgnoreDataMember]
@@ -39,7 +53,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
         [DataMember(Name = "comment_karma", IsRequired = true)]
 
         public int CommentKarma { get; protected set; }
-        
+
         [DataMember(Name = "link_karma", IsRequired = true)]
         public int LinkKarma { get; protected set; }
 

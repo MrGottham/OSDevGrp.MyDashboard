@@ -6,7 +6,7 @@ namespace OSDevGrp.MyDashboard.Core.Utilities
 {
    public static class JsonSerialization
    {
-       public static string ToBase64<T>(T obj, DataContractJsonSerializerSettings serializerSettings = null) where T : class
+       public static byte[] ToByteArray<T>(T obj, DataContractJsonSerializerSettings serializerSettings = null) where T : class
        {
            if (obj == null)
            {
@@ -19,24 +19,44 @@ namespace OSDevGrp.MyDashboard.Core.Utilities
                serializer.WriteObject(memoryStream, obj);
 
                memoryStream.Seek(0, SeekOrigin.Begin);
-               return Convert.ToBase64String(memoryStream.ToArray());
+               return memoryStream.ToArray();
            }
        }
 
-       public static T FromBase64<T>(string base64, DataContractJsonSerializerSettings serializerSettings = null) where T : class
+       public static T FromByteArray<T>(byte[] byteArray, DataContractJsonSerializerSettings serializerSettings = null) where T : class
+       {
+           if (byteArray == null)
+           {
+               throw new ArgumentNullException(nameof(byteArray));
+           }
+
+           using (MemoryStream memoryStream = new MemoryStream(byteArray))
+           {
+               return FromStream<T>(memoryStream, serializerSettings);
+           }
+       }
+
+       internal static string ToBase64<T>(T obj, DataContractJsonSerializerSettings serializerSettings = null) where T : class
+       {
+           if (obj == null)
+           {
+               throw new ArgumentNullException(nameof(obj));
+           }
+
+           return Convert.ToBase64String(ToByteArray<T>(obj, serializerSettings));
+       }
+
+       internal  static T FromBase64<T>(string base64, DataContractJsonSerializerSettings serializerSettings = null) where T : class
        {
            if (string.IsNullOrWhiteSpace(base64))
            {
                throw new ArgumentNullException(nameof(base64));
            }
 
-           using (MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(base64)))
-           {
-               return FromStream<T>(memoryStream, serializerSettings);
-           }
+           return FromByteArray<T>(Convert.FromBase64String(base64), serializerSettings);
        }
-       
-       public static T FromStream<T>(Stream stream, DataContractJsonSerializerSettings serializerSettings = null) where T : class
+
+       internal static T FromStream<T>(Stream stream, DataContractJsonSerializerSettings serializerSettings = null) where T : class
        {
            if (stream == null)
            {

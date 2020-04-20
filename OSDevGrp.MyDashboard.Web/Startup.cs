@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
@@ -33,22 +35,46 @@ namespace OSDevGrp.MyDashboard.Web
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(opt =>
+            {
+                opt.CheckConsentNeeded = context => true;
+                opt.MinimumSameSitePolicy = SameSiteMode.None;
+                opt.Secure = CookieSecurePolicy.Always;
+            });
+
+            services.AddDataProtection()
+                .SetApplicationName("OSDevGrp.MyDashboard.Web")
+                .SetDefaultKeyLifetime(new TimeSpan(30, 0, 0, 0));
+
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+
+            services.AddHealthChecks();
+
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(factory => 
+            {
+                IActionContextAccessor actionContextAccessor = factory.GetRequiredService<IActionContextAccessor>();
+                return factory.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(actionContextAccessor.ActionContext);
+            });
+            services.AddMemoryCache();
+
             // Adds dependencies for the infrastructure. 
-            services.AddTransient<IExceptionHandler, ExceptionHandler>();
+            services.AddScoped<IExceptionHandler, ExceptionHandler>();
+            services.AddSingleton<ISeedGenerator, SeedGenerator>();
             services.AddSingleton<IRandomizer, Randomizer>();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Adds dependencies for the repositories.
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
             services.AddTransient<IRedditAccessTokenProviderFactory, RedditAccessTokenProviderFactory>();
             services.AddTransient<INewsRepository, NewsRepository>();
             services.AddTransient<IRedditRepository, RedditRepository>();
-            services.AddSingleton<IExceptionRepository, ExceptionRepository>();
+            services.AddScoped<IExceptionRepository, ExceptionRepository>();
             // Adds dependencies for the logic.
             services.AddTransient<INewsLogic, NewsLogic>();
-            services.AddSingleton<IRedditRateLimitLogic, RedditRateLimitLogic>();
+            services.AddScoped<IRedditRateLimitLogic, RedditRateLimitLogic>();
             services.AddTransient<IRedditFilterLogic, RedditFilterLogic>();
             services.AddTransient<IRedditLogic, RedditLogic>();
             services.AddTransient<ISystemErrorLogic, SystemErrorLogic>();
@@ -60,19 +86,24 @@ namespace OSDevGrp.MyDashboard.Web
             // Adds dependencies for the view model builders.
             services.AddSingleton<IHtmlHelper, HtmlHelper>();
             services.AddSingleton<IHttpHelper, HttpHelper>();
-            services.AddTransient<IViewModelBuilder<InformationViewModel, INews>, NewsToInformationViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<SystemErrorViewModel, ISystemError>, SystemErrorViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>, DashboardSettingsViewModelBuilder>();
+            services.AddScoped<IContentHelper, ContentHelper>();
+            services.AddScoped<ICookieHelper, CookieHelper>();
+            services.AddTransient<IViewModelBuilder, NewsToInformationViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, RedditAuthenticatedUserToObjectViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, RedditSubredditToObjectViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, RedditLinkToInformationViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, SystemErrorViewModelBuilder>();
+            services.AddTransient<IViewModelBuilder, DashboardSettingsViewModelBuilder>();
             services.AddTransient<IViewModelBuilder<DashboardViewModel, IDashboard>, DashboardViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>, RedditAuthenticatedUserToObjectViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>, RedditSubredditToObjectViewModelBuilder>();
-            services.AddTransient<IViewModelBuilder<InformationViewModel, IRedditLink>, RedditLinkToInformationViewModelBuilder>();
-            // Adds other services.
-            services.AddMvc();
+            services.AddTransient<IModelExporter, NewsModelExporter>();
+            services.AddTransient<IModelExporter, RedditAuthenticatedUserModelExporter>();
+            services.AddTransient<IModelExporter, RedditSubredditModelExporter>();
+            services.AddTransient<IModelExporter, RedditLinkModelExporter>();
+            services.AddTransient<IModelExporter<DashboardExportModel, IDashboard>, DashboardModelExporter>(); 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -81,15 +112,22 @@ namespace OSDevGrp.MyDashboard.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseRouting();
 
-            app.UseMvc(routes =>
+            app.UseCookiePolicy();
+
+            app.UseCors("default");
+
+            app.UseEndpoints(endpoints => 
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHealthChecks("/health");
             });
         }
     }

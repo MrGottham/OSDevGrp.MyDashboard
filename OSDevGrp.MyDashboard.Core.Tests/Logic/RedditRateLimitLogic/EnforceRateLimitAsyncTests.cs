@@ -25,7 +25,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndUsedLowerThanAlreadyUsed_ExpectUsedUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndUsedLowerThanAlreadyUsed_ExpectUsedUntouched()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed - _random.Next(1, 10);
@@ -36,14 +36,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(alreadyUsed, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndUsedEqualToAlreadyUsed_ExpectUsedUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndUsedEqualToAlreadyUsed_ExpectUsedUntouched()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed;
@@ -54,14 +53,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(alreadyUsed, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndUsedGreaterThanAlreadyUsed_ExpectUsedEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndUsedGreaterThanAlreadyUsed_ExpectUsedEqualToInputValue()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed + _random.Next(1, 10);
@@ -72,14 +70,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(used, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndRemainingLowerThanExistingRemaining_ExpectRemainingEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndRemainingLowerThanExistingRemaining_ExpectRemainingEqualToInputValue()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining - _random.Next(1, 10);
@@ -90,14 +87,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(remaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndRemainingEqualToExistingRemaining_ExpectRemainingUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndRemainingEqualToExistingRemaining_ExpectRemainingUntouched()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining;
@@ -108,14 +104,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingRemaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndRemainingGreaterThanExistingRemaining_ExpectRemainingUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNullAndRemainingGreaterThanExistingRemaining_ExpectRemainingUntouched()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining + _random.Next(1, 10);
@@ -126,14 +121,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingRemaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNull_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToNull_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             int used = _random.Next(30, 60);
             int remaining = _random.Next(30, 60);
@@ -142,15 +136,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut();
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndUsedLowerThanAlreadyUsed_ExpectUsedUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndUsedLowerThanAlreadyUsed_ExpectUsedUntouched()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed - _random.Next(1, 10);
@@ -163,14 +156,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(alreadyUsed, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndUsedEqualToAlreadyUsed_ExpectUsedUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndUsedEqualToAlreadyUsed_ExpectUsedUntouched()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed;
@@ -183,14 +175,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(alreadyUsed, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndUsedGreaterThanAlreadyUsed_ExpectUsedEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndUsedGreaterThanAlreadyUsed_ExpectUsedEqualToInputValue()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed + _random.Next(1, 10);
@@ -203,14 +194,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(used, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndRemainingLowerThanExistingRemaining_ExpectRemainingEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndRemainingLowerThanExistingRemaining_ExpectRemainingEqualToInputValue()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining - _random.Next(1, 10);
@@ -223,14 +213,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(remaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndRemainingEqualToExistingRemaining_ExpectRemainingUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndRemainingEqualToExistingRemaining_ExpectRemainingUntouched()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining;
@@ -243,14 +232,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingRemaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndRemainingGreaterThanExistingRemaining_ExpectRemainingUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTimeAndRemainingGreaterThanExistingRemaining_ExpectRemainingUntouched()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining + _random.Next(1, 10);
@@ -263,14 +251,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingRemaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTime_ExpectResetTimeUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTime_ExpectResetTimeUntouched()
         {
             DateTime existingResetTime = DateTime.Now.AddSeconds(_random.Next(30, 60));
             DateTime? resetTime = existingResetTime.AddSeconds(_random.Next(1, 25) * -1);
@@ -281,14 +268,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingResetTime, sut.ResetTime);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTime_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeBeforeThanExistingResetTime_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             DateTime existingResetTime = DateTime.Now.AddSeconds(_random.Next(30, 60));
             DateTime? resetTime = existingResetTime.AddSeconds(_random.Next(1, 25) * -1);
@@ -299,15 +285,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndUsedLowerThanAlreadyUsed_ExpectUsedUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndUsedLowerThanAlreadyUsed_ExpectUsedUntouched()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed - _random.Next(1, 10);
@@ -320,14 +305,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(alreadyUsed, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndUsedEqualToAlreadyUsed_ExpectUsedUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndUsedEqualToAlreadyUsed_ExpectUsedUntouched()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed;
@@ -340,14 +324,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(alreadyUsed, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndUsedGreaterThanAlreadyUsed_ExpectUsedEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndUsedGreaterThanAlreadyUsed_ExpectUsedEqualToInputValue()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed + _random.Next(1, 10);
@@ -360,14 +343,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(used, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndRemainingLowerThanExistingRemaining_ExpectRemainingEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndRemainingLowerThanExistingRemaining_ExpectRemainingEqualToInputValue()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining - _random.Next(1, 10);
@@ -380,14 +362,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(remaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndRemainingEqualToExistingRemaining_ExpectRemainingUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndRemainingEqualToExistingRemaining_ExpectRemainingUntouched()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining;
@@ -400,14 +381,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingRemaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndRemainingGreaterThanExistingRemaining_ExpectRemainingUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTimeAndRemainingGreaterThanExistingRemaining_ExpectRemainingUntouched()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining + _random.Next(1, 10);
@@ -420,14 +400,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingRemaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTime_ExpectResetTimeUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTime_ExpectResetTimeUntouched()
         {
             DateTime existingResetTime = DateTime.Now.AddSeconds(_random.Next(30, 60));
             DateTime? resetTime = existingResetTime;
@@ -438,14 +417,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingResetTime, sut.ResetTime);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTime_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeEqualToExistingResetTime_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             DateTime existingResetTime = DateTime.Now.AddSeconds(_random.Next(30, 60));
             DateTime? resetTime = existingResetTime;
@@ -456,15 +434,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeLaterThanExistingResetTime_ExpectUsedEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeLaterThanExistingResetTime_ExpectUsedEqualToInputValue()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed + _random.Next(1, 10);
@@ -477,14 +454,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(used, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeLaterThanExistingResetTime_ExpectRemainingEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeLaterThanExistingResetTime_ExpectRemainingEqualToInputValue()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining - _random.Next(1, 10);
@@ -497,14 +473,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining, resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(remaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeLaterThanExistingResetTime_ExpectResetTimeEqualToInputValue()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeLaterThanExistingResetTime_ExpectResetTimeEqualToInputValue()
         {
             DateTime existingResetTime = DateTime.Now.AddSeconds(_random.Next(30, 60));
             DateTime? resetTime = existingResetTime.AddSeconds(_random.Next(1, 30));
@@ -515,14 +490,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(resetTime, sut.ResetTime);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithResetTimeLaterThanExistingResetTime_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task EnforceRateLimitAsync_WhenCalledWithResetTimeLaterThanExistingResetTime_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             DateTime existingResetTime = DateTime.Now.AddSeconds(_random.Next(30, 60));
             DateTime? resetTime = existingResetTime.AddSeconds(_random.Next(1, 30));
@@ -533,15 +507,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
 
             IRedditRateLimitLogic sut = CreateSut(resetTime: existingResetTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithReceivedTimeLowerThanLatestReceivedTime_ExpectUsedUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithReceivedTimeLowerThanLatestReceivedTime_ExpectUsedUntouched()
         {
             int alreadyUsed = _random.Next(30, 60);
             int used = alreadyUsed + _random.Next(1, 10);
@@ -555,14 +528,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
             DateTime latestReceivedTime = receivedTime.AddSeconds(_random.Next(10, 30));
             IRedditRateLimitLogic sut = CreateSut(used: alreadyUsed, resetTime: existingResetTime, latestReceivedTime: latestReceivedTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(alreadyUsed, sut.Used);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithReceivedTimeLowerThanLatestReceivedTime_ExpectRemainingUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithReceivedTimeLowerThanLatestReceivedTime_ExpectRemainingUntouched()
         {
             int existingRemaining = _random.Next(30, 60);
             int remaining = existingRemaining - _random.Next(1, 10);
@@ -576,14 +548,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
             DateTime latestReceivedTime = receivedTime.AddSeconds(_random.Next(10, 30));
             IRedditRateLimitLogic sut = CreateSut(remaining: existingRemaining, resetTime: existingResetTime, latestReceivedTime: latestReceivedTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingRemaining, sut.Remaining);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithReceivedTimeLowerThanLatestReceivedTime_ExpectResetTimeUnthouched()
+        public async Task EnforceRateLimitAsync_WhenCalledWithReceivedTimeLowerThanLatestReceivedTime_ExpectResetTimeUntouched()
         {
             DateTime existingResetTime = DateTime.Now.AddSeconds(_random.Next(10, 60));
             DateTime? resetTime = existingResetTime.AddSeconds(_random.Next(10, 60));
@@ -595,14 +566,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
             DateTime latestReceivedTime = receivedTime.AddSeconds(_random.Next(10, 30));
             IRedditRateLimitLogic sut = CreateSut(resetTime: existingResetTime, latestReceivedTime: latestReceivedTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             Assert.AreEqual(existingResetTime, sut.ResetTime);
         }
 
         [TestMethod]
-        public void EnforceRateLimitAsync_WhenCalledWithReceivedTimeLowerThanLatestReceivedTime_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task EnforceRateLimitAsync_WhenCalledWithReceivedTimeLowerThanLatestReceivedTime_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             DateTime existingResetTime = DateTime.Now.AddSeconds(_random.Next(10, 60));
             DateTime? resetTime = existingResetTime.AddSeconds(_random.Next(10, 60));
@@ -614,8 +584,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditRateLimitLogic
             DateTime latestReceivedTime = receivedTime.AddSeconds(_random.Next(10, 30));
             IRedditRateLimitLogic sut = CreateSut(resetTime: existingResetTime, latestReceivedTime: latestReceivedTime);
 
-            Task enforceRateLimitTask = sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
-            enforceRateLimitTask.Wait();
+            await sut.EnforceRateLimitAsync(used, remaining, resetTime, receivedTime);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);

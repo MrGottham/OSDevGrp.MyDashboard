@@ -28,94 +28,92 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
         [TestMethod]
         [ExpectedArgumentNullException("code")]
-        public void GetRedditAccessTokenAsync_WhenCodeIsNull_ThrowsArgumentNullException()
+        public async Task GetRedditAccessTokenAsync_WhenCodeIsNull_ThrowsArgumentNullException()
         {
             const string code = null;
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.GetRedditAccessTokenAsync(code, redirectUri);
+            await sut.GetRedditAccessTokenAsync(code, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("code")]
-        public void GetRedditAccessTokenAsync_WhenCodeIsEmpty_ThrowsArgumentNullException()
+        public async Task GetRedditAccessTokenAsync_WhenCodeIsEmpty_ThrowsArgumentNullException()
         {
             string code = string.Empty;
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.GetRedditAccessTokenAsync(code, redirectUri);
+            await sut.GetRedditAccessTokenAsync(code, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("code")]
-        public void GetRedditAccessTokenAsync_WhenCodeIsWhitespace_ThrowsArgumentNullException()
+        public async Task GetRedditAccessTokenAsync_WhenCodeIsWhitespace_ThrowsArgumentNullException()
         {
             const string code = " ";
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.GetRedditAccessTokenAsync(code, redirectUri);
+            await sut.GetRedditAccessTokenAsync(code, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("code")]
-        public void GetRedditAccessTokenAsync_WhenCodeIsWhitespaces_ThrowsArgumentNullException()
+        public async Task GetRedditAccessTokenAsync_WhenCodeIsWhitespaces_ThrowsArgumentNullException()
         {
             const string code = "  ";
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.GetRedditAccessTokenAsync(code, redirectUri);
+            await sut.GetRedditAccessTokenAsync(code, redirectUri);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("redirectUri")]
-        public void GetRedditAccessTokenAsync_WhenRedirectUriIsNull_ThrowsArgumentNullException()
+        public async Task GetRedditAccessTokenAsync_WhenRedirectUriIsNull_ThrowsArgumentNullException()
         {
             string code = Guid.NewGuid().ToString("D");
             const Uri redirectUri = null;
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            sut.GetRedditAccessTokenAsync(code, redirectUri);
+            await sut.GetRedditAccessTokenAsync(code, redirectUri);
         }
 
         [TestMethod]
-        public void GetRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
+        public async Task GetRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
         {
             string code = Guid.NewGuid().ToString("D");
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            Task<IRedditAccessToken> result = sut.GetRedditAccessTokenAsync(code, redirectUri);
-            result.Wait();
+            await sut.GetRedditAccessTokenAsync(code, redirectUri);
 
             _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Once);
         }
 
         [TestMethod]
-        public void GetRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientSecretWasCalledOnConfiguration()
+        public async Task GetRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientSecretWasCalledOnConfiguration()
         {
             string code = Guid.NewGuid().ToString("D");
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            Task<IRedditAccessToken> result = sut.GetRedditAccessTokenAsync(code, redirectUri);
-            result.Wait();
+            await sut.GetRedditAccessTokenAsync(code, redirectUri);
 
             _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientSecret", value, StringComparison.Ordinal) == 0)], Times.Once);
         }
 
         [TestMethod]
-        public void GetRedditAccessTokenAsync_WhenCalled_AssertGetRedditAccessTokenAsyncWasCalledOnDataProviderFactory()
+        public async Task GetRedditAccessTokenAsync_WhenCalled_AssertGetRedditAccessTokenAsyncWasCalledOnDataProviderFactory()
         {
             string code = Guid.NewGuid().ToString("D");
             Uri redirectUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
@@ -124,8 +122,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
             string clientSecret = Guid.NewGuid().ToString("D");
             IRedditAccessTokenProviderFactory sut = CreateSut(clientId: clientId, clientSecret: clientSecret);
 
-            Task<IRedditAccessToken> result = sut.GetRedditAccessTokenAsync(code, redirectUri);
-            result.Wait();
+            await sut.GetRedditAccessTokenAsync(code, redirectUri);
 
             _dataProviderFactoryMock.Verify(m => m.GetRedditAccessTokenAsync(
                     It.Is<string>(value => string.Compare(clientId, value, StringComparison.Ordinal) == 0),
@@ -145,7 +142,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
             IRedditAccessTokenProviderFactory sut = CreateSut(getRedditAccessTokenTask: getRedditAccessTokenTask);
 
             Task<IRedditAccessToken> result = sut.GetRedditAccessTokenAsync(code, redirectUri);
-            result.Wait();
 
             Assert.AreEqual(getRedditAccessTokenTask, result);           
         }

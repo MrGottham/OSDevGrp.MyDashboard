@@ -4,9 +4,23 @@ using OSDevGrp.MyDashboard.Core.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
+    [Serializable]
     [DataContract]
     public class RedditSubreddit : RedditCreatedThingBase, IRedditSubreddit
     {
+        #region Constructors
+
+        public RedditSubreddit()
+        {
+        }
+
+        protected RedditSubreddit(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion
+
         #region Properties
 
         [IgnoreDataMember]
@@ -128,7 +142,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
 
         [DataMember(Name = "subscribers", IsRequired = true)]
         public long Subscribers { get; protected set; }
-        
+
         [IgnoreDataMember]
         public Uri Url
         { 

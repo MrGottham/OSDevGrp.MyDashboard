@@ -12,52 +12,49 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
     public class GetSystemErrorsAsyncTests
     {
         [TestMethod]
-        public void GetSystemErrorsAsyncTests_WhenCalled_ReturnsSystemErrors()
+        public async Task GetSystemErrorsAsyncTests_WhenCalled_ReturnsSystemErrors()
         {
             Exception firstException = new Exception(Guid.NewGuid().ToString("D"));
             Exception secondException = new Exception(Guid.NewGuid().ToString("D"));
             Exception thirdException = new Exception(Guid.NewGuid().ToString("D"));
 
             IExceptionRepository sut = CreateSut();
-            
-            sut.AddAsync(firstException).Wait();
-            sut.AddAsync(secondException).Wait();
-            sut.AddAsync(thirdException).Wait();
 
-            Task<IEnumerable<ISystemError>> getSystemErrorsTask = sut.GetSystemErrorsAsync();
-            getSystemErrorsTask.Wait();
+            await sut.AddAsync(firstException);
+            await sut.AddAsync(secondException);
+            await sut.AddAsync(thirdException);
 
-            Assert.IsNotNull(getSystemErrorsTask.Result);
-            Assert.IsTrue(getSystemErrorsTask.Result.Any());
-            Assert.IsNotNull(getSystemErrorsTask.Result.FirstOrDefault(systemError => string.Compare(systemError.Information, firstException.Message, StringComparison.InvariantCulture) == 0));
-            Assert.IsNotNull(getSystemErrorsTask.Result.FirstOrDefault(systemError => string.Compare(systemError.Information, secondException.Message, StringComparison.InvariantCulture) == 0));
-            Assert.IsNotNull(getSystemErrorsTask.Result.FirstOrDefault(systemError => string.Compare(systemError.Information, thirdException.Message, StringComparison.InvariantCulture) == 0));
+            IEnumerable<ISystemError> result = await sut.GetSystemErrorsAsync();
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Any());
+            Assert.IsNotNull(result.FirstOrDefault(systemError => string.Compare(systemError.Information, firstException.Message, StringComparison.InvariantCulture) == 0));
+            Assert.IsNotNull(result.FirstOrDefault(systemError => string.Compare(systemError.Information, secondException.Message, StringComparison.InvariantCulture) == 0));
+            Assert.IsNotNull(result.FirstOrDefault(systemError => string.Compare(systemError.Information, thirdException.Message, StringComparison.InvariantCulture) == 0));
         }
 
         [TestMethod]
-        public void GetSystemErrorsAsyncTests_WhenCalled_RemoveSystemErrors()
+        public async Task GetSystemErrorsAsyncTests_WhenCalled_RemoveSystemErrors()
         {
             Exception firstException = new Exception();
             Exception secondException = new Exception();
             Exception thirdException = new Exception();
 
             IExceptionRepository sut = CreateSut();
-            
-            sut.AddAsync(firstException).Wait();
-            sut.AddAsync(secondException).Wait();
-            sut.AddAsync(thirdException).Wait();
 
-            Task<IEnumerable<ISystemError>> firstGetSystemErrorsTask = sut.GetSystemErrorsAsync();
-            firstGetSystemErrorsTask.Wait();
+            await sut.AddAsync(firstException);
+            await sut.AddAsync(secondException);
+            await sut.AddAsync(thirdException);
 
-            Assert.IsNotNull(firstGetSystemErrorsTask.Result);
-            Assert.IsTrue(firstGetSystemErrorsTask.Result.Any());
+            IEnumerable<ISystemError> firstGetSystemErrors = await sut.GetSystemErrorsAsync();
 
-            Task<IEnumerable<ISystemError>> secondGetSystemErrorsTask = sut.GetSystemErrorsAsync();
-            secondGetSystemErrorsTask.Wait();
+            Assert.IsNotNull(firstGetSystemErrors);
+            Assert.IsTrue(firstGetSystemErrors.Any());
 
-            Assert.IsNotNull(secondGetSystemErrorsTask.Result);
-            Assert.IsFalse(secondGetSystemErrorsTask.Result.Any());
+            IEnumerable<ISystemError> secondGetSystemErrors = await sut.GetSystemErrorsAsync();
+
+            Assert.IsNotNull(secondGetSystemErrors);
+            Assert.IsFalse(secondGetSystemErrors.Any());
         }
 
         private IExceptionRepository CreateSut()

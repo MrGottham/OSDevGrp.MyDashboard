@@ -1,106 +1,39 @@
-﻿@using System.Linq;
-@using OSDevGrp.MyDashboard.Core.Contracts.Models;
-@using OSDevGrp.MyDashboard.Web.Models;
-@model DashboardViewModel
-
+﻿@inject IContentHelper contentHelper
+@model DashboardSettingsViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="row">
-    @if (Model.LatestInformationsWithImage != null && Model.LatestInformationsWithImage.Any() && Model.RedditAuthenticatedUser != null)
-    {
-        <div class="col-md-8">
-            @Html.Partial("_CarouselPartial", Model.LatestInformationsWithImage)
+    <div id="topContent" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="display: none">
+        <div class="spinner-border mb-3" role="status" data-url="@Model.GetTopContentUrl(contentHelper)">
+            <span class="sr-only">Henter data...</span>
         </div>
-        <div class="col-md-4">
-            <div class="card-deck mb-md-3">
-                @Html.Raw(Model.RedditAuthenticatedUser.Html)
-            </div>
-        </div>
-    }
-    else if (Model.LatestInformationsWithImage != null && Model.LatestInformationsWithImage.Any())
-    {
-        <div class="col-md-1">
-        </div>
-        <div class="col-md-10">
-            @Html.Partial("_CarouselPartial", Model.LatestInformationsWithImage)
-        </div>
-        <div class="col-md-1">
-        </div>
-    }
-    else if (Model.RedditAuthenticatedUser != null)
-    {
-        <div class="col-md-4">
-            <div class="card-deck mb-md-3">
-                @Html.Raw(Model.RedditAuthenticatedUser.Html)
-            </div>
-        </div>
-        <div class="col-md-8">
-        </div>
-    }
+    </div>
 </div>
 <div class="row">
-    <div class="col-md-9">
-        @if (Model.Informations != null && Model.Informations.Any())
-        {
-            @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
-            {
-                <div class="card-deck mb-md-3">
-                    @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo))
-                    @if (elementNo + 1 < Model.Informations.Count())
-                    {
-                        @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo + 1))
-                    }
-                    @if (elementNo + 2 < Model.Informations.Count())
-                    {
-                        @Html.Partial("_InformationPartial", Model.Informations.ElementAt(elementNo + 2))
-                    }
-                </div>
-            }
-        }
+    <div id="mainContent" class="col-6 col-sm-7 col-md-8 col-lg-8 col-xl-9" data-url-instant-loading>
+        <div class="spinner-border" role="status" data-url="@Model.GetBuildUrl(contentHelper)">
+            <span class="sr-only">Henter data...</span>
+        </div>
     </div>
-    <div class="col-md-3">
-        @if (Model.Settings != null)
-        {
-            @Html.Partial("_DashboardSettingsPartial", Model.Settings)                        
-        }
-        @if (Model.RedditSubreddits != null && Model.RedditSubreddits.Any())
-        {
-            <h2>Subreddits</h2>
-            @foreach (ObjectViewModel<IRedditSubreddit> objectViewModelForRedditSubreddit in Model.RedditSubreddits)
-            {
-                @Html.Raw(objectViewModelForRedditSubreddit.Html);
-            }
-        }
-        @if (Model.SystemErrors != null && Model.SystemErrors.Any())
-        {
-            <h2>System errors</h2>
-            @foreach (SystemErrorViewModel systemErrorViewModel in Model.SystemErrors)
-            {
-                <div class="card mb-md-3">
-                    <div class="card-header text-danger">System error</div>
-                    <div class="card-body">@Html.Raw(systemErrorViewModel.TruncatedMessage)</div> 
-                    <div class="card-footer">
-                        <form asp-controller="Home" asp-action="SystemError" method="post">
-                            <input asp-for="@systemErrorViewModel.SystemErrorIdentifier" type="hidden" />
-                            <input asp-for="@systemErrorViewModel.Timestamp" type="hidden" />
-                            <input asp-for="@systemErrorViewModel.Message" type="hidden" />
-                            <input asp-for="@systemErrorViewModel.Details" type="hidden" />
-                            <div class="text-center">
-                                <div class="btn-group">
-                                    <button type="submit" class="btn btn-info">View</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+    <div class="col-6 col-sm-5 col-md-4 col-lg-4 col-xl-3">
+        <div class="row">
+            <div id="dashboardSettings" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-3">
+                @await Html.PartialAsync("_DashboardSettingsPartial", Model)
+            </div>
+        </div>
+        <div class="row">
+            <div id="subContent" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="display: none">
+                <div class="spinner-border" role="status" data-url="@Model.GetSubContentUrl(contentHelper)">
+                    <span class="sr-only">Henter data...</span>
                 </div>
-            }
-        }
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts
 {
-    @Html.Partial("_ValidationScriptsPartial")
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

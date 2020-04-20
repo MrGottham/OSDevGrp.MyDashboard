@@ -1,10 +1,24 @@
 using System;
+using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
+    [Serializable]
     public class InformationViewModel : IViewModel
     {
+        #region Constructors
+
+        public InformationViewModel()
+        {
+        }
+
+        protected InformationViewModel(SerializationInfo info, StreamingContext context)
+        {
+        }
+
+        #endregion
+
         #region Properties
 
         public string InformationIdentifier { get; set; }

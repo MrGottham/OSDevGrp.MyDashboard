@@ -31,68 +31,64 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
 
         [TestMethod]
         [ExpectedArgumentNullExceptionAttribute("input")]
-        public void BuildAsync_WhenSystemErrorIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenSystemErrorIsNull_ThrowsArgumentNullException()
         {
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            sut.BuildAsync(null);
+            await sut.BuildAsync(null);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertIdentifierWasCalledOnNews()
+        public async Task BuildAsync_WhenCalled_AssertIdentifierWasCalledOnNews()
         {
             Mock<INews> newsMock = CreateNewsMock();
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Identifier, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertTimestampWasCalledOnNews()
+        public async Task BuildAsync_WhenCalled_AssertTimestampWasCalledOnNews()
         {
             Mock<INews> newsMock = CreateNewsMock();
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Timestamp, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertInformationWasCalledOnNews()
+        public async Task BuildAsync_WhenCalled_AssertInformationWasCalledOnNews()
         {
             Mock<INews> newsMock = CreateNewsMock();
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Information, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertConvertWasCalledOnHtmlHelperWithInformation()
+        public async Task BuildAsync_WhenCalled_AssertConvertWasCalledOnHtmlHelperWithInformation()
         {
             string information = Guid.NewGuid().ToString("D");
             INews news = CreateNews(information: information);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            await sut.BuildAsync(news);
 
             _htmlHelperMock.Verify(m => m.Convert(It.Is<string>(value => value == information), It.Is<bool>(value => value == false), It.Is<bool>(value => value == true)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertExtractImagesWasCalledOnHtmlHelperWithInformation()
+        public async Task BuildAsync_WhenCalled_AssertExtractImagesWasCalledOnHtmlHelperWithInformation()
         {
             IList<Uri> imageUrlCollection = null;
 
@@ -101,41 +97,38 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            await sut.BuildAsync(news);
 
             _htmlHelperMock.Verify(m => m.ExtractImages(It.Is<string>(value => value == $"HtmlHelper.Convert:{information}"), out imageUrlCollection), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertDetailsWasCalledOnNews()
+        public async Task BuildAsync_WhenCalled_AssertDetailsWasCalledOnNews()
         {
             Mock<INews> newsMock = CreateNewsMock();
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Details, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertConvertWasCalledOnHtmlHelperWithDetails()
+        public async Task BuildAsync_WhenCalled_AssertConvertWasCalledOnHtmlHelperWithDetails()
         {
             string details = Guid.NewGuid().ToString("D");
             INews news = CreateNews(details: details);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            await sut.BuildAsync(news);
 
             _htmlHelperMock.Verify(m => m.Convert(It.Is<string>(value => value == details), It.Is<bool>(value => value == false), It.Is<bool>(value => value == true)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertExtractImagesWasCalledOnHtmlHelperWithDetails()
+        public async Task BuildAsync_WhenCalled_AssertExtractImagesWasCalledOnHtmlHelperWithDetails()
         {
             IList<Uri> imageUrlCollection = null;
 
@@ -144,41 +137,38 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            await sut.BuildAsync(news);
 
             _htmlHelperMock.Verify(m => m.ExtractImages(It.Is<string>(value => value == $"HtmlHelper.Convert:{details}"), out imageUrlCollection), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertProviderWasCalledOnNews()
+        public async Task BuildAsync_WhenCalled_AssertProviderWasCalledOnNews()
         {
             Mock<INews> newsMock = CreateNewsMock();
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Provider, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertNameWasCalledOnProvider()
+        public async Task BuildAsync_WhenCalled_AssertNameWasCalledOnProvider()
         {
             Mock<INewsProvider> provider = CreateNewsProviderMock();
             INews news = CreateNews(provider: provider.Object);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            await sut.BuildAsync(news);
 
             provider.Verify(m => m.Name, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithNameOfProvider()
+        public async Task BuildAsync_WhenCalled_AssertConvertNewLinesWasCalledOnHtmlHelperWithNameOfProvider()
         {
             string providerName = Guid.NewGuid().ToString("D");
             INewsProvider provider = CreateNewsProvider(providerName);
@@ -186,131 +176,126 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            await sut.BuildAsync(news);
 
             _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == providerName)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertLinkWasCalledOnNews()
+        public async Task BuildAsync_WhenCalled_AssertLinkWasCalledOnNews()
         {
             Mock<INews> newsMock = CreateNewsMock();
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Link, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertAuthorWasCalledOnNews()
+        public async Task BuildAsync_WhenCalled_AssertAuthorWasCalledOnNews()
         {
             Mock<INews> newsMock = CreateNewsMock();
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(newsMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Author, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsHasAuthor_AssertNameWasCalledOnAuthor()
+        public async Task BuildAsync_WhenCalledWhereNewsHasAuthor_AssertNameWasCalledOnAuthor()
         {
             Mock<IAuthor> authorMock = CreateAuthorMock();
             INews news = CreateNews(author: authorMock.Object);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            await sut.BuildAsync(news);
 
             authorMock.Verify(m => m.Name, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsHasAuthor_AssertConvertNewLinesWasCalledOnHtmlHelperWithNameOfAuthor()
+        public async Task BuildAsync_WhenCalledWhereNewsHasAuthor_AssertConvertNewLinesWasCalledOnHtmlHelperWithNameOfAuthor()
         {
-            string autherName = Guid.NewGuid().ToString("D");
-            IAuthor author = CreateAuthor(autherName);
+            string authorName = Guid.NewGuid().ToString("D");
+            IAuthor author = CreateAuthor(authorName);
             INews news = CreateNews(author: author);
 
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            await sut.BuildAsync(news);
 
-            _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == autherName)), Times.Once);
+            _htmlHelperMock.Verify(m => m.ConvertNewLines(It.Is<string>(value => value == authorName)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel()
         {
             bool hasLink = _random.Next(0, 100) > 50;
             bool hasAuthor = _random.Next(0, 100) > 50;
             bool hasImage = _random.Next(0, 100) > 50;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsHasLink_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWhereNewsHasLink_ReturnsInitializedInformationViewModel()
         {
             const bool hasLink = true;
             bool hasAuthor = _random.Next(0, 100) > 50;
             bool hasImage = _random.Next(0, 100) > 50;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsHasNoLink_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWhereNewsHasNoLink_ReturnsInitializedInformationViewModel()
         {
             const bool hasLink = false;
             bool hasAuthor = _random.Next(0, 100) > 50;
             bool hasImage = _random.Next(0, 100) > 50;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsHasAuthor_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWhereNewsHasAuthor_ReturnsInitializedInformationViewModel()
         {
             bool hasLink = _random.Next(0, 100) > 50;
             const bool hasAuthor = true;
             bool hasImage = _random.Next(0, 100) > 50;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsHasNoAuthor_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWhereNewsHasNoAuthor_ReturnsInitializedInformationViewModel()
         {
             bool hasLink = _random.Next(0, 100) > 50;
             const bool hasAuthor = false;
             bool hasImage = _random.Next(0, 100) > 50;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsIncludesImage_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWhereNewsIncludesImage_ReturnsInitializedInformationViewModel()
         {
             bool hasLink = _random.Next(0, 100) > 50;
             bool hasAuthor = _random.Next(0, 100) > 50;
             const bool hasImage = true;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWhereNewsDoesNotIncludeImage_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWhereNewsDoesNotIncludeImage_ReturnsInitializedInformationViewModel()
         {
             bool hasLink = _random.Next(0, 100) > 50;
             bool hasAuthor = _random.Next(0, 100) > 50;
             const bool hasImage = false;
-            BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
         }
 
-        private void BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(bool hasLink, bool hasAuthor, bool hasImage)
+        private async Task BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(bool hasLink, bool hasAuthor, bool hasImage)
         {
             string identifier = Guid.NewGuid().ToString("D");
             DateTime timestamp = DateTime.Now.AddTicks(_random.Next(-5000, 5000));
@@ -336,10 +321,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             }
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut(imageUrl: imageUrl);
 
-            Task<InformationViewModel> buildTask = sut.BuildAsync(news);
-            buildTask.Wait();
+            InformationViewModel result = await sut.BuildAsync(news);
 
-            InformationViewModel result = buildTask.Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.InformationIdentifier);
             Assert.AreEqual(identifier, result.InformationIdentifier);

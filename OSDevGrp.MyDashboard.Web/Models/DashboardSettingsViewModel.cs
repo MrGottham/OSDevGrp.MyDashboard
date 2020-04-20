@@ -1,24 +1,36 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using Microsoft.AspNetCore.Http;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
-using OSDevGrp.MyDashboard.Core.Utilities;
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
-    [DataContract(Name = "DashboardSettings", Namespace = "urn:osdevgrp:mydashboard:1.0.0")]
+    [Serializable]
+    [DataContract(Name = "DashboardSettings")]
     public class DashboardSettingsViewModel : IViewModel
     {
+        #region Constructors
+
+        public DashboardSettingsViewModel()
+        {
+        }
+
+        protected DashboardSettingsViewModel(SerializationInfo info, StreamingContext context)
+        {
+        }
+
+        #endregion
+
         #region Properties
 
         [Range(0, 250)]
         [Display(Name = "Number of news", ShortName = "News", Description = "Number of news to receive")]
         [DataMember(Name = "NumberOfNews", IsRequired = true)]
         public int NumberOfNews { get; set; }
-        
+
         [Display(Name = "Use Reddit", ShortName = "Reddit", Description = "Collect data from Reddit")]
         [DataMember(Name = "UseReddit", IsRequired = true)]
         public bool UseReddit { get; set; }
@@ -67,13 +79,18 @@ namespace OSDevGrp.MyDashboard.Web.Models
         [DataMember(Name = "RedditAccessToken", IsRequired = false)]
         public string RedditAccessToken { get; set; }
 
+        [Display(Name = "Export data", ShortName = "Export", Description = "Indicates whether dashboard data should be exported")]
+        [DataMember(Name = "ExportData", IsRequired = false)]
+        public bool ExportData { get; set; }
+
         [Display(Name = "Cookie name", ShortName = "Cookie name", Description = "Cookie name for the dashboard settings view model")]
         [IgnoreDataMember]
         public static string CookieName
         {
             get
             {
-                return "OSDevGrp.MyDashboard.Web.Models.DashboardSettingsViewModel";
+                Type type = typeof(DashboardSettingsViewModel);
+                return $"{type.Namespace}.{type.Name}";
             }
         }
 
@@ -93,85 +110,92 @@ namespace OSDevGrp.MyDashboard.Web.Models
             };
         }
 
-        public void ToCookie(HttpContext httpContext, DateTime expires)
-        {
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-
-            HttpResponse response = httpContext.Response;
-            if (response == null)
-            {
-                return;
-            }
-
-            IResponseCookies responseCookies = response.Cookies;
-            if (responseCookies == null)
-            {
-                return;
-            }
-
-            CookieOptions cookieOptions = new CookieOptions
-            {
-                Expires = expires.ToUniversalTime()
-            };
-            responseCookies.Append(CookieName, ToBase64(), cookieOptions);
-        }
-
-        public string ToBase64()
-        {
-            return JsonSerialization.ToBase64(this);
-        }
-
-        public static DashboardSettingsViewModel Create(string base64)
-        {
-            return JsonSerialization.FromBase64<DashboardSettingsViewModel>(base64);
-        }
-
-        public static DashboardSettingsViewModel Create(HttpContext httpContext)
-        {
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-
-            HttpRequest request = httpContext.Request;
-            if (request == null)
-            {
-                return null;
-            }
-
-            IRequestCookieCollection requestCookieCollection = request.Cookies;
-            if (requestCookieCollection == null)
-            {
-                return null;
-            }
-
-            if (requestCookieCollection.ContainsKey(CookieName) == false)
-            {
-                return null;
-            }
-
-            return Create(requestCookieCollection[CookieName]);
-        }
-
-        public void ApplyRules(IDashboardRules rules)
+        public void ApplyRules(IDashboardRules rules, ICookieHelper cookieHelper)
         {
             if (rules == null)
             {
                 throw new ArgumentNullException(nameof(rules));
             }
-
-            AllowNsfwContent = rules.AllowNsfwContent;
-            if (AllowNsfwContent)
+            if (cookieHelper == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(cookieHelper));
             }
-            IncludeNsfwContent = null;
-            OnlyNsfwContent = null;
+
+            try
+            {
+                AllowNsfwContent = rules.AllowNsfwContent;
+                if (AllowNsfwContent)
+                {
+                    return;
+                }
+                IncludeNsfwContent = null;
+                OnlyNsfwContent = null;
+            }
+            finally
+            {
+                cookieHelper.ToCookie(this);
+            }
         }
 
         #endregion
+    }
+
+    public static class DashboardSettingsViewModelExtensions
+    {
+        public static string GetBuildUrl(this DashboardSettingsViewModel dashboardSettingsViewModel, IContentHelper contentHelper)
+        {
+            if (dashboardSettingsViewModel == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardSettingsViewModel));
+            }
+            if (contentHelper == null)
+            {
+                throw new ArgumentNullException(nameof(contentHelper));
+            }
+
+            return contentHelper.AbsoluteUrl("Build", "Home", new {DashboardSettings = contentHelper.ToBase64String(dashboardSettingsViewModel)});
+        }
+
+        public static string GetTopContentUrl(this DashboardSettingsViewModel dashboardSettingsViewModel, IContentHelper contentHelper)
+        {
+            if (dashboardSettingsViewModel == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardSettingsViewModel));
+            }
+            if (contentHelper == null)
+            {
+                throw new ArgumentNullException(nameof(contentHelper));
+            }
+
+            return contentHelper.AbsoluteUrl("TopContent", "Home");
+        }
+
+        public static string GetSubContentUrl(this DashboardSettingsViewModel dashboardSettingsViewModel, IContentHelper contentHelper)
+        {
+            if (dashboardSettingsViewModel == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardSettingsViewModel));
+            }
+            if (contentHelper == null)
+            {
+                throw new ArgumentNullException(nameof(contentHelper));
+            }
+
+            return contentHelper.AbsoluteUrl("SubContent", "Home");
+        }
+
+        public static string GetSettingsUrl(this DashboardSettingsViewModel dashboardSettingsViewModel, IContentHelper contentHelper)
+        {
+            if (dashboardSettingsViewModel == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardSettingsViewModel));
+            }
+            if (contentHelper == null)
+            {
+                throw new ArgumentNullException(nameof(contentHelper));
+            }
+
+            return contentHelper.AbsoluteUrl("Settings", "Home");
+        }
     }
 }

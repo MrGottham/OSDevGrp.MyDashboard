@@ -51,7 +51,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes
             ArgumentException argumentException = exception as ArgumentException;
             Assert.IsNotNull(argumentException, "An ArgumentException was not thrown.");
 
-            string expectedMessage = $"{ExpectedMessage + Environment.NewLine}Parameter name: {ExpectedParamName}"; 
+            string expectedMessage = $"{ExpectedMessage} (Parameter '{ExpectedParamName}')"; 
             Assert.IsNotNull(argumentException.Message, "The Message in the thrown ArgumentException is null.");
             Assert.AreEqual(expectedMessage, argumentException.Message, $"The Message in the thrown ArgumentException was not '{expectedMessage}' but '{argumentException.Message}'.");
  

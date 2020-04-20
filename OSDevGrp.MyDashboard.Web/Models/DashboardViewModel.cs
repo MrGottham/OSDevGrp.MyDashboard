@@ -1,18 +1,33 @@
 using System;
+using System.Runtime.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
+    [Serializable]
     public class DashboardViewModel : IViewModel
     {
+        #region Constructors
+
+        public DashboardViewModel()
+        {
+        }
+
+        protected DashboardViewModel(SerializationInfo info, StreamingContext context)
+        {
+        }
+
+        #endregion
+
         #region Properties
 
-        public IEnumerable<InformationViewModel> Informations { get; set; }
+        public List<InformationViewModel> Informations { get; set; }
 
-        public IEnumerable<ImageViewModel<InformationViewModel>> LatestInformationsWithImage { get; set; }
+        public List<ImageViewModel<InformationViewModel>> LatestInformationsWithImage { get; set; }
 
         public IEnumerable<InformationViewModel> InformationsWithImageUrl
         {
@@ -28,30 +43,44 @@ namespace OSDevGrp.MyDashboard.Web.Models
             }
         }
 
-        public IEnumerable<SystemErrorViewModel> SystemErrors { get; set; }
+        public List<SystemErrorViewModel> SystemErrors { get; set; }
 
         public DashboardSettingsViewModel Settings { get; set; }
 
         public ObjectViewModel<IRedditAuthenticatedUser> RedditAuthenticatedUser { get; set; }
 
-        public IEnumerable<ObjectViewModel<IRedditSubreddit>> RedditSubreddits { get; set; }
+        public List<ObjectViewModel<IRedditSubreddit>> RedditSubreddits { get; set; }
+
+        public static string CookieName
+        {
+            get
+            {
+                Type type = typeof(DashboardViewModel);
+                return $"{type.Namespace}.{type.Name}";
+            }
+        }
 
         #endregion
 
         #region Methods
 
-        public void ApplyRules(IDashboardRules rules)
+        public void ApplyRules(IDashboardRules rules, ICookieHelper cookieHelper)
         {
             if (rules == null)
             {
                 throw new ArgumentNullException(nameof(rules));
+            }
+            if (cookieHelper == null)
+            {
+                throw new ArgumentNullException(nameof(cookieHelper));
             }
 
             if (Settings == null)
             {
                 return;
             }
-            Settings.ApplyRules(rules);
+
+            Settings.ApplyRules(rules, cookieHelper);
         }
 
         #endregion

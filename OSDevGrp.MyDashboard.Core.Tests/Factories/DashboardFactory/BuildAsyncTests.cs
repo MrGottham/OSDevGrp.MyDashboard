@@ -15,7 +15,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
     [TestClass]
     public class BuildAsyncTests
     {
-         #region Private variables
+        #region Private variables
 
         private Mock<IDashboardContentBuilder> _dashboardContentBuilder1Mock;
         private Mock<IDashboardContentBuilder> _dashboardContentBuilder2Mock;
@@ -39,22 +39,21 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         
         [TestMethod]
         [ExpectedArgumentNullException("dashboardSettings")]
-        public void BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
         {
             IDashboardFactory sut = CreateSut();
 
-            sut.BuildAsync(null);
+            await sut.BuildAsync(null);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertShouldBuildWasCalledOnEachDashboardContentBuilder()
+        public async Task BuildAsync_WhenCalled_AssertShouldBuildWasCalledOnEachDashboardContentBuilder()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IDashboardFactory sut = CreateSut();
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _dashboardContentBuilder1Mock.Verify(m => m.ShouldBuild(It.Is<IDashboardSettings>(value => value == dashboardSettings)), Times.Once);
             _dashboardContentBuilder2Mock.Verify(m => m.ShouldBuild(It.Is<IDashboardSettings>(value => value == dashboardSettings)), Times.Once);
@@ -62,14 +61,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertBuildAsyncWasCalledOnEachDashboardContentBuilderWhichShouldBuild()
+        public async Task BuildAsync_WhenCalled_AssertBuildAsyncWasCalledOnEachDashboardContentBuilderWhichShouldBuild()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IDashboardFactory sut = CreateSut();
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _dashboardContentBuilder1Mock.Verify(m => m.BuildAsync(
                     It.Is<IDashboardSettings>(value => value == dashboardSettings),
@@ -86,14 +84,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndFirstDashboardBuilderShouldNotBuild_AssertBuildAsyncWasNotCalledOnFirstDashboardContentBuilder()
+        public async Task BuildAsync_WhenCalledAndFirstDashboardBuilderShouldNotBuild_AssertBuildAsyncWasNotCalledOnFirstDashboardContentBuilder()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IDashboardFactory sut = CreateSut(dashboardContentBuilder1ShouldBuild: false);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _dashboardContentBuilder1Mock.Verify(m => m.BuildAsync(
                     It.IsAny<IDashboardSettings>(),
@@ -102,14 +99,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndSecondDashboardBuilderShouldNotBuild_AssertBuildAsyncWasNotCalledOnSecondDashboardContentBuilder()
+        public async Task BuildAsync_WhenCalledAndSecondDashboardBuilderShouldNotBuild_AssertBuildAsyncWasNotCalledOnSecondDashboardContentBuilder()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IDashboardFactory sut = CreateSut(dashboardContentBuilder2ShouldBuild: false);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _dashboardContentBuilder2Mock.Verify(m => m.BuildAsync(
                     It.IsAny<IDashboardSettings>(),
@@ -118,14 +114,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndThirdDashboardBuilderShouldNotBuild_AssertBuildAsyncWasNotCalledOnThirdDashboardContentBuilder()
+        public async Task BuildAsync_WhenCalledAndThirdDashboardBuilderShouldNotBuild_AssertBuildAsyncWasNotCalledOnThirdDashboardContentBuilder()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IDashboardFactory sut = CreateSut(dashboardContentBuilder3ShouldBuild: false);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _dashboardContentBuilder3Mock.Verify(m => m.BuildAsync(
                     It.IsAny<IDashboardSettings>(),
@@ -134,30 +129,27 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
+        public async Task BuildAsync_WhenCalled_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IDashboardFactory sut = CreateSut(dashboardContentBuilder3ShouldBuild: false);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _systemErrorLogic.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_ReturnsDashboard()
+        public async Task BuildAsync_WhenCalled_ReturnsDashboard()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             List<ISystemError> systemErrors = BuildSystemErrors(_random.Next(1, 10));
             IDashboardFactory sut = CreateSut(systemErrors: systemErrors);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            IDashboard dashboard = await sut.BuildAsync(dashboardSettings);
 
-            IDashboard dashboard = buildTask.Result;
             Assert.IsNotNull(dashboard);
             Assert.IsNotNull(dashboard.SystemErrors);
             Assert.AreEqual(systemErrors.Count, dashboard.SystemErrors.Count());
@@ -168,35 +160,33 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task BuildAsync_WhenCalledAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             AggregateException aggregateException = new AggregateException();
             IDashboardFactory sut = CreateSut(provokeException: aggregateException);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(ex => ex == aggregateException)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndAggregateExceptionOccurs_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
+        public async Task BuildAsync_WhenCalledAndAggregateExceptionOccurs_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             AggregateException aggregateException = new AggregateException();
             IDashboardFactory sut = CreateSut(provokeException: aggregateException);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _systemErrorLogic.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndAggregateExceptionOccurs_ReturnsDashboard()
+        public async Task BuildAsync_WhenCalledAndAggregateExceptionOccurs_ReturnsDashboard()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
@@ -204,10 +194,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             List<ISystemError> systemErrors = BuildSystemErrors(_random.Next(1, 10));
             IDashboardFactory sut = CreateSut(provokeException: aggregateException, systemErrors: systemErrors);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
-
-            IDashboard dashboard = buildTask.Result;
+            IDashboard dashboard = await sut.BuildAsync(dashboardSettings);
             Assert.IsNotNull(dashboard);
             Assert.IsNotNull(dashboard.SystemErrors);
             Assert.AreEqual(systemErrors.Count, dashboard.SystemErrors.Count());
@@ -218,35 +205,33 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task BuildAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             Exception exception = new Exception();
             IDashboardFactory sut = CreateSut(provokeException: exception);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(ex => ex == exception)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndExceptionOccurs_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
+        public async Task BuildAsync_WhenCalledAndExceptionOccurs_AssertGetSystemErrorsAsyncWasCalledOnSystemErrorLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             Exception exception = new Exception();
             IDashboardFactory sut = CreateSut(provokeException: exception);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings);
 
             _systemErrorLogic.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndExceptionOccurs_ReturnsDashboard()
+        public async Task BuildAsync_WhenCalledAndExceptionOccurs_ReturnsDashboard()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
@@ -254,10 +239,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
             List<ISystemError> systemErrors = BuildSystemErrors(_random.Next(1, 10));
             IDashboardFactory sut = CreateSut(provokeException: exception, systemErrors: systemErrors);
 
-            Task<IDashboard> buildTask = sut.BuildAsync(dashboardSettings);
-            buildTask.Wait();
-
-            IDashboard dashboard = buildTask.Result;
+            IDashboard dashboard = await sut.BuildAsync(dashboardSettings);
             Assert.IsNotNull(dashboard);
             Assert.IsNotNull(dashboard.SystemErrors);
             Assert.AreEqual(systemErrors.Count, dashboard.SystemErrors.Count());

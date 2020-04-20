@@ -42,7 +42,7 @@ namespace OSDevGrp.MyDashboard.Core.Factories
             return dashboardSettings.NumberOfNews > 0 && dashboardSettings.OnlyNsfwContent == false;
         }
 
-        public Task BuildAsync(IDashboardSettings dashboardSettings, IDashboard dashboard)
+        public async Task BuildAsync(IDashboardSettings dashboardSettings, IDashboard dashboard)
         {
             if (dashboardSettings == null)
             {
@@ -53,19 +53,16 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 throw new ArgumentNullException(nameof(dashboard));
             }
 
-            return Task.Run(async () => 
+            try
             {
-                try
-                {
-                    IEnumerable<INews> news = await _newLogic.GetNewsAsync(dashboardSettings.NumberOfNews);
+                IEnumerable<INews> news = await _newLogic.GetNewsAsync(dashboardSettings.NumberOfNews);
 
-                    dashboard.Replace(news);
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-            });
+                dashboard.Replace(news);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
         }
 
         #endregion 

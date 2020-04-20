@@ -32,28 +32,28 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
         
         [TestMethod]
         [ExpectedArgumentNullException("dashboardSettings")]
-        public void BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
         {
             IDashboard dashboard = CreateDashboard();
 
             IDashboardNewsBuilder sut = CreateSut();
 
-            sut.BuildAsync(null, dashboard);
+            await sut.BuildAsync(null, dashboard);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("dashboard")]
-        public void BuildAsync_WhenDashboardIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenDashboardIsNull_ThrowsArgumentNullException()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IDashboardNewsBuilder sut = CreateSut();
 
-            sut.BuildAsync(dashboardSettings, null);
+            await sut.BuildAsync(dashboardSettings, null);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertGetNewsAsyncWasCalledOnNewsLogic()
+        public async Task BuildAsync_WhenCalled_AssertGetNewsAsyncWasCalledOnNewsLogic()
         {
             int numberOfNews = _random.Next(25, 75);
 
@@ -62,14 +62,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
 
             IDashboardNewsBuilder sut = CreateSut();
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _newsLogicMock.Verify(m => m.GetNewsAsync(It.Is<int>(value => value == numberOfNews)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertReplaceWasCalledOnDashboardWithNews()
+        public async Task BuildAsync_WhenCalled_AssertReplaceWasCalledOnDashboardWithNews()
         {
             IEnumerable<INews> news = BuildNews(_random.Next(25, 75));
 
@@ -78,14 +77,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
 
             IDashboardNewsBuilder sut = CreateSut(news);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboardMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboardMock.Object);
 
             dashboardMock.Verify(m => m.Replace(It.Is<IEnumerable<INews>>(value => value == news)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task BuildAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IDashboard dashboard = CreateDashboard();
@@ -93,8 +91,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
             Exception exception = new Exception();
             IDashboardNewsBuilder sut = CreateSut(provokedException: exception);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(ex => ex == exception)), Times.Once);
         }

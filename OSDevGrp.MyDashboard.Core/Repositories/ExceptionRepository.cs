@@ -34,7 +34,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 }
             });
         }
-        
+
         public Task<IEnumerable<ISystemError>> GetSystemErrorsAsync()
         {
             return Task.Run<IEnumerable<ISystemError>>(() =>

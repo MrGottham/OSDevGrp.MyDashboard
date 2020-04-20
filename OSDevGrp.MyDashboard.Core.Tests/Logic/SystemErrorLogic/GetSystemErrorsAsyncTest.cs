@@ -29,91 +29,79 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.SystemErrorLogic
         }
 
         [TestMethod]
-        public void GetSystemErrorsAsync_WhenCalled_ExpectNoError()
+        public async Task GetSystemErrorsAsync_WhenCalled_ExpectNoError()
         {
             ISystemErrorLogic sut = CreateSut();
 
-            Task<IEnumerable<ISystemError>> getNewsTask = sut.GetSystemErrorsAsync();
-            getNewsTask.Wait();
+            await sut.GetSystemErrorsAsync();
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetSystemErrorsAsync_WhenCalled_AssertGetSystemErrorsAsyncWasCalledOnExceptionRepository()
+        public async Task GetSystemErrorsAsync_WhenCalled_AssertGetSystemErrorsAsyncWasCalledOnExceptionRepository()
         {
             ISystemErrorLogic sut = CreateSut();
 
-            Task<IEnumerable<ISystemError>> getNewsTask = sut.GetSystemErrorsAsync();
-            getNewsTask.Wait();
+            await sut.GetSystemErrorsAsync();
 
             _exceptionRepositoryMock.Verify(m => m.GetSystemErrorsAsync(), Times.Once);
         }
 
         [TestMethod]
-        public void GetSystemErrorsAsync_WhenCalledAndGetSystemErrorsAsyncOnExceptionRepositoryReturnsNull_ReturnsEmptyCollection()
+        public async Task GetSystemErrorsAsync_WhenCalledAndGetSystemErrorsAsyncOnExceptionRepositoryReturnsNull_ReturnsEmptyCollection()
         {
             ISystemErrorLogic sut = CreateSut(getSystemErrorsAsyncReturnsNull: true);
 
-            Task<IEnumerable<ISystemError>> getNewsTask = sut.GetSystemErrorsAsync();
-            getNewsTask.Wait();
+            IEnumerable<ISystemError> result = await sut.GetSystemErrorsAsync();
 
-            IEnumerable<ISystemError> result = getNewsTask.Result;
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Any());
         }
 
         [TestMethod]
-        public void GetSystemErrorsAsync_WhenCalledAndGetSystemErrorsAsyncOnExceptionRepositoryReturnsEmptyCollection_ReturnsEmptyCollection()
+        public async Task GetSystemErrorsAsync_WhenCalledAndGetSystemErrorsAsyncOnExceptionRepositoryReturnsEmptyCollection_ReturnsEmptyCollection()
         {
             IEnumerable<ISystemError> systemErrors = BuildSystemErrors(numberOfSystemErrors: 0);
             ISystemErrorLogic sut = CreateSut(systemErrors: systemErrors);
 
-            Task<IEnumerable<ISystemError>> getNewsTask = sut.GetSystemErrorsAsync();
-            getNewsTask.Wait();
+            IEnumerable<ISystemError> result = await sut.GetSystemErrorsAsync();
 
-            IEnumerable<ISystemError> result = getNewsTask.Result;
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Any());
         }
 
         [TestMethod]
-        public void GetSystemErrorsAsync_WhenCalledAndGetSystemErrorsAsyncOnExceptionRepositoryReturnsCollection_ReturnsEmptyCollection()
+        public async Task GetSystemErrorsAsync_WhenCalledAndGetSystemErrorsAsyncOnExceptionRepositoryReturnsCollection_ReturnsEmptyCollection()
         {
             IEnumerable<ISystemError> systemErrors = BuildSystemErrors(numberOfSystemErrors: 100);
             ISystemErrorLogic sut = CreateSut(systemErrors: systemErrors);
 
-            Task<IEnumerable<ISystemError>> getNewsTask = sut.GetSystemErrorsAsync();
-            getNewsTask.Wait();
+            IEnumerable<ISystemError> result = await sut.GetSystemErrorsAsync();
 
-            IEnumerable<ISystemError> result = getNewsTask.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(100, result.Count());
             Assert.IsTrue(result.All(systemError => systemErrors.Contains(systemError)));
         }
 
         [TestMethod]
-        public void GetSystemErrorsAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetSystemErrorsAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             Exception exception = new Exception();
             ISystemErrorLogic sut =  CreateSut(provokedException: exception);
 
-            Task<IEnumerable<ISystemError>> getNewsTask = sut.GetSystemErrorsAsync();
-            getNewsTask.Wait();
+            await sut.GetSystemErrorsAsync();
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(ex => ex == exception)), Times.Once);
         }
 
         [TestMethod]
-        public void GetSystemErrorsAsync_WhenCalledAndExceptionOccurs_ReturnsEmptyCollection()
+        public async Task GetSystemErrorsAsync_WhenCalledAndExceptionOccurs_ReturnsEmptyCollection()
         {
             Exception exception = new Exception();
             ISystemErrorLogic sut =  CreateSut(provokedException: exception);
 
-            Task<IEnumerable<ISystemError>> getNewsTask = sut.GetSystemErrorsAsync();
-            getNewsTask.Wait();
-
-            IEnumerable<ISystemError> result = getNewsTask.Result;
+            IEnumerable<ISystemError> result = await sut.GetSystemErrorsAsync();
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Any());
         }

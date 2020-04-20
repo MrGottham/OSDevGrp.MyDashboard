@@ -12,15 +12,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.HttpHelper
     {
         [TestMethod]
         [ExpectedArgumentNullException("url")]
-        public void ReadAsync_WhenUrlIsNull_ThrowsArgumentNullException()
+        public async Task ReadAsync_WhenUrlIsNull_ThrowsArgumentNullException()
         {
             IHttpHelper sut = CreateSut();
 
-            sut.ReadAsync(null);
+            await sut.ReadAsync(null);
         }
 
         [TestMethod]
-        public void ReadAsync_WhenCalled_ThrowsAggregateException()
+        public async Task ReadAsync_WhenCalled_ThrowsHttpRequestException()
         {
             Uri url = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
 
@@ -28,27 +28,17 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.HttpHelper
 
             try
             {
-                Task<byte[]> readTask = sut.ReadAsync(url);
-                readTask.Wait();
+                await sut.ReadAsync(url);
 
-                Assert.Fail("An AggregateException was expected.");
+                Assert.Fail("An HttpRequestException was expected.");
             }
-            catch (AggregateException aggregateException)
+            catch (HttpRequestException)
             {
-                aggregateException.Handle(ex => {
-                    if (ex is HttpRequestException)
-                    {
-                        return true;
-                    }
-                    Assert.IsInstanceOfType(ex, typeof(Exception));
-                    Assert.IsNotNull(ex.Message);
-                    Assert.AreEqual($"Unable to perform the operation ({url.AbsoluteUri}): Not Found", ex.Message);
-                    return true;
-                });
             }
-            catch
+            catch (Exception ex)
             {
-                Assert.Fail("An AggregateException was expected.");
+                Assert.IsNotNull(ex.Message);
+                Assert.AreEqual($"Unable to perform the operation ({url.AbsoluteUri}): Not Found", ex.Message);
             }
         }
 

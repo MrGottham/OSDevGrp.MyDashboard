@@ -13,39 +13,37 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.ViewModelBuilderBase
     {
         [TestMethod]
         [ExpectedArgumentNullExceptionAttribute("input")]
-        public void BuildAsync_WhenInputIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenInputIsNull_ThrowsArgumentNullException()
         {
             MyViewModelBuilder sut = CreateSut();
 
-            sut.BuildAsync(null);
+            await sut.BuildAsync(null);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertBuildWasCalledOnBaseClass()
+        public async Task BuildAsync_WhenCalled_AssertBuildWasCalledOnBaseClass()
         {
             IDashboard dashboard = CreateDashboard();
 
             MyViewModelBuilder sut = CreateSut();
             Assert.IsFalse(sut.BuildWasCalled);
 
-            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboard);
 
             Assert.IsTrue(sut.BuildWasCalled);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_ReturnsViewModelFromBaseClass()
+        public async Task BuildAsync_WhenCalled_ReturnsViewModelFromBaseClass()
         {
             IDashboard dashboard = CreateDashboard();
 
             DashboardViewModel dashboardViewModelToBuild = new DashboardViewModel();
             MyViewModelBuilder sut = CreateSut(dashboardViewModelToBuild);
 
-            Task<DashboardViewModel> buildTask = sut.BuildAsync(dashboard);
-            buildTask.Wait();
+            DashboardViewModel result = await sut.BuildAsync(dashboard);
 
-            Assert.AreEqual(dashboardViewModelToBuild, buildTask.Result);
+            Assert.AreEqual(dashboardViewModelToBuild, result);
         }
 
         private MyViewModelBuilder CreateSut(DashboardViewModel dashboardViewModelToBuild = null)

@@ -64,126 +64,106 @@ namespace OSDevGrp.MyDashboard.Core.Logic
 
         #region Methods
         
-        public Task<IRedditAccessToken> RenewAccessTokenAsync(IRedditAccessToken accessToken)
+        public async Task<IRedditAccessToken> RenewAccessTokenAsync(IRedditAccessToken accessToken)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException(nameof(accessToken));
             }
 
-            return Task.Run<IRedditAccessToken>(() => 
+            try
             {
-                try
+                if (DateTime.Now <= accessToken.Expires)
                 {
-                    if (DateTime.Now <= accessToken.Expires)
-                    {
-                        return accessToken;
-                    }
+                    return accessToken;
+                }
 
-                    Task<IRedditAccessToken> renewRedditAccessTokenTask = _redditAccessTokenProviderFactory.RenewRedditAccessTokenAsync(accessToken.RefreshToken);
-                    renewRedditAccessTokenTask.Wait();
-
-                    return renewRedditAccessTokenTask.Result;
-                }
-                catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex);
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex);
-                }
-                return null;
-            });
+                return await _redditAccessTokenProviderFactory.RenewRedditAccessTokenAsync(accessToken.RefreshToken);
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return null;
         }
 
-        public Task<IRedditAuthenticatedUser> GetAuthenticatedUserAsync(IRedditAccessToken accessToken)
+        public async Task<IRedditAuthenticatedUser> GetAuthenticatedUserAsync(IRedditAccessToken accessToken)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException(nameof(accessToken));
             }
 
-            return Task.Run<IRedditAuthenticatedUser>(() => 
+            try
             {
-                try
+                if (_redditRateLimitLogic.WillExceedRateLimit(1))
                 {
-                    if (_redditRateLimitLogic.WillExceedRateLimit(1))
-                    {
-                        return null;
-                    }
-
-                    Task<IRedditResponse<IRedditAuthenticatedUser>> getAuthenticatedUserTask = _redditRepository.GetAuthenticatedUserAsync(accessToken);
-                    getAuthenticatedUserTask.Wait();
-
-                    IRedditResponse<IRedditAuthenticatedUser> response = getAuthenticatedUserTask.Result;
-                    if (response == null)
-                    {
-                        return null;
-                    }
-
-                    Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
-                    enforceRateLimitTask.Wait();
-
-                    return response.Data;
+                    return null;
                 }
-                catch (AggregateException ex)
+
+                IRedditResponse<IRedditAuthenticatedUser> response =  await _redditRepository.GetAuthenticatedUserAsync(accessToken);
+                if (response == null)
                 {
-                    _exceptionHandler.HandleAsync(ex).Wait();
+                    return null;
                 }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return null;
-            });
+
+                await _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
+
+                return response.Data;
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return null;
         }
 
-        public Task<IEnumerable<IRedditSubreddit>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken, bool includeNsfwContent, bool onlyNsfwContent)
+        public async Task<IEnumerable<IRedditSubreddit>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken, bool includeNsfwContent, bool onlyNsfwContent)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException(nameof(accessToken));
             }
 
-            return Task.Run<IEnumerable<IRedditSubreddit>>(() =>
+            try
             {
-                try
+                if (_redditRateLimitLogic.WillExceedRateLimit(1))
                 {
-                    if (_redditRateLimitLogic.WillExceedRateLimit(1))
-                    {
-                        return new List<IRedditSubreddit>(0);
-                    }
-
-                    Task<IRedditResponse<IRedditList<IRedditSubreddit>>> getSubredditsForAuthenticatedUserTask = _redditRepository.GetSubredditsForAuthenticatedUserAsync(accessToken);
-                    getSubredditsForAuthenticatedUserTask.Wait();
-
-                    IRedditResponse<IRedditList<IRedditSubreddit>> response = getSubredditsForAuthenticatedUserTask.Result;
-                    if (response == null)
-                    {
-                        return new List<IRedditSubreddit>(0);
-                    }
-
-                    Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
-                    enforceRateLimitTask.Wait();
-
-                    return ApplyFilters(response.Data, includeNsfwContent, onlyNsfwContent)
-                        .OrderByDescending(subreddit => subreddit.Subscribers)
-                        .ToList();
+                    return new List<IRedditSubreddit>(0);
                 }
-                catch (AggregateException ex)
+
+                IRedditResponse<IRedditList<IRedditSubreddit>> response = await _redditRepository.GetSubredditsForAuthenticatedUserAsync(accessToken);
+                if (response == null)
                 {
-                    _exceptionHandler.HandleAsync(ex).Wait();
+                    return new List<IRedditSubreddit>(0);
                 }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return new List<IRedditSubreddit>(0);
-            });
+
+                await _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
+
+                return ApplyFilters(response.Data, includeNsfwContent, onlyNsfwContent)
+                    .OrderByDescending(subreddit => subreddit.Subscribers)
+                    .ToList();
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return new List<IRedditSubreddit>(0);
         }
 
-        public Task<IRedditSubreddit> GetSpecificSubredditAsync(IRedditAccessToken accessToken, IRedditKnownSubreddit knownSubreddit)
+        public async Task<IRedditSubreddit> GetSpecificSubredditAsync(IRedditAccessToken accessToken, IRedditKnownSubreddit knownSubreddit)
         {
             if (accessToken == null)
             {
@@ -194,91 +174,78 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                 throw new ArgumentNullException(nameof(knownSubreddit));
             }
 
-            return Task.Run<IRedditSubreddit>(() => 
+            try
             {
-                try
+                if (_redditRateLimitLogic.WillExceedRateLimit(1))
                 {
-                    if (_redditRateLimitLogic.WillExceedRateLimit(1))
-                    {
-                        return null;
-                    }
-
-                    Task<IRedditResponse<IRedditSubreddit>> getSpecificSubredditTask = _redditRepository.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-                    getSpecificSubredditTask.Wait();
-
-                    IRedditResponse<IRedditSubreddit> response = getSpecificSubredditTask.Result;
-                    if (response == null)
-                    {
-                        return null;
-                    }
-
-                    Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
-                    enforceRateLimitTask.Wait();
-
-                    return response.Data;
+                    return null;
                 }
-                catch (AggregateException ex)
+
+                IRedditResponse<IRedditSubreddit> response = await _redditRepository.GetSpecificSubredditAsync(accessToken, knownSubreddit);
+                if (response == null)
                 {
-                    _exceptionHandler.HandleAsync(ex).Wait();
+                    return null;
                 }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-               return null;
-            });
+
+                await _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
+
+                return response.Data;
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return null;
         }
 
-        public Task<IEnumerable<IRedditSubreddit>> GetNsfwSubredditsAsync(IRedditAccessToken accessToken, int numberOfSubreddits)
+        public async Task<IEnumerable<IRedditSubreddit>> GetNsfwSubredditsAsync(IRedditAccessToken accessToken, int numberOfSubreddits)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException(nameof(accessToken));
             }
 
-            return Task.Run<IEnumerable<IRedditSubreddit>>(() =>
+            try
             {
-                try
+                List<IRedditKnownSubreddit> knownNsfwSubreddits = (await _dataProviderFactory.GetKnownNsfwSubredditsAsync())
+                    .OrderBy(m => m.Rank)
+                    .ThenBy(m => m.Name)
+                    .ToList();
+
+                int numberOfSubredditsToGet = Math.Min(numberOfSubreddits, knownNsfwSubreddits.Count);
+                if (_redditRateLimitLogic.WillExceedRateLimit(numberOfSubredditsToGet))
                 {
-                    Task<IEnumerable<IRedditKnownSubreddit>> getKnownNsfwSubredditsTask = _dataProviderFactory.GetKnownNsfwSubredditsAsync();
-                    getKnownNsfwSubredditsTask.Wait();
-
-                    List<IRedditKnownSubreddit> knownNsfwSubreddits = getKnownNsfwSubredditsTask.Result
-                        .OrderBy(m => m.Rank)
-                        .ThenBy(m => m.Name)
-                        .ToList();
-
-                    int numberOfSubredditsToGet = Math.Min(numberOfSubreddits, knownNsfwSubreddits.Count);
-                    if (_redditRateLimitLogic.WillExceedRateLimit(numberOfSubredditsToGet))
-                    {
-                        return new List<IRedditSubreddit>(0);
-                    }
-
-                    Task<IRedditSubreddit>[] getSpecificSubredditTaskArray = knownNsfwSubreddits.Take(numberOfSubredditsToGet)
-                        .Select(knownNsfwSubreddit => GetSpecificSubredditAsync(accessToken, knownNsfwSubreddit))
-                        .ToArray();
-                    Task.WaitAll(getSpecificSubredditTaskArray);
-
-                    return getSpecificSubredditTaskArray
-                        .Where(getSpecificSubredditTask => getSpecificSubredditTask.IsCompleted && getSpecificSubredditTask.IsFaulted == false && getKnownNsfwSubredditsTask.IsCanceled == false)
-                        .Select(getSpecificSubredditTask => getSpecificSubredditTask.Result)
-                        .Where(subreddit => subreddit != null)
-                        .OrderByDescending(subreddit => subreddit.Subscribers)
-                        .ToList();
+                    return new List<IRedditSubreddit>(0);
                 }
-                catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return new List<IRedditSubreddit>(0);
-            });
+
+                Task<IRedditSubreddit>[] getSpecificSubredditTaskArray = knownNsfwSubreddits.Take(numberOfSubredditsToGet)
+                    .Select(knownNsfwSubreddit => GetSpecificSubredditAsync(accessToken, knownNsfwSubreddit))
+                    .ToArray();
+                await Task.WhenAll(getSpecificSubredditTaskArray);
+
+                return getSpecificSubredditTaskArray
+                    .Where(getSpecificSubredditTask => getSpecificSubredditTask.IsCompleted && getSpecificSubredditTask.IsFaulted == false)
+                    .Select(getSpecificSubredditTask => getSpecificSubredditTask.Result)
+                    .Where(subreddit => subreddit != null)
+                    .OrderByDescending(subreddit => subreddit.Subscribers)
+                    .ToList();
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return new List<IRedditSubreddit>(0);
         }
 
-        public Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IRedditSubreddit subreddit, bool includeNsfwContent, bool onlyNsfwContent)
+        public async Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IRedditSubreddit subreddit, bool includeNsfwContent, bool onlyNsfwContent)
         {
             if (accessToken == null)
             {
@@ -289,44 +256,37 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                 throw new ArgumentNullException(nameof(subreddit));
             }
 
-            return Task.Run<IEnumerable<IRedditLink>>(() =>
+            try
             {
-                try
+                if (_redditRateLimitLogic.WillExceedRateLimit(1))
                 {
-                    if (_redditRateLimitLogic.WillExceedRateLimit(1))
-                    {
-                        return new List<IRedditLink>(0);
-                    }
-
-                    Task<IRedditResponse<IRedditList<IRedditLink>>> getLinksTask = _redditRepository.GetLinksAsync(accessToken, subreddit);
-                    getLinksTask.Wait();
-
-                    IRedditResponse<IRedditList<IRedditLink>> response = getLinksTask.Result;
-                    if (response == null)
-                    {
-                        return new List<IRedditLink>(0);
-                    }
-
-                    Task enforceRateLimitTask = _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
-                    enforceRateLimitTask.Wait();
-
-                    return ApplyFilters(response.Data, includeNsfwContent, onlyNsfwContent)
-                        .OrderByDescending(link => link.CreatedTime)
-                        .ToList();
+                    return new List<IRedditLink>(0);
                 }
-                catch (AggregateException ex)
+
+                IRedditResponse<IRedditList<IRedditLink>> response = await _redditRepository.GetLinksAsync(accessToken, subreddit);
+                if (response == null)
                 {
-                    _exceptionHandler.HandleAsync(ex).Wait();
+                    return new List<IRedditLink>(0);
                 }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return new List<IRedditLink>(0);
-            });
+
+                await _redditRateLimitLogic.EnforceRateLimitAsync(response.RateLimitUsed, response.RateLimitRemaining, response.RateLimitResetTime, response.ReceivedTime);
+
+                return ApplyFilters(response.Data, includeNsfwContent, onlyNsfwContent)
+                    .OrderByDescending(link => link.CreatedTime)
+                    .ToList();
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return new List<IRedditLink>(0);
         }
 
-        public Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IEnumerable<IRedditSubreddit> subredditCollection, bool includeNsfwContent, bool onlyNsfwContent)
+        public async Task<IEnumerable<IRedditLink>> GetLinksAsync(IRedditAccessToken accessToken, IEnumerable<IRedditSubreddit> subredditCollection, bool includeNsfwContent, bool onlyNsfwContent)
         {
             if (accessToken == null)
             {
@@ -337,40 +297,36 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                 throw new ArgumentNullException(nameof(subredditCollection));
             }
 
-            return Task.Run<IEnumerable<IRedditLink>>(() =>
+            try
             {
-                try
+                if (_redditRateLimitLogic.WillExceedRateLimit(subredditCollection.Count()))
                 {
-                    if (_redditRateLimitLogic.WillExceedRateLimit(subredditCollection.Count()))
-                    {
-                        return new List<IRedditLink>(0);
-                    }
-
-                    Task<IEnumerable<IRedditLink>>[] getLinksTaskArray = subredditCollection
-                        .Select(subreddit => GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent))
-                        .ToArray();
-                    Task.WaitAll(getLinksTaskArray);
-
-                    Task<IRedditThingComparer<IRedditLink>> createComparerTask = _redditFilterLogic.CreateComparerAsync<IRedditLink>();
-                    createComparerTask.Wait();
-
-                    return getLinksTaskArray
-                        .Where(getLinksTask => getLinksTask.IsCompleted && getLinksTask.IsFaulted == false && getLinksTask.IsCanceled == false)
-                        .SelectMany(getLinksTask => getLinksTask.Result)
-                        .Distinct(createComparerTask.Result)
-                        .OrderByDescending(link => link.CreatedTime)
-                        .ToList();
+                    return new List<IRedditLink>(0);
                 }
-                catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return new List<IRedditLink>(0);
-            });
+
+                Task<IEnumerable<IRedditLink>>[] getLinksTaskArray = subredditCollection
+                    .Select(subreddit => GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent))
+                    .ToArray();
+                await Task.WhenAll(getLinksTaskArray);
+
+                IRedditThingComparer<IRedditLink> createComparer = await _redditFilterLogic.CreateComparerAsync<IRedditLink>();
+
+                return getLinksTaskArray
+                    .Where(getLinksTask => getLinksTask.IsCompleted && getLinksTask.IsFaulted == false && getLinksTask.IsCanceled == false)
+                    .SelectMany(getLinksTask => getLinksTask.Result)
+                    .Distinct(createComparer)
+                    .OrderByDescending(link => link.CreatedTime)
+                    .ToList();
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return new List<IRedditLink>(0);
         }
 
         private IEnumerable<T> ApplyFilters<T>(IEnumerable<T> filterableCollection, bool includeNsfwContent, bool onlyNsfwContent) where T : IRedditFilterable
@@ -403,10 +359,7 @@ namespace OSDevGrp.MyDashboard.Core.Logic
                 throw new ArgumentNullException(nameof(filterTaskGetter));
             }
 
-            Task<IEnumerable<T>> filterTask = filterTaskGetter(filterableCollection);
-            filterTask.Wait();
-
-            return filterTask.Result;
+            return filterTaskGetter(filterableCollection).GetAwaiter().GetResult();
         }
 
         #endregion

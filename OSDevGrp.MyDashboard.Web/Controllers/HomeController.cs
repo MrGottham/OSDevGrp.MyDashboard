@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
-using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Controllers
@@ -20,15 +19,16 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         private readonly IDashboardFactory _dashboardFactory;
         private readonly IViewModelBuilder<DashboardViewModel, IDashboard> _dashboardViewModelBuilder;
+        private readonly IModelExporter<DashboardExportModel, IDashboard> _dashboardModelExporter;
         private readonly IRedditAccessTokenProviderFactory _redditAccessTokenProviderFactory;
-        private readonly IExceptionHandler _exceptionHandler;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IContentHelper _contentHelper;
+        private readonly ICookieHelper _cookieHelper;
 
         #endregion
 
         #region Constructor
 
-        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IRedditAccessTokenProviderFactory redditAccessTokenProviderFactory, IExceptionHandler exceptionHandler, IHttpContextAccessor httpContextAccessor)
+        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IModelExporter<DashboardExportModel, IDashboard> dashboardModelExporter, IRedditAccessTokenProviderFactory redditAccessTokenProviderFactory, IContentHelper contentHelper, ICookieHelper cookieHelper)
         {
             if (dashboardFactory == null)
             {
@@ -38,49 +38,113 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 throw new ArgumentNullException(nameof(dashboardViewModelBuilder));
             }
+            if (dashboardModelExporter == null)
+            {
+                throw new ArgumentNullException(nameof(dashboardModelExporter));
+            }
             if (redditAccessTokenProviderFactory == null)
             {
                 throw new ArgumentNullException(nameof(redditAccessTokenProviderFactory));
             }
-            if (exceptionHandler == null)
+            if (contentHelper == null)
             {
-                throw new ArgumentNullException(nameof(exceptionHandler));
+                throw new ArgumentNullException(nameof(contentHelper));
             }
-            if (httpContextAccessor == null)
+            if (cookieHelper == null)
             {
-                throw new ArgumentNullException(nameof(httpContextAccessor));
+                throw new ArgumentNullException(nameof(cookieHelper));
             }
 
             _dashboardFactory = dashboardFactory;
             _dashboardViewModelBuilder = dashboardViewModelBuilder;
+            _dashboardModelExporter = dashboardModelExporter;
             _redditAccessTokenProviderFactory = redditAccessTokenProviderFactory;
-            _exceptionHandler = exceptionHandler;
-            _httpContextAccessor = httpContextAccessor;
+            _contentHelper = contentHelper;
+            _cookieHelper = cookieHelper;
         }
 
         #endregion
 
         #region Methods
 
+        [HttpGet]
         public IActionResult Index()
         {
-            IDashboardSettings defaultDashboardSettings = new DashboardSettings
+            DashboardSettingsViewModel defaultDashboardSettingsViewModel = new DashboardSettingsViewModel
             {
                 NumberOfNews = 100,
                 UseReddit = false,
-                RedditAccessToken = null,
+                AllowNsfwContent = false,
                 IncludeNsfwContent = false,
-                OnlyNsfwContent = false
+                OnlyNsfwContent = false,
+                RedditAccessToken = null,
+                ExportData = false
             };
 
-            DashboardSettingsViewModel dashboardSettingsViewModel = DashboardSettingsViewModel.Create(_httpContextAccessor.HttpContext);
-            
-            return GenerateDashboardView(dashboardSettingsViewModel == null ? defaultDashboardSettings : dashboardSettingsViewModel.ToDashboardSettings());
+            DashboardSettingsViewModel dashboardSettingsViewModel = _cookieHelper.ToDashboardSettingsViewModel();
+
+            return View("Index", dashboardSettingsViewModel ?? defaultDashboardSettingsViewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Build(string dashboardSettings)
+        {
+            if (string.IsNullOrWhiteSpace(dashboardSettings))
+            {
+                throw new ArgumentNullException(nameof(dashboardSettings));
+            }
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = _contentHelper.ToDashboardSettingsViewModel(dashboardSettings);
+            if (dashboardSettingsViewModel == null)
+            {
+                return BadRequest();
+            }
+
+            IDashboard dashboard = await _dashboardFactory.BuildAsync(dashboardSettingsViewModel.ToDashboardSettings());
+            DashboardViewModel dashboardViewModel = await _dashboardViewModelBuilder.BuildAsync(dashboard);
+
+            return PartialView("_MainContentPartial", dashboardViewModel);
+        }
+
+        [HttpGet]
+        public IActionResult TopContent()
+        {
+            DashboardViewModel dashboardViewModel = _cookieHelper.ToDashboardViewModel();
+            if (dashboardViewModel == null)
+            {
+                return PartialView("_EmptyContentPartial");
+            }
+
+            return PartialView("_TopContentPartial", dashboardViewModel);
+        }
+
+        [HttpGet]
+        public IActionResult SubContent()
+        {
+            DashboardViewModel dashboardViewModel = _cookieHelper.ToDashboardViewModel();
+            if (dashboardViewModel == null)
+            {
+                return PartialView("_EmptyContentPartial");
+            }
+
+            return PartialView("_SubContentPartial", dashboardViewModel);
+        }
+
+        [HttpGet]
+        public IActionResult Settings()
+        {
+            DashboardSettingsViewModel dashboardSettingsViewModel = _cookieHelper.ToDashboardSettingsViewModel();
+            if (dashboardSettingsViewModel == null)
+            {
+                return BadRequest();
+            }
+
+            return PartialView("_DashboardSettingsPartial", dashboardSettingsViewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Commit(DashboardSettingsViewModel dashboardSettingsViewModel)
+        public async Task<IActionResult> Commit(DashboardSettingsViewModel dashboardSettingsViewModel)
         {
             if (dashboardSettingsViewModel == null)
             {
@@ -94,13 +158,17 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
             if (dashboardSettingsViewModel.UseReddit && string.IsNullOrWhiteSpace(dashboardSettingsViewModel.RedditAccessToken))
             {
-                return AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModel, _httpContextAccessor.HttpContext);
+                return await AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModel);
             }
-            
-            return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
+
+            dashboardSettingsViewModel.IncludeNsfwContent = dashboardSettingsViewModel.UseReddit ? dashboardSettingsViewModel.NotNullableIncludeNsfwContent : (bool?) null;
+            dashboardSettingsViewModel.OnlyNsfwContent = dashboardSettingsViewModel.UseReddit ? dashboardSettingsViewModel.NotNullableOnlyNsfwContent : (bool?) null;
+
+            return View("Index", dashboardSettingsViewModel);
         }
 
-        public IActionResult RedditCallback(string code, string state, string error = null)
+        [HttpGet]
+        public async Task<IActionResult> RedditCallback(string code, string state, string error = null)
         {
             if (string.IsNullOrWhiteSpace(code))
             {
@@ -111,19 +179,31 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
                 throw new ArgumentNullException(nameof(state));
             }
 
-            DashboardSettingsViewModel dashboardSettingsViewModel = DashboardSettingsViewModel.Create(state);
-            IDashboardSettings dashboardSettings = dashboardSettingsViewModel.ToDashboardSettings();
-
             if (string.IsNullOrWhiteSpace(error) == false)
             {
-                return HandleErrorFromReddit(error, dashboardSettings);
+                return Unauthorized($"Unable to get the access token from Reddit: {error}");
             }
 
-            IRedditAccessToken redditAccessToken = GetRedditAccessToken(code, _httpContextAccessor.HttpContext);
-            dashboardSettings.UseReddit = redditAccessToken != null;
-            dashboardSettings.RedditAccessToken = redditAccessToken;
+            DashboardSettingsViewModel dashboardSettingsViewModel = _contentHelper.ToDashboardSettingsViewModel(state);
+            if (dashboardSettingsViewModel == null)
+            {
+                return BadRequest();    
+            }
 
-            return GenerateDashboardView(dashboardSettings);
+            IRedditAccessToken redditAccessToken = await GetRedditAccessTokenAsync(code);
+            if (redditAccessToken != null)
+            {
+                dashboardSettingsViewModel.RedditAccessToken = redditAccessToken.ToBase64();
+                return View("Index", dashboardSettingsViewModel);
+            }
+
+            dashboardSettingsViewModel.UseReddit = false;
+            dashboardSettingsViewModel.AllowNsfwContent = false;
+            dashboardSettingsViewModel.IncludeNsfwContent = false;
+            dashboardSettingsViewModel.OnlyNsfwContent = false;
+            dashboardSettingsViewModel.RedditAccessToken = null;
+
+            return View("Index", dashboardSettingsViewModel);
         }
 
         [HttpPost]
@@ -134,140 +214,89 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 throw new ArgumentNullException(nameof(systemErrorViewModel));
             }
+
             return View("SystemError", systemErrorViewModel);
         }
 
+        [HttpGet]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
 
-        private IActionResult GenerateDashboardView(IDashboardSettings dashboardSettings)
+        [HttpGet("/api/export")]
+        public async Task<IActionResult> Export(int numberOfNews = 100, [FromHeader]string redditAccessToken = null, bool includeNsfwContent = false, bool onlyNsfwContent = false)
         {
-            if (dashboardSettings == null)
+            if (numberOfNews < 0)
             {
-                throw new ArgumentNullException(nameof(dashboardSettings));
+                return BadRequest($"The submitted value for '{nameof(numberOfNews)}' cannot be lower than 0.");
+            }
+            if (numberOfNews > 250)
+            {
+                return BadRequest($"The submitted value for '{nameof(numberOfNews)}' cannot be greater than 250.");
             }
 
-            try
+            IRedditAccessToken token = null;
+            if (string.IsNullOrWhiteSpace(redditAccessToken) == false)
             {
-                Task<IDashboard> buildDashboardTask = _dashboardFactory.BuildAsync(dashboardSettings);
-                buildDashboardTask.Wait();
+                try
+                {
+                    token = RedditAccessToken.Create(redditAccessToken);
+                }
+                catch (SerializationException)
+                {
+                    return BadRequest($"The submitted value for '{nameof(redditAccessToken)}' is invalid.");
+                }
+                catch (FormatException)
+                {
+                    return BadRequest($"The submitted value for '{nameof(redditAccessToken)}' is invalid.");
+                }
+            }
 
-                Task<DashboardViewModel> buildDashboardViewModelTask = _dashboardViewModelBuilder.BuildAsync(buildDashboardTask.Result);
-                buildDashboardViewModelTask.Wait();
+            DashboardSettingsViewModel dashboardSettingsViewModel = new DashboardSettingsViewModel
+            {
+                NumberOfNews = numberOfNews,
+                UseReddit = token != null,
+                AllowNsfwContent = token != null ? includeNsfwContent || onlyNsfwContent : false,
+                IncludeNsfwContent = token != null ? includeNsfwContent : false,
+                NotNullableIncludeNsfwContent = token != null ? includeNsfwContent : false,
+                OnlyNsfwContent = token != null ? onlyNsfwContent : false,
+                NotNullableOnlyNsfwContent = token != null ? onlyNsfwContent : false,
+                RedditAccessToken = token?.ToBase64(),
+                ExportData = true
+            };
+            IDashboard dashboard = await _dashboardFactory.BuildAsync(dashboardSettingsViewModel.ToDashboardSettings());
 
-                return View("Index", buildDashboardViewModelTask.Result);
-            }
-            catch (AggregateException aggregateException)
-            {
-                _exceptionHandler.HandleAsync(aggregateException).Wait();
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _exceptionHandler.HandleAsync(ex).Wait();
-                throw;
-            }
+            DashboardExportModel dashboardExportModel = await _dashboardModelExporter.ExportAsync(dashboard);
+
+            return Ok(dashboardExportModel);
         }
 
-        private IActionResult AcquireRedditAuthorizationTokenAsync(DashboardSettingsViewModel dashboardSettingsViewModel, HttpContext httpContext)
+        private async Task<IActionResult> AcquireRedditAuthorizationTokenAsync(DashboardSettingsViewModel dashboardSettingsViewModel)
         {
             if (dashboardSettingsViewModel == null)
             {
                 throw new ArgumentNullException(nameof(dashboardSettingsViewModel));
             }
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
 
-            try
-            {
-                string dashboardSettingsViewModelAsBase64 = dashboardSettingsViewModel.ToBase64();
-                Uri redirectUrl = GetRedditCallbackUri(httpContext);
+            string dashboardSettingsViewModelAsBase64 = _contentHelper.ToBase64String(dashboardSettingsViewModel);
+            Uri redirectUrl = new Uri(_contentHelper.AbsoluteUrl("RedditCallback", "Home"));
 
-                Task<Uri> acquireRedditAccessTokenTask = _redditAccessTokenProviderFactory.AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModelAsBase64, redirectUrl);
-                acquireRedditAccessTokenTask.Wait();
-                
-                return Redirect(acquireRedditAccessTokenTask.Result.AbsoluteUri);
-            }
-            catch (AggregateException aggregateException)
-            {
-                _exceptionHandler.HandleAsync(aggregateException).Wait();
-            }
-            catch (Exception ex)
-            {
-                _exceptionHandler.HandleAsync(ex).Wait();
-            }
-            dashboardSettingsViewModel.UseReddit = false;
-            dashboardSettingsViewModel.RedditAccessToken = null;
-            return GenerateDashboardView(dashboardSettingsViewModel.ToDashboardSettings());
+            Uri acquireRedditAuthorizationTokenUrl = await _redditAccessTokenProviderFactory.AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModelAsBase64, redirectUrl);
+
+            return Redirect(acquireRedditAuthorizationTokenUrl.AbsoluteUri);
         }
 
-        private IRedditAccessToken GetRedditAccessToken(string code, HttpContext httpContext)
+        private async Task<IRedditAccessToken> GetRedditAccessTokenAsync(string code)
         {
             if (string.IsNullOrWhiteSpace(code))
             {
                 throw new ArgumentNullException(nameof(code));
             }
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-            
-            try
-            {
-                Uri redirectUrl = GetRedditCallbackUri(httpContext);
 
-                Task<IRedditAccessToken> getRedditAccessTokenTask = _redditAccessTokenProviderFactory.GetRedditAccessTokenAsync(code, redirectUrl);
-                getRedditAccessTokenTask.Wait();
+            Uri redirectUrl = new Uri(_contentHelper.AbsoluteUrl("RedditCallback", "Home"));
 
-                return getRedditAccessTokenTask.Result;
-            }
-            catch (AggregateException aggregateException)
-            {
-                _exceptionHandler.HandleAsync(aggregateException).Wait();
-            }
-            catch (Exception ex)
-            {
-                _exceptionHandler.HandleAsync(ex).Wait();
-            }
-            return null;
-        }
-
-        private IActionResult HandleErrorFromReddit(string error, IDashboardSettings dashboardSettings)
-        {
-            if (string.IsNullOrWhiteSpace(error))
-            {
-                throw new ArgumentNullException(nameof(error));
-            }
-            if (dashboardSettings == null)
-            {
-                throw new ArgumentNullException(nameof(dashboardSettings));
-            }
-            
-            try
-            {
-                throw new Exception($"Unable to get the access token from Reddit: {error}");
-            }
-            catch (Exception ex)
-            {
-                _exceptionHandler.HandleAsync(ex).Wait();
-            }
-
-            dashboardSettings.UseReddit = false;
-            dashboardSettings.RedditAccessToken = null;
-            return GenerateDashboardView(dashboardSettings);
-        }
-
-        private Uri GetRedditCallbackUri(HttpContext httpContext)
-        {
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-            return new Uri($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/Home/RedditCallback");
+            return await _redditAccessTokenProviderFactory.GetRedditAccessTokenAsync(code, redirectUrl);
         }
 
         #endregion

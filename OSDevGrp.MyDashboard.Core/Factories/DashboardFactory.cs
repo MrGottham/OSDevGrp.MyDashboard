@@ -46,41 +46,38 @@ namespace OSDevGrp.MyDashboard.Core.Factories
 
         #region Methods
 
-        public Task<IDashboard> BuildAsync(IDashboardSettings dashboardSettings)
+        public async Task<IDashboard> BuildAsync(IDashboardSettings dashboardSettings)
         {
             if (dashboardSettings == null)
             {
                 throw new ArgumentNullException(nameof(dashboardSettings));
             }
 
-            return Task.Run<IDashboard>(async () =>
+            IDashboard dashboard = new Dashboard();
+            try
             {
-                IDashboard dashboard = new Dashboard();
-                try
-                {
-                    Task[] dashboardContentBuilderTasks = _dashboardContentBuilderCollection
-                        .Where(dashboardContentBuilder => dashboardContentBuilder.ShouldBuild(dashboardSettings))
-                        .Select(dashboardContentBuilder => dashboardContentBuilder.BuildAsync(dashboardSettings, dashboard))
-                        .ToArray();
-                    Task.WaitAll(dashboardContentBuilderTasks);
-                }
-                catch (AggregateException ex)
-                {
-                    await _exceptionHandler.HandleAsync(ex);
-                }
-                catch (Exception ex)
-                {
-                    await _exceptionHandler.HandleAsync(ex);
-                }
-                finally
-                {
-                    dashboard.Replace(dashboardSettings);
-                    
-                    IEnumerable<ISystemError> systemErrors = await _systemErrorLogic.GetSystemErrorsAsync();
-                    dashboard.Replace(systemErrors.OrderByDescending(systemError => systemError.Timestamp));
-                }
-                return dashboard;
-            });
+                Task[] dashboardContentBuilderTasks = _dashboardContentBuilderCollection
+                    .Where(dashboardContentBuilder => dashboardContentBuilder.ShouldBuild(dashboardSettings))
+                    .Select(dashboardContentBuilder => dashboardContentBuilder.BuildAsync(dashboardSettings, dashboard))
+                    .ToArray();
+                await Task.WhenAll(dashboardContentBuilderTasks);
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            finally
+            {
+                dashboard.Replace(dashboardSettings);
+
+                IEnumerable<ISystemError> systemErrors = await _systemErrorLogic.GetSystemErrorsAsync();
+                dashboard.Replace(systemErrors.OrderByDescending(systemError => systemError.Timestamp));
+            }
+            return dashboard;
         }
 
         #endregion 

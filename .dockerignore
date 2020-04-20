@@ -1,6 +1,7 @@
 # Directories
- bin/
- obj/
+**/bin/
+**/obj/
+**/out/
 
- # Files
- Dockerfile
+# Files
+Dockerfile

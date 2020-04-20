@@ -1,5 +1,6 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
@@ -10,6 +11,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.Randomizer
     {
         #region Private variables
 
+        private Mock<ISeedGenerator> _seedGeneratorMock;
         private Random _random;
 
         #endregion
@@ -17,6 +19,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.Randomizer
         [TestInitialize]
         public void TestInitialize()
         {
+            _seedGeneratorMock = new Mock<ISeedGenerator>();
             _random = new Random(DateTime.Now.Millisecond);
         }
 
@@ -47,7 +50,10 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.Randomizer
 
         private IRandomizer CreateSut()
         {
-            return new OSDevGrp.MyDashboard.Core.Infrastructure.Randomizer();
+            _seedGeneratorMock.Setup(m => m.Generate())
+                .Returns(_random.Next(100));
+
+            return new Core.Infrastructure.Randomizer(_seedGeneratorMock.Object);
         }
     }
 }

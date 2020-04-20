@@ -1,0 +1,44 @@
+@model DashboardViewModel
+@if (Model.LatestInformationsWithImage != null && Model.LatestInformationsWithImage.Any() && Model.RedditAuthenticatedUser != null)
+{
+    <div class="row">
+        <div class="col-7 col-sm-7 col-md-8 col-lg-8 col-xl-9">
+            @await Html.PartialAsync("_CarouselPartial", Model.LatestInformationsWithImage)
+        </div>
+        <div class="col-5 col-sm-5 col-md-4 col-lg-4 col-xl-3">
+            <div class="card-deck mb-3">
+                @Html.Raw(Model.RedditAuthenticatedUser.Html)
+            </div>
+        </div>
+    </div>
+}
+else if (Model.LatestInformationsWithImage != null && Model.LatestInformationsWithImage.Any())
+{
+    <div class="row">
+        <div class="d-none d-md-block d-lg-block d-xl-block col-md-1 col-lg-1 col-xl-2">
+        </div>
+        <div class="col-sm-12 col-md-10 col-lg-10 col-xl-8">
+            @await Html.PartialAsync("_CarouselPartial", Model.LatestInformationsWithImage)
+        </div>
+        <div class="d-none d-md-block d-lg-block d-xl-block col-md-1 col-lg-1 col-xl-2">
+        </div>
+    </div>
+}
+else if (Model.RedditAuthenticatedUser != null)
+{
+    <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+            <div class="card-deck mb-3">
+                @Html.Raw(Model.RedditAuthenticatedUser.Html)
+            </div>
+        </div>
+        <div class="d-none d-md-block d-lg-block d-xl-block col-md-4 col-lg-4 col-xl-4">
+        </div>
+        <div class="d-none d-md-block d-lg-block d-xl-block col-md-4 col-lg-4 col-xl-4">
+        </div>
+    </div>
+}
+else
+{
+    <div></div>
+}

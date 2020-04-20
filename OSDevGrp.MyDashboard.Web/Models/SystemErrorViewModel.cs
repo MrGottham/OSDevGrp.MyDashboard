@@ -1,10 +1,24 @@
 using System;
+using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
+    [Serializable]
     public class SystemErrorViewModel : IViewModel
     {
+        #region Constructors
+
+        public SystemErrorViewModel()
+        {
+        }
+
+        protected SystemErrorViewModel(SerializationInfo info, StreamingContext context)
+        {
+        }
+
+        #endregion
+
         #region Properties
 
         public string SystemErrorIdentifier { get; set; }

@@ -33,44 +33,43 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         
         [TestMethod]
         [ExpectedArgumentNullException("dashboardSettings")]
-        public void BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
         {
             const IDashboardSettings dashboardSettings = null; 
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            sut.BuildAsync(dashboardSettings, dashboard);
+            await sut.BuildAsync(dashboardSettings, dashboard);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("dashboard")]
-        public void BuildAsync_WhenDashboardIsNull_ThrowsArgumentNullException()
+        public async Task BuildAsync_WhenDashboardIsNull_ThrowsArgumentNullException()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings(); 
             const IDashboard dashboard = null;
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            sut.BuildAsync(dashboardSettings, dashboard);
+            await sut.BuildAsync(dashboardSettings, dashboard);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertRedditAccessTokenWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalled_AssertRedditAccessTokenWasCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock(); 
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
 
             dashboardSettingsMock.Verify(m => m.RedditAccessToken, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertExpiresWasCalledOnRedditAccessToken()
+        public async Task BuildAsync_WhenCalled_AssertExpiresWasCalledOnRedditAccessToken()
         {
             Mock<IRedditAccessToken> redditAccessTokenMock = CreateRedditAccessTokenMock();
             IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessTokenMock.Object);
@@ -78,14 +77,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             redditAccessTokenMock.Verify(m => m.Expires, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRenewAccessTokenAsyncWasNotCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRenewAccessTokenAsyncWasNotCalledOnRedditLogic()
         {
             DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300));
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
@@ -94,14 +92,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.RenewAccessTokenAsync(It.IsAny<IRedditAccessToken>()), Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRedditAccessTokenSetterWasNotCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertRedditAccessTokenSetterWasNotCalledOnDashboardSettings()
         {
             DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300));
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
@@ -110,14 +107,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
 
             dashboardSettingsMock.VerifySet(m => m.RedditAccessToken = It.IsAny<IRedditAccessToken>(), Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertGetAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledWithUnexpiredRedditAccessToken_AssertGetAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
             IDashboardSettings dashboardSettings = CreateDashboardSettings(redditAccessToken: redditAccessToken);
@@ -125,14 +121,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetAuthenticatedUserAsync(It.Is<IRedditAccessToken>(value => value == redditAccessToken)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithExpiredRedditAccessToken_AssertRenewAccessTokenAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledWithExpiredRedditAccessToken_AssertRenewAccessTokenAsyncWasCalledOnRedditLogic()
         {
             DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
@@ -141,14 +136,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.RenewAccessTokenAsync(It.Is<IRedditAccessToken>(value => value == redditAccessToken)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNull_AssertRedditAccessTokenSetterWasNotCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNull_AssertRedditAccessTokenSetterWasNotCalledOnDashboardSettings()
         {
             DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
@@ -158,14 +152,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             const IRedditAccessToken renewedRedditAccessToken = null;
             IDashboardRedditContentBuilder sut = CreateSut(renewedRedditAccessToken: renewedRedditAccessToken);
 
-            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
 
             dashboardSettingsMock.VerifySet(m => m.RedditAccessToken = It.IsAny<IRedditAccessToken>(), Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNull_AssertGetAuthenticatedUserAsyncWasNotCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNull_AssertGetAuthenticatedUserAsyncWasNotCalledOnRedditLogic()
         {
             DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
@@ -175,14 +168,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             const IRedditAccessToken renewedRedditAccessToken = null;
             IDashboardRedditContentBuilder sut = CreateSut(renewedRedditAccessToken: renewedRedditAccessToken);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetAuthenticatedUserAsync(It.IsAny<IRedditAccessToken>()), Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNotNull_AssertRedditAccessTokenSetterWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNotNull_AssertRedditAccessTokenSetterWasCalledOnDashboardSettings()
         {
             DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
@@ -192,14 +184,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAccessToken renewedRedditAccessToken = CreateRedditAccessToken();
             IDashboardRedditContentBuilder sut = CreateSut(renewedRedditAccessToken: renewedRedditAccessToken);
 
-            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
 
             dashboardSettingsMock.VerifySet(m => m.RedditAccessToken = It.Is<IRedditAccessToken>(value => value == renewedRedditAccessToken), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNotNull_AssertGetAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledWithExpiredRedditAccessTokenAndRenewedAccessTokenIsNotNull_AssertGetAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             DateTime expires = DateTime.Now.AddSeconds(_random.Next(60, 300) * -1);
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken(expires: expires);
@@ -209,64 +200,59 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAccessToken renewedRedditAccessToken = CreateRedditAccessToken();
             IDashboardRedditContentBuilder sut = CreateSut(renewedRedditAccessToken: renewedRedditAccessToken);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetAuthenticatedUserAsync(It.Is<IRedditAccessToken>(value => value == renewedRedditAccessToken)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertReplaceWasNotCalledOnDashbaordWithAuthenticatedUser()
+        public async Task BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertReplaceWasNotCalledOnDashbaordWithAuthenticatedUser()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             Mock<IDashboard> dashboardMock = CreateDashboardMock();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: false);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboardMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboardMock.Object);
 
             dashboardMock.Verify(m => m.Replace(It.IsAny<IRedditAuthenticatedUser>()), Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertIncludeNsfwContentWasNotCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertIncludeNsfwContentWasNotCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: false);
 
-            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
 
             dashboardSettingsMock.Verify(m => m.IncludeNsfwContent, Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertOnlyNsfwContentWasNotCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertOnlyNsfwContentWasNotCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: false);
 
-            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
 
             dashboardSettingsMock.Verify(m => m.OnlyNsfwContent, Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertGetSubredditsForAuthenticatedUserAsyncWasNotCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertGetSubredditsForAuthenticatedUserAsyncWasNotCalledOnRedditLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: false);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetSubredditsForAuthenticatedUserAsync(
                     It.IsAny<IRedditAccessToken>(), 
@@ -276,15 +262,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertGetNsfwSubredditsAsyncWasNotCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertGetNsfwSubredditsAsyncWasNotCalledOnRedditLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: false);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetNsfwSubredditsAsync(
                     It.IsAny<IRedditAccessToken>(), 
@@ -293,29 +278,27 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertReplaceWasNotCalledOnDashboardWithSubredditCollection()
+        public async Task BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertReplaceWasNotCalledOnDashboardWithSubredditCollection()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             Mock<IDashboard> dashboardMock = CreateDashboardMock();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: false);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboardMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboardMock.Object);
 
             dashboardMock.Verify(m => m.Replace(It.IsAny<IEnumerable<IRedditSubreddit>>()), Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertGetLinksAsyncWasNotCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertGetLinksAsyncWasNotCalledOnRedditLogic()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: false);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetLinksAsync(
                     It.IsAny<IRedditAccessToken>(), 
@@ -326,21 +309,20 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertReplaceWasNotCalledOnDashboardWithLinkCollection()
+        public async Task BuildAsync_WhenCalledAndDoesNotHaveAuthenticatedUser_AssertReplaceWasNotCalledOnDashboardWithLinkCollection()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             Mock<IDashboard> dashboardMock = CreateDashboardMock();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: false);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboardMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboardMock.Object);
 
             dashboardMock.Verify(m => m.Replace(It.IsAny<IEnumerable<IRedditLink>>()), Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertReplaceWasCalledOnDashbaordWithAuthenticatedUser()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertReplaceWasCalledOnDashbaordWithAuthenticatedUser()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             Mock<IDashboard> dashboardMock = CreateDashboardMock();
@@ -348,14 +330,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser();
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboardMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboardMock.Object);
 
             dashboardMock.Verify(m => m.Replace(It.Is<IRedditAuthenticatedUser>(value => value == redditAuthenticatedUser)), Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertOver18WasCalledOnRedditAuthenticatedUser()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertOver18WasCalledOnRedditAuthenticatedUser()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IDashboard dashboard = CreateDashboard();
@@ -363,42 +344,39 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             Mock<IRedditAuthenticatedUser> redditAuthenticatedUserMock = CreateRedditAuthenticatedUserMock();
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUserMock.Object);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             redditAuthenticatedUserMock.Verify(m => m.Over18, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertIncludeNsfwContentWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertIncludeNsfwContentWasCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true);
 
-            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
 
             dashboardSettingsMock.Verify(m => m.IncludeNsfwContent, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertOnlyNsfwContentWasCalledOnDashboardSettings()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertOnlyNsfwContentWasCalledOnDashboardSettings()
         {
             Mock<IDashboardSettings> dashboardSettingsMock = CreateDashboardSettingsMock();
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true);
 
-            Task buildTask = sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettingsMock.Object, dashboard);
 
             dashboardSettingsMock.Verify(m => m.OnlyNsfwContent, Times.Once);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserNotOver18_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserNotOver18_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -410,8 +388,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetSubredditsForAuthenticatedUserAsync(
                     It.Is<IRedditAccessToken>(value => value == redditAccessToken), 
@@ -421,7 +398,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithIncludeNsfwContent_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithIncludeNsfwContent_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             const bool includeNsfwContent = true;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -433,8 +410,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetSubredditsForAuthenticatedUserAsync(
                     It.Is<IRedditAccessToken>(value => value == redditAccessToken), 
@@ -444,7 +420,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutIncludeNsfwContent_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutIncludeNsfwContent_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             const bool includeNsfwContent = false;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -456,8 +432,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetSubredditsForAuthenticatedUserAsync(
                     It.Is<IRedditAccessToken>(value => value == redditAccessToken), 
@@ -467,7 +442,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithOnlyNsfwContent_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithOnlyNsfwContent_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;;
             const bool onlyNsfwContent = true;
@@ -479,8 +454,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetSubredditsForAuthenticatedUserAsync(
                     It.Is<IRedditAccessToken>(value => value == redditAccessToken), 
@@ -490,7 +464,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutOnlyNsfwContent_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutOnlyNsfwContent_AssertGetSubredditsForAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;;
             const bool onlyNsfwContent = false;
@@ -502,8 +476,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetSubredditsForAuthenticatedUserAsync(
                     It.Is<IRedditAccessToken>(value => value == redditAccessToken), 
@@ -513,7 +486,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserNotOver18_AssertGetNsfwSubredditsAsyncWasNotCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserNotOver18_AssertGetNsfwSubredditsAsyncWasNotCalledOnRedditLogic()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -524,8 +497,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetNsfwSubredditsAsync(
                     It.IsAny<IRedditAccessToken>(), 
@@ -534,7 +506,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutIncludeNsfwContentAndWithoutOnlyNsfwContent_AssertGetNsfwSubredditsAsyncWasNotCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutIncludeNsfwContentAndWithoutOnlyNsfwContent_AssertGetNsfwSubredditsAsyncWasNotCalledOnRedditLogic()
         {
             const bool includeNsfwContent = false;
             const bool onlyNsfwContent = false;
@@ -545,8 +517,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetNsfwSubredditsAsync(
                     It.IsAny<IRedditAccessToken>(), 
@@ -555,7 +526,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithIncludeNsfwContentAndWithoutOnlyNsfwContent_AssertGetNsfwSubredditsAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithIncludeNsfwContentAndWithoutOnlyNsfwContent_AssertGetNsfwSubredditsAsyncWasCalledOnRedditLogic()
         {
             const bool includeNsfwContent = true;
             const bool onlyNsfwContent = false;
@@ -567,8 +538,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetNsfwSubredditsAsync(
                     It.Is<IRedditAccessToken>(value => value == redditAccessToken), 
@@ -577,7 +547,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutIncludeNsfwContentAndWithOnlyNsfwContent_AssertGetNsfwSubredditsAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutIncludeNsfwContentAndWithOnlyNsfwContent_AssertGetNsfwSubredditsAsyncWasCalledOnRedditLogic()
         {
             const bool includeNsfwContent = false;
             const bool onlyNsfwContent = true;
@@ -589,8 +559,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser(over18: over18);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _redditLogicMock.Verify(m => m.GetNsfwSubredditsAsync(
                     It.Is<IRedditAccessToken>(value => value == redditAccessToken), 
@@ -599,7 +568,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertReplaceWasCalledOnDashboardWithSubredditCollection()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertReplaceWasCalledOnDashboardWithSubredditCollection()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -619,8 +588,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IEnumerable<IRedditSubreddit> nsfwSubreddits = CreateSubredditCollection(nsfwSubreddit1, nsfwSubReddit2, nsfwSubReddit3);
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser, subredditsForAuthenticatedUser: subredditsForAuthenticatedUser, nsfwSubreddits: nsfwSubreddits);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboardMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboardMock.Object);
 
             List<IRedditSubreddit> expectedSubreddits = new List<IRedditSubreddit>(subredditsForAuthenticatedUser);
             if (over18 && (includeNsfwContent || onlyNsfwContent))
@@ -636,7 +604,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserNotOver18_AssertGetLinksAsyncForAuthenticatedUserAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserNotOver18_AssertGetLinksAsyncForAuthenticatedUserAsyncWasCalledOnRedditLogic()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -649,8 +617,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IEnumerable<IRedditSubreddit> subredditsForAuthenticatedUser = CreateSubredditCollection(CreateSubreddit(), CreateSubreddit(), CreateSubreddit());
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser, subredditsForAuthenticatedUser: subredditsForAuthenticatedUser);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             List<IRedditSubreddit> expectedSubreddits = new List<IRedditSubreddit>(subredditsForAuthenticatedUser);
 
@@ -663,7 +630,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithIncludeNsfwContent_AssertGetLinksAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithIncludeNsfwContent_AssertGetLinksAsyncWasCalledOnRedditLogic()
         {
             const bool includeNsfwContent = true;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -677,8 +644,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IEnumerable<IRedditSubreddit> nsfwSubreddits = CreateSubredditCollection(CreateSubreddit(), CreateSubreddit(), CreateSubreddit());
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser, subredditsForAuthenticatedUser: subredditsForAuthenticatedUser, nsfwSubreddits: nsfwSubreddits);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             List<IRedditSubreddit> expectedSubreddits = new List<IRedditSubreddit>(subredditsForAuthenticatedUser);
             expectedSubreddits.AddRange(nsfwSubreddits);
@@ -692,7 +658,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutIncludeNsfwContent_AssertGetLinksAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutIncludeNsfwContent_AssertGetLinksAsyncWasCalledOnRedditLogic()
         {
             const bool includeNsfwContent = false;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -706,8 +672,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IEnumerable<IRedditSubreddit> nsfwSubreddits = CreateSubredditCollection(CreateSubreddit(), CreateSubreddit(), CreateSubreddit());
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser, subredditsForAuthenticatedUser: subredditsForAuthenticatedUser, nsfwSubreddits: nsfwSubreddits);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             List<IRedditSubreddit> expectedSubreddits = new List<IRedditSubreddit>(subredditsForAuthenticatedUser);
             if (onlyNsfwContent)
@@ -724,7 +689,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithOnlyNsfwContent_AssertGetLinksAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithOnlyNsfwContent_AssertGetLinksAsyncWasCalledOnRedditLogic()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;;
             const bool onlyNsfwContent = true;
@@ -738,8 +703,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IEnumerable<IRedditSubreddit> nsfwSubreddits = CreateSubredditCollection(CreateSubreddit(), CreateSubreddit(), CreateSubreddit());
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser, subredditsForAuthenticatedUser: subredditsForAuthenticatedUser, nsfwSubreddits: nsfwSubreddits);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             List<IRedditSubreddit> expectedSubreddits = new List<IRedditSubreddit>(subredditsForAuthenticatedUser);
             expectedSubreddits.AddRange(nsfwSubreddits);
@@ -753,7 +717,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutOnlyNsfwContent_AssertGetLinksAsyncWasCalledOnRedditLogic()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUserOver18WithoutOnlyNsfwContent_AssertGetLinksAsyncWasCalledOnRedditLogic()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;;
             const bool onlyNsfwContent = false;
@@ -767,8 +731,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IEnumerable<IRedditSubreddit> nsfwSubreddits = CreateSubredditCollection(CreateSubreddit(), CreateSubreddit(), CreateSubreddit());
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser, subredditsForAuthenticatedUser: subredditsForAuthenticatedUser, nsfwSubreddits: nsfwSubreddits);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             List<IRedditSubreddit> expectedSubreddits = new List<IRedditSubreddit>(subredditsForAuthenticatedUser);
             if (includeNsfwContent)
@@ -785,7 +748,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertReplaceWasCalledOnDashboardWithLinkCollection()
+        public async Task BuildAsync_WhenCalledAndHaveAuthenticatedUser_AssertReplaceWasCalledOnDashboardWithLinkCollection()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;
             bool onlyNsfwContent = _random.Next(1, 100) > 50;
@@ -798,8 +761,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             IEnumerable<IRedditLink> links = CreateLinkCollection(CreateLink(), CreateLink(), CreateLink(), CreateLink(), CreateLink());
             IDashboardRedditContentBuilder sut = CreateSut(hasRedditAuthenticatedUser: true, redditAuthenticatedUser: redditAuthenticatedUser, links: links);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboardMock.Object);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboardMock.Object);
 
             dashboardMock.Verify(m => m.Replace(It.Is<IEnumerable<IRedditLink>>(value =>
                     value != null &&
@@ -809,21 +771,20 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalled_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task BuildAsync_WhenCalled_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IDashboard dashboard = CreateDashboard();
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void BuildAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task BuildAsync_WhenCalledAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
             IDashboard dashboard = CreateDashboard();
@@ -831,8 +792,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
             Exception exception = new Exception();
             IDashboardRedditContentBuilder sut = CreateSut(exception: exception);
 
-            Task buildTask = sut.BuildAsync(dashboardSettings, dashboard);
-            buildTask.Wait();
+            await sut.BuildAsync(dashboardSettings, dashboard);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
         }

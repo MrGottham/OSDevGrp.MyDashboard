@@ -1,10 +1,5 @@
-@using System;
-@using System.Collections.Generic;
-@using System.Linq;
-@using OSDevGrp.MyDashboard.Web.Models;
 @model IEnumerable<ImageViewModel<InformationViewModel>>
-
-<div id="myCarousel" class="carousel slide mb-md-3" data-ride="carousel">
+<div id="myCarousel" class="carousel slide mb-3" data-ride="carousel">
     <ol class="carousel-indicators">
         <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
         @for (int elementNo = 1; elementNo < Math.Min(7, Model.Count()); elementNo++)
@@ -14,12 +9,12 @@
     </ol>
     <div class="carousel-inner">
         <div class="carousel-item active">
-            @Html.Partial("_CarouselInformationPartial", Model.ElementAt(0))
+            @await Html.PartialAsync("_CarouselInformationPartial", Model.ElementAt(0))
         </div>
         @for (int elementNo = 1; elementNo < Math.Min(7, Model.Count()); elementNo++)
         {
             <div class="carousel-item">
-                @Html.Partial("_CarouselInformationPartial", Model.ElementAt(elementNo))
+                @await Html.PartialAsync("_CarouselInformationPartial", Model.ElementAt(elementNo))
             </div>
         }
     </div>

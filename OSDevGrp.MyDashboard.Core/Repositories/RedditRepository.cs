@@ -57,65 +57,53 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
 
         #region Methods
 
-        public Task<IRedditResponse<IRedditAuthenticatedUser>> GetAuthenticatedUserAsync(IRedditAccessToken accessToken)
+        public async Task<IRedditResponse<IRedditAuthenticatedUser>> GetAuthenticatedUserAsync(IRedditAccessToken accessToken)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException(nameof(accessToken));
             }
 
-            return Task.Run<IRedditResponse<IRedditAuthenticatedUser>>(() => 
+            try
             {
-                try
-                {
-                    Task<IRedditResponse<RedditAuthenticatedUser>> getTask = GetAsync<RedditAuthenticatedUser>(new Uri($"{RedditApiUrl}/api/v1/me"), accessToken.TokenType, accessToken.AccessToken);
-                    getTask.Wait();
-
-                    return getTask.Result.As<IRedditAuthenticatedUser>();
-                }
-                catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return null;
-            });
+                return (await GetAsync<RedditAuthenticatedUser>(new Uri($"{RedditApiUrl}/api/v1/me"), accessToken.TokenType, accessToken.AccessToken)).As<IRedditAuthenticatedUser>();
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return null;
         }
 
-        public Task<IRedditResponse<IRedditList<IRedditSubreddit>>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken)
+        public async Task<IRedditResponse<IRedditList<IRedditSubreddit>>> GetSubredditsForAuthenticatedUserAsync(IRedditAccessToken accessToken)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException(nameof(accessToken));
             }
 
-            return Task.Run<IRedditResponse<IRedditList<IRedditSubreddit>>>(() => 
+            try
             {
-                try
-                {
-                    Task<IRedditResponse<RedditList<RedditSubreddit>>> getTask = GetAsync<RedditList<RedditSubreddit>>(new Uri($"{RedditApiUrl}/subreddits/mine/subscriber"), accessToken.TokenType, accessToken.AccessToken);
-                    getTask.Wait();
+                IRedditResponse<RedditList<RedditSubreddit>> response = await GetAsync<RedditList<RedditSubreddit>>(new Uri($"{RedditApiUrl}/subreddits/mine/subscriber"), accessToken.TokenType, accessToken.AccessToken);
 
-                    IRedditResponse<RedditList<RedditSubreddit>> response = getTask.Result;
-
-                    return response.As<IRedditList<IRedditSubreddit>>(response.Data.As<IRedditSubreddit>());
-                }
-                catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return null;
-            });
+                return response.As<IRedditList<IRedditSubreddit>>(response.Data.As<IRedditSubreddit>());
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return null;
         }
 
-        public Task<IRedditResponse<IRedditSubreddit>> GetSpecificSubredditAsync(IRedditAccessToken accessToken, IRedditKnownSubreddit knownSubreddit)
+        public async Task<IRedditResponse<IRedditSubreddit>> GetSpecificSubredditAsync(IRedditAccessToken accessToken, IRedditKnownSubreddit knownSubreddit)
         {
             if (accessToken == null)
             {
@@ -126,30 +114,24 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 throw new ArgumentNullException(nameof(knownSubreddit));
             }
 
-            return Task.Run<IRedditResponse<IRedditSubreddit>>(() => 
+            try
             {
-                try
-                {
-                    Task<IRedditResponse<RedditListChild<RedditSubreddit>>> getTask = GetAsync<RedditListChild<RedditSubreddit>>(new Uri($"{RedditApiUrl}/r/{knownSubreddit.Name}/about"), accessToken.TokenType, accessToken.AccessToken);
-                    getTask.Wait();
+                IRedditResponse<RedditListChild<RedditSubreddit>> response = await GetAsync<RedditListChild<RedditSubreddit>>(new Uri($"{RedditApiUrl}/r/{knownSubreddit.Name}/about"), accessToken.TokenType, accessToken.AccessToken);
 
-                    IRedditResponse<RedditListChild<RedditSubreddit>> response = getTask.Result;
-
-                    return response.As<IRedditSubreddit>(response.Data.Data);
-                }
-                catch (AggregateException ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler.HandleAsync(ex).Wait();
-                }
-                return null;
-            });
+                return response.As<IRedditSubreddit>(response.Data.Data);
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return null;
         }
 
-        public Task<IRedditResponse<IRedditList<IRedditLink>>> GetLinksAsync(IRedditAccessToken accessToken, IRedditSubreddit subreddit)
+        public async Task<IRedditResponse<IRedditList<IRedditLink>>> GetLinksAsync(IRedditAccessToken accessToken, IRedditSubreddit subreddit)
         {
             if (accessToken == null)
             {
@@ -160,46 +142,41 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 throw new ArgumentNullException(nameof(subreddit));
             }
 
-            return Task.Run<IRedditResponse<IRedditList<IRedditLink>>>(() => 
+            try
             {
-                try
+                if (subreddit.Url == null)
                 {
-                    if (subreddit.Url == null)
-                    {
-                        return null;
-                    }
-
-                    string localPath = subreddit.Url.LocalPath;
-                    if (localPath.StartsWith("/"))
-                    {
-                        localPath = localPath.Substring(1);
-                    }
-                    if (localPath.EndsWith("/"))
-                    {
-                        localPath = localPath.Substring(0, localPath.Length - 1);
-                    }
-
-                    Task<IRedditResponse<RedditList<RedditLink>>> getTask = GetAsync<RedditList<RedditLink>>(new Uri($"{RedditApiUrl}/{localPath}/new"), accessToken.TokenType, accessToken.AccessToken);
-                    getTask.Wait();
-
-                    IRedditResponse<RedditList<RedditLink>> response = getTask.Result;
-                    foreach (RedditLink link in response.Data)
-                    {
-                        link.Subreddit = subreddit;
-                    }
-
-                    return response.As<IRedditList<IRedditLink>>(response.Data.As<IRedditLink>());
+                    return null;
                 }
-                catch (AggregateException ex)
+
+                string localPath = subreddit.Url.LocalPath;
+                if (localPath.StartsWith("/"))
                 {
-                    _exceptionHandler.HandleAsync(ex).Wait();
+                    localPath = localPath.Substring(1);
                 }
-                catch (Exception ex)
+                if (localPath.EndsWith("/"))
                 {
-                    _exceptionHandler.HandleAsync(ex).Wait();
+                    localPath = localPath.Substring(0, localPath.Length - 1);
                 }
-                return null;
-            });
+
+                IRedditResponse<RedditList<RedditLink>> response = await GetAsync<RedditList<RedditLink>>(new Uri($"{RedditApiUrl}/{localPath}/new"), accessToken.TokenType, accessToken.AccessToken);
+
+                foreach (RedditLink link in response.Data)
+                {
+                    link.Subreddit = subreddit;
+                }
+
+                return response.As<IRedditList<IRedditLink>>(response.Data.As<IRedditLink>());
+            }
+            catch (AggregateException ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            catch (Exception ex)
+            {
+                await _exceptionHandler.HandleAsync(ex);
+            }
+            return null;
         }
 
         internal async Task<IRedditResponse<TRedditObject>> GetAsync<TRedditObject>(Uri requestUri, string authenticationHeaderScheme, string authenticationHeaderParameter) where TRedditObject : class, IRedditObject
@@ -298,9 +275,10 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             {
                 switch (httpResponseMessage.StatusCode)
                 {
+                    case HttpStatusCode.Forbidden:
                     case HttpStatusCode.Unauthorized:
                         throw new UnauthorizedAccessException("You are not authorized to perform this operation against Reddit.");
-                        
+
                     default:
                         throw new Exception($"Unable to perform an operation against Reddit ({httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri}): {httpResponseMessage.ReasonPhrase}");
                 }

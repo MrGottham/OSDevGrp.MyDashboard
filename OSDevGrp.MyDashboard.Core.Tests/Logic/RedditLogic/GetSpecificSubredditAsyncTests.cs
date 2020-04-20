@@ -40,44 +40,43 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
         [TestMethod]
         [ExpectedArgumentNullException("accessToken")]
-        public void GetSpecificSubredditAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
+        public async Task GetSpecificSubredditAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
 
             IRedditLogic sut = CreateSut();
 
-            sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("knownSubreddit")]
-        public void GetSpecificSubredditAsync_WhenRedditKnownSubredditIsNull_ThrowsArgumentNullException()
+        public async Task GetSpecificSubredditAsync_WhenRedditKnownSubredditIsNull_ThrowsArgumentNullException()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             const IRedditKnownSubreddit knownSubreddit = null;
 
             IRedditLogic sut = CreateSut();
 
-            sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalled_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogic()
+        public async Task GetSpecificSubredditAsync_WhenCalled_AssertWillExceedRateLimitWasCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
 
             IRedditLogic sut = CreateSut();
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _redditRateLimitLogicMock.Verify(m => m.WillExceedRateLimit(It.Is<int>(value => value == 1)), Times.Once);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertGetSpecificSubredditAsyncWasNotCalledOnRedditRepository()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertGetSpecificSubredditAsyncWasNotCalledOnRedditRepository()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -85,8 +84,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _redditRepositoryMock.Verify(m => m.GetSpecificSubredditAsync(
                     It.IsAny<IRedditAccessToken>(),
@@ -95,7 +93,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertEnforceRateLimitAsyncWasNotCalledOnRedditRateLimitLogic()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertEnforceRateLimitAsyncWasNotCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -103,8 +101,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _redditRateLimitLogicMock.Verify(m => m.EnforceRateLimitAsync(
                     It.IsAny<int>(),
@@ -115,7 +112,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -123,15 +120,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasExceeded_ReturnsNull()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasExceeded_ReturnsNull()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -139,15 +135,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = true;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            IRedditSubreddit result = await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
-            IRedditSubreddit result = getSpecificSubredditTaks.Result;
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetSpecificSubredditAsyncWasCalledOnRedditRepository()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertGetSpecificSubredditAsyncWasCalledOnRedditRepository()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -155,8 +149,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _redditRepositoryMock.Verify(m => m.GetSpecificSubredditAsync(
                     It.Is<IRedditAccessToken>(value => value == accessToken),
@@ -165,7 +158,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertEnforceRateLimitAsyncWasCalledOnRedditRateLimitLogic()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertEnforceRateLimitAsyncWasCalledOnRedditRateLimitLogic()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -178,8 +171,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IRedditResponse<IRedditSubreddit> redditResponse = CreateRedditResponse(rateLimitUsed, rateLimitRemaining, rateLimitResetTime, receivedTime);
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, redditResponse: redditResponse);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _redditRateLimitLogicMock.Verify(m => m.EnforceRateLimitAsync(
                     It.Is<int>(value => value == rateLimitUsed),
@@ -190,7 +182,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceeded_AssertHandleAsyncWasNotCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -198,15 +190,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             const bool willExceedRateLimit = false;
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<AggregateException>()), Times.Never);
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.IsAny<Exception>()), Times.Never);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceeded_ReturnsSubreddit()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceeded_ReturnsSubreddit()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -216,16 +207,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             IRedditResponse<IRedditSubreddit> redditResponse = CreateRedditResponse(subreddit: subreddit);
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, redditResponse: redditResponse);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            IRedditSubreddit result = await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
-            IRedditSubreddit result = getSpecificSubredditTaks.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(subreddit, result);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -234,14 +223,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: aggregateException);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(value => value == aggregateException)), Times.Once);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_ReturnsNull()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceededAndAggregateExceptionOccurs_ReturnsNull()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -250,15 +238,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             AggregateException aggregateException = new AggregateException();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: aggregateException);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            IRedditSubreddit result = await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
-            IRedditSubreddit result = getSpecificSubredditTaks.Result;
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -267,14 +253,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: exception);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
             _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(value => value == exception)), Times.Once);
         }
 
         [TestMethod]
-        public void GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_ReturnsNull()
+        public async Task GetSpecificSubredditAsync_WhenCalledAndRedditRateLimitHasNotExceededAndExceptionOccurs_ReturnsNull()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             IRedditKnownSubreddit knownSubreddit = CreateRedditKnownSubreddit();
@@ -283,10 +268,8 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
             Exception exception = new Exception();
             IRedditLogic sut = CreateSut(willExceedRateLimit: willExceedRateLimit, exception: exception);
 
-            Task<IRedditSubreddit> getSpecificSubredditTaks = sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
-            getSpecificSubredditTaks.Wait();
+            IRedditSubreddit result = await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
 
-            IRedditSubreddit result = getSpecificSubredditTaks.Result;
             Assert.IsNull(result);
         }
 

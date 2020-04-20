@@ -22,36 +22,17 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         private readonly IViewModelBuilder<InformationViewModel, IRedditLink> _redditLinkToInformationViewModelBuilder;
         private readonly IHtmlHelper _htmlHelper;
         private readonly IHttpHelper _httpHelper;
+        private readonly ICookieHelper _cookieHelper;
 
         #endregion
 
         #region Constructor
 
-        public DashboardViewModelBuilder(IViewModelBuilder<InformationViewModel, INews> newsToInformationViewModelBuilder, IViewModelBuilder<SystemErrorViewModel, ISystemError> systemErrorViewModelBuilder, IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings> dashboardSettingsViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser> redditAuthenticatedUserToObjectViewModelBuilder, IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit> redditSubredditToObjectViewModelBuilder, IViewModelBuilder<InformationViewModel, IRedditLink> redditLinkToInformationViewModelBuilder, IHtmlHelper htmlHelper, IHttpHelper httpHelper)
+        public DashboardViewModelBuilder(IEnumerable<IViewModelBuilder> viewModelBuilderCollection, IHtmlHelper htmlHelper, IHttpHelper httpHelper, ICookieHelper cookieHelper)
         {
-            if (newsToInformationViewModelBuilder == null) 
+            if (viewModelBuilderCollection == null) 
             {
-                throw new ArgumentNullException(nameof(newsToInformationViewModelBuilder));
-            }
-            if (systemErrorViewModelBuilder == null) 
-            {
-                throw new ArgumentNullException(nameof(systemErrorViewModelBuilder));
-            }
-            if (dashboardSettingsViewModelBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(dashboardSettingsViewModelBuilder));
-            }
-            if (redditAuthenticatedUserToObjectViewModelBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(redditAuthenticatedUserToObjectViewModelBuilder));
-            }
-            if (redditSubredditToObjectViewModelBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(redditSubredditToObjectViewModelBuilder));
-            }
-            if (redditLinkToInformationViewModelBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(redditLinkToInformationViewModelBuilder));
+                throw new ArgumentNullException(nameof(viewModelBuilderCollection));
             }
             if (htmlHelper == null)
             {
@@ -61,15 +42,22 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 throw new ArgumentNullException(nameof(httpHelper));
             }
+            if (cookieHelper == null)
+            {
+                throw new ArgumentNullException(nameof(cookieHelper));
+            }
 
-            _newsToInformationViewModelBuilder = newsToInformationViewModelBuilder;
-            _systemErrorViewModelBuilder = systemErrorViewModelBuilder;
-            _dashboardSettingsViewModelBuilder = dashboardSettingsViewModelBuilder;
-            _redditAuthenticatedUserToObjectViewModelBuilder = redditAuthenticatedUserToObjectViewModelBuilder;
-            _redditSubredditToObjectViewModelBuilder = redditSubredditToObjectViewModelBuilder;
-            _redditLinkToInformationViewModelBuilder = redditLinkToInformationViewModelBuilder;
+            IViewModelBuilder[] viewModelBuilderArray = viewModelBuilderCollection.ToArray();
+
+            _newsToInformationViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<InformationViewModel, INews>>().Single();
+            _systemErrorViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<SystemErrorViewModel, ISystemError>>().Single();
+            _dashboardSettingsViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<DashboardSettingsViewModel, IDashboardSettings>>().Single();
+            _redditAuthenticatedUserToObjectViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<ObjectViewModel<IRedditAuthenticatedUser>, IRedditAuthenticatedUser>>().Single();
+            _redditSubredditToObjectViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<ObjectViewModel<IRedditSubreddit>, IRedditSubreddit>>().Single();
+            _redditLinkToInformationViewModelBuilder = viewModelBuilderArray.OfType<IViewModelBuilder<InformationViewModel, IRedditLink>>().Single();
             _htmlHelper = htmlHelper;
             _httpHelper = httpHelper;
+            _cookieHelper = cookieHelper;
         }
 
         #endregion
@@ -117,13 +105,9 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                     m => GenerateViewModelBuilderTaskArrayForCollection(m, n => n.RedditLinks, _redditLinkToInformationViewModelBuilder),
                     viewModel => AddViewModelToViewModelCollection(viewModel, informationViewModelCollection, syncRoot),
                     exception => HandleException(exception, systemErrorViewModelCollection, syncRoot));
-               Task.WaitAll(new[] {
-                    handleInformationViewModelsForNewsTask, 
-                    handleSystemErrorViewModelsTask, 
-                    handleDashboardSettingsViewModelTask, 
-                    handleObjectViewModelForRedditAuthenticatedUserTask, 
-                    handleObjectViewModelsForRedditSubredditTask,
-                    handleInformationViewModelsForRedditLinkTask});
+               Task.WhenAll(new[] {handleInformationViewModelsForNewsTask, handleSystemErrorViewModelsTask, handleDashboardSettingsViewModelTask, handleObjectViewModelForRedditAuthenticatedUserTask, handleObjectViewModelsForRedditSubredditTask, handleInformationViewModelsForRedditLinkTask})
+                    .GetAwaiter()
+                    .GetResult();
             }
             catch (Exception ex)
             {
@@ -141,11 +125,14 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 RedditAuthenticatedUser = objectViewModelForRedditAuthenticatedUser,
                 RedditSubreddits = objectViewModelForRedditSubredditCollection.OrderByDescending(objectViewModelForRedditSubreddit => objectViewModelForRedditSubreddit.Object.Subscribers).ToList()
             };
-            dashboardViewModel.ApplyRules(dashboard.Rules);
+            dashboardViewModel.ApplyRules(dashboard.Rules, _cookieHelper);
+
+            _cookieHelper.ToCookie(dashboardViewModel);
+
             return dashboardViewModel;
         }
 
-        private Task HandleAsync<TViewModel>(IDashboard dashboard, Func<IDashboard, Task<TViewModel>[]> taskArrayGenerator, Action<TViewModel> resultHandler, Action<Exception> exceptionHandler) where TViewModel : IViewModel
+        private async Task HandleAsync<TViewModel>(IDashboard dashboard, Func<IDashboard, Task<TViewModel>[]> taskArrayGenerator, Action<TViewModel> resultHandler, Action<Exception> exceptionHandler) where TViewModel : IViewModel
         {
             if (dashboard == null)
             {
@@ -164,23 +151,20 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 throw new ArgumentNullException(nameof(exceptionHandler));
             }
 
-            return Task.Run(() => 
+            try
             {
-                try
-                {
-                    Task<TViewModel>[] taskArray = taskArrayGenerator(dashboard);
-                    Task.WaitAll(taskArray);
+                Task<TViewModel>[] taskArray = taskArrayGenerator(dashboard);
+                await Task.WhenAll(taskArray);
 
-                    foreach (TViewModel viewModel in taskArray.Where(task => task.IsCompletedSuccessfully).Select(task => task.Result))
-                    {
-                        resultHandler(viewModel);
-                    }
-                }
-                catch (Exception ex)
+                foreach (TViewModel viewModel in taskArray.Where(task => task.IsCompletedSuccessfully).Select(task => task.Result))
                 {
-                    exceptionHandler(ex);
+                    resultHandler(viewModel);
                 }
-            });
+            }
+            catch (Exception ex)
+            {
+                exceptionHandler(ex);
+            }
         }
 
         private Task<TViewModel>[] GenerateViewModelBuilderTaskArrayForObject<TViewModel, TObject>(IDashboard dashboard, Func<IDashboard, TObject> objectGetter, IViewModelBuilder<TViewModel, TObject> viewModelBuilder) where TViewModel : class, IViewModel where TObject : class
@@ -278,7 +262,9 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                         return new ImageViewModel<InformationViewModel>(informationViewModel, image);
                     }))
                     .ToArray();
-                Task.WaitAll(getLatestInformationsWithImageTaskArray);
+                Task.WhenAll(getLatestInformationsWithImageTaskArray)
+                    .GetAwaiter()
+                    .GetResult();
 
                 return getLatestInformationsWithImageTaskArray
                     .Where(getLatestInformationsWithImageTask => getLatestInformationsWithImageTask.IsCompletedSuccessfully)

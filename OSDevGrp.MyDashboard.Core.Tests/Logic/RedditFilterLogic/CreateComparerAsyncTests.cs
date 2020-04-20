@@ -9,27 +9,23 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
     public class CreateComparerAsyncTests
     {
         [TestMethod]
-        public void CreateComparerAsync_WhenCalledWithRedditThing_ReturnsRedditThingComparer()
+        public async Task CreateComparerAsync_WhenCalledWithRedditThing_ReturnsRedditThingComparer()
         {
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IRedditThingComparer<IRedditThing>> createComparerTask = sut.CreateComparerAsync<IRedditThing>();
-            createComparerTask.Wait();
+            IRedditThingComparer<IRedditThing> result = await sut.CreateComparerAsync<IRedditThing>();
 
-            IRedditThingComparer<IRedditThing> result = createComparerTask.Result;
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(OSDevGrp.MyDashboard.Core.Logic.RedditThingComparer<IRedditThing>));
         }
 
         [TestMethod]
-        public void CreateComparerAsync_WhenCalledWithRedditLink_ReturnsRedditThingComparer()
+        public async Task CreateComparerAsync_WhenCalledWithRedditLink_ReturnsRedditThingComparer()
         {
             IRedditFilterLogic sut = CreateSut();
 
-            Task<IRedditThingComparer<IRedditLink>> createComparerTask = sut.CreateComparerAsync<IRedditLink>();
-            createComparerTask.Wait();
+            IRedditThingComparer<IRedditLink> result = await sut.CreateComparerAsync<IRedditLink>();
 
-            IRedditThingComparer<IRedditLink> result = createComparerTask.Result;
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(OSDevGrp.MyDashboard.Core.Logic.RedditThingComparer<IRedditLink>));
         }

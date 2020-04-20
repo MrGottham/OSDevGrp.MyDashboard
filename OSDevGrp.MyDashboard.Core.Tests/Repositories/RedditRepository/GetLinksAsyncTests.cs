@@ -26,43 +26,42 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
 
         [TestMethod]
         [ExpectedArgumentNullException("accessToken")]
-        public void GetLinksAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
+        public async Task GetLinksAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
             IRedditSubreddit subreddit = CreateRedditSubreddit();
 
             IRedditRepository sut = CreateSut();
 
-            sut.GetLinksAsync(accessToken, subreddit);
+            await sut.GetLinksAsync(accessToken, subreddit);
         }
 
         [TestMethod]
         [ExpectedArgumentNullException("subreddit")]
-        public void GetLinksAsync_WhenSubredditIsNull_ThrowsArgumentNullException()
+        public async Task GetLinksAsync_WhenSubredditIsNull_ThrowsArgumentNullException()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
             const IRedditSubreddit subreddit = null;
 
             IRedditRepository sut = CreateSut();
 
-            sut.GetLinksAsync(accessToken, subreddit);
+            await sut.GetLinksAsync(accessToken, subreddit);
         }
 
         [TestMethod]
-        public void GetLinksAsync_WhenCalled_AssertHandleAsyncWasCalledOnExceptionHandler()
+        public async Task GetLinksAsync_WhenCalled_AssertHandleAsyncWasCalledOnExceptionHandler()
         {
             IRedditAccessToken redditAccessToken = CreateRedditAccessToken();
             IRedditSubreddit subreddit = CreateRedditSubreddit();
 
             IRedditRepository sut = CreateSut();
 
-            Task<IRedditResponse<IRedditList<IRedditLink>>> getLinksTask = sut.GetLinksAsync(redditAccessToken, subreddit);
-            getLinksTask.Wait();
+            await sut.GetLinksAsync(redditAccessToken, subreddit);
 
-            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<AggregateException>(aggregateException => 
-                    aggregateException != null &&
-                    aggregateException.InnerException != null &&
-                    aggregateException.InnerException.GetType() == typeof(UnauthorizedAccessException))),
+            _exceptionHandlerMock.Verify(m => m.HandleAsync(It.Is<Exception>(exception => 
+                    exception != null &&
+                    exception.InnerException == null &&
+                    exception.GetType() == typeof(UnauthorizedAccessException))),
                 Times.Once());
         }
 
