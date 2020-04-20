@@ -129,8 +129,6 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapHealthChecks("/health");
             });
-
-            // TODO: Update Docker files
         }
     }
 }
