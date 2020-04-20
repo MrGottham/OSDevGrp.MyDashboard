@@ -179,6 +179,18 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturend_AssertIsHttpsWasCalledOnReturnedHttpRequest()
+        {
+            Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
+            IContentHelper sut = CreateSut(httpContext: httpContext);
+
+            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"));
+
+            httpRequestMock.Verify(m => m.IsHttps, Times.Once);
+        }
+
+        [TestMethod]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturend_AssertHostWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
@@ -376,7 +388,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
             Assert.IsNull(result);
         }
 
-         [TestMethod]
+        [TestMethod]
         public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturend_AssertSchemeWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
@@ -386,6 +398,18 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
             sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()});
 
             httpRequestMock.Verify(m => m.Scheme, Times.Once);
+        }
+
+        [TestMethod]
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturend_AssertIsHttpsWasCalledOnReturnedHttpRequest()
+        {
+            Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
+            IContentHelper sut = CreateSut(httpContext: httpContext);
+
+            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()});
+
+            httpRequestMock.Verify(m => m.IsHttps, Times.Once);
         }
 
         [TestMethod]
@@ -477,6 +501,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
             Mock<HttpRequest> httpRequestMock = new Mock<HttpRequest>();
             httpRequestMock.Setup(m => m.Scheme)
                 .Returns(scheme ?? "http");
+            httpRequestMock.Setup(m => m.IsHttps)
+                .Returns(false);
             httpRequestMock.Setup(m => m.Host)
                 .Returns(new HostString(host ?? "localhost"));
             httpRequestMock.Setup(m => m.PathBase)

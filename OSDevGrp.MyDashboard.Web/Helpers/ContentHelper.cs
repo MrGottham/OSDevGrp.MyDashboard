@@ -299,7 +299,13 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                 return null;
             }
 
-            return $"{httpRequest.Scheme}://{httpRequest.Host}{httpRequest.PathBase}";
+            string scheme = httpRequest.Scheme;
+            if (httpRequest.IsHttps && scheme.ToLower().EndsWith("s") == false)
+            {
+                scheme = scheme + "s";
+            }
+
+            return $"{scheme}://{httpRequest.Host}{httpRequest.PathBase}";
         }
 
         private string GetActionUrl(Func<string> actionUrlGetter)
