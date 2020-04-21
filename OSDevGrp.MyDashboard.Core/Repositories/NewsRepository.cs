@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Security;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
@@ -83,23 +86,44 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
 
             try
             {
-                using (HttpClient client = new HttpClient())
+                try
                 {
-                    using (HttpResponseMessage responseMessage = await client.GetAsync(newsProvider.Uri))
+                    EnsureSecurityProtocol(SecurityProtocolType.Tls11);
+                    EnsureSecurityProtocol(SecurityProtocolType.Tls12);
+                    using (HttpClientHandler clientHandler = new HttpClientHandler {ClientCertificateOptions = ClientCertificateOption.Automatic})
                     {
-                        if (responseMessage.IsSuccessStatusCode == false)
+                        clientHandler.ServerCertificateCustomValidationCallback = (message, certificate, chain, errors) => errors == SslPolicyErrors.None;
+                        using (HttpClient client = new HttpClient(clientHandler))
                         {
-                            return new List<INews>(0);
-                        }
-                        using (Stream responseStream = await responseMessage.Content.ReadAsStreamAsync())
-                        {
-                            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-                            using (XmlReader xmlReader = XmlReader.Create(responseStream, xmlReaderSettings))
+                            using (HttpResponseMessage responseMessage = await client.GetAsync(newsProvider.Uri))
                             {
-                                return GenerateNews(newsProvider, xmlReader);
+                                if (responseMessage.IsSuccessStatusCode == false)
+                                {
+                                    return new List<INews>(0);
+                                }
+                                using (Stream responseStream = await responseMessage.Content.ReadAsStreamAsync())
+                                {
+                                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                                    using (XmlReader xmlReader = XmlReader.Create(responseStream, xmlReaderSettings))
+                                    {
+                                        return GenerateNews(newsProvider, xmlReader);
+                                    }
+                                }
                             }
                         }
                     }
+                }
+                catch (HttpRequestException ex)
+                {
+                    StringBuilder messageBuilder = new StringBuilder($"Unable to communicate with {newsProvider.Name} ({newsProvider.Uri}): {ex.Message}");
+
+                    Exception baseException = ex.GetBaseException();
+                    if (baseException != null)
+                    {
+                        messageBuilder.Append($" ({baseException.Message})");
+                    }
+
+                    throw new Exception(messageBuilder.ToString(), ex);
                 }
             }
             catch (Exception ex)
@@ -107,6 +131,16 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 await _exceptionHandler.HandleAsync(ex);
             }
             return new List<INews>(0);
+        }
+
+        private void EnsureSecurityProtocol(SecurityProtocolType ensureSecurityProtocol)
+        {
+            SecurityProtocolType existingSecurityProtocol = ServicePointManager.SecurityProtocol;
+            if (existingSecurityProtocol.HasFlag(ensureSecurityProtocol))
+            {
+                return;
+            }
+            ServicePointManager.SecurityProtocol = existingSecurityProtocol | ensureSecurityProtocol;
         }
 
         private IEnumerable<INews> GenerateNews(INewsProvider newsProvider, XmlReader xmlReader)
