@@ -29,6 +29,8 @@ namespace OSDevGrp.MyDashboard.Web
 {
     public class Startup
     {
+        private const string DotnetRunningInContainerEnvironmentVariable = "DOTNET_RUNNING_IN_CONTAINER";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -49,12 +51,15 @@ namespace OSDevGrp.MyDashboard.Web
             {
                 opt.CheckConsentNeeded = context => true;
                 opt.MinimumSameSitePolicy = SameSiteMode.None;
-                opt.Secure = CookieSecurePolicy.Always;
+                opt.Secure = CookieSecurePolicy.SameAsRequest;
             });
 
             services.AddDataProtection()
                 .SetApplicationName("OSDevGrp.MyDashboard.Web")
+                .UseEphemeralDataProtectionProvider()
                 .SetDefaultKeyLifetime(new TimeSpan(30, 0, 0, 0));
+
+            services.AddAntiforgery();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -125,7 +130,10 @@ namespace OSDevGrp.MyDashboard.Web
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            if (RunningInDocker() == false)
+            {
+                app.UseHttpsRedirection();
+            }
             app.UseStaticFiles();
             app.UseRouting();
 
@@ -139,6 +147,21 @@ namespace OSDevGrp.MyDashboard.Web
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapHealthChecks("/health");
             });
+        }
+
+        private static bool RunningInDocker()
+        {
+            return RunningInDocker(Environment.GetEnvironmentVariable(DotnetRunningInContainerEnvironmentVariable));
+        }
+
+        private static bool RunningInDocker(string environmentVariable)
+        {
+            if (string.IsNullOrWhiteSpace(environmentVariable) || bool.TryParse(environmentVariable, out bool result) == false)
+            {
+                return false;
+            }
+
+            return result;
         }
     }
 }

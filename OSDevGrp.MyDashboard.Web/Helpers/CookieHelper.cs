@@ -54,7 +54,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
 
             StoreCookie(DashboardSettingsViewModel.CookieName, dashboardSettingsViewModel,
                 viewModel => _contentHelper.ToBase64String(viewModel),
-                viewModel => 
+                (viewModel, secureHttpRequest) => 
                 {
                     DateTime expires = DateTime.Now.AddHours(8);
                     if (string.IsNullOrWhiteSpace(viewModel.RedditAccessToken) == false)
@@ -69,7 +69,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                     return new CookieOptions
                     {
                         Expires = expires,
-                        Secure = true,
+                        Secure = secureHttpRequest,
                         SameSite = SameSiteMode.None
                     };
                 });
@@ -108,7 +108,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
 
                     return _contentHelper.ToBase64String(memoryCacheKey);
                 },
-                viewModel => new CookieOptions {Expires = expires, Secure = true, SameSite = SameSiteMode.None});
+                (viewModel, secureHttpRequest) => new CookieOptions {Expires = expires, Secure = secureHttpRequest, SameSite = SameSiteMode.None});
         }
 
         public DashboardSettingsViewModel ToDashboardSettingsViewModel()
@@ -135,7 +135,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
             });
         }
 
-        private void StoreCookie<T>(string cookieName, T viewModel, Func<T, string> cookieValueGetter, Func<T, CookieOptions> cookieOptionsGetter) where T : IViewModel
+        private void StoreCookie<T>(string cookieName, T viewModel, Func<T, string> cookieValueGetter, Func<T, bool, CookieOptions> cookieOptionsGetter) where T : IViewModel
         {
             if (string.IsNullOrWhiteSpace(cookieName))
             {
@@ -154,6 +154,8 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                 throw new ArgumentNullException(nameof(cookieOptionsGetter));
             }
 
+            bool secureHttpRequest = IsHttpRequestSecure();
+
             IResponseCookies responseCookies = ResolveResponseCookies();
             if (responseCookies == null)
             {
@@ -166,7 +168,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                 return;
             }
 
-            responseCookies.Append(cookieName, cookieValue, cookieOptionsGetter(viewModel));
+            responseCookies.Append(cookieName, cookieValue, cookieOptionsGetter(viewModel, secureHttpRequest));
         }
 
         private T RestoreFromCookie<T>(string cookieName, Func<string, T> viewModelGetter) where T : IViewModel
@@ -210,15 +212,28 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
             return requestCookies[cookieName];
         }
 
-        private IRequestCookieCollection ResolveRequestCookies()
+        private bool IsHttpRequestSecure()
         {
-            HttpContext httpContext = ResolveHttpContext();
-            if (httpContext == null)
+            HttpRequest httpRequest = ResolveHttpRequest();
+            if (httpRequest == null)
             {
-                return null;
+                return false;
             }
 
-            HttpRequest httpRequest = httpContext.Request;
+            bool isHttps = httpRequest.IsHttps;
+            string scheme = httpRequest.Scheme;
+
+            if (string.IsNullOrWhiteSpace(scheme))
+            {
+                return isHttps;
+            }
+
+            return isHttps || scheme.ToLower().EndsWith("s");
+        }
+
+        private IRequestCookieCollection ResolveRequestCookies()
+        {
+            HttpRequest httpRequest = ResolveHttpRequest();
             if (httpRequest == null)
             {
                 return null;
@@ -242,6 +257,17 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
             }
 
             return httpResponse.Cookies;
+        }
+
+        private HttpRequest ResolveHttpRequest()
+        {
+            HttpContext httpContext = ResolveHttpContext();
+            if (httpContext == null)
+            {
+                return null;
+            }
+
+            return httpContext.Request;
         }
 
         private HttpContext ResolveHttpContext()

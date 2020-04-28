@@ -18,7 +18,12 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS runtime
 WORKDIR /app
 COPY --from=builder /src/OSDevGrp.MyDashboard.Web/out .
 
-ENV Authentication:Reddit:ClientId=[TBD] Authentication:Reddit:ClientSecret=[TBD]
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+ENV ASPNETCORE_URLS http://*:80
+ENV Authentication__Reddit__ClientId=[TBD] Authentication__Reddit__ClientSecret=[TBD]
+
+# Downgrade the SECLEVEL to 1 so we can communicate with the Version2 RSS Feed 
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
 
 EXPOSE 80
 

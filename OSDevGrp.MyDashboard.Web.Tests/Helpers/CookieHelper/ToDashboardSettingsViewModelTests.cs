@@ -107,7 +107,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         [TestMethod]
         public void ToDashboardSettingsViewModel_WhenHttpRequestWasReturnedButRequestCookieCollectionWasNotReturned_AssertToDashboardSettingsViewModelWasNotCalledOnContentHelper()
         {
-            HttpRequest httpRequest = BuildHttpRequest(false);
+            HttpRequest httpRequest = BuildHttpRequest(hasRequestCookieCollection: false);
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequest);
             ICookieHelper sut = CreateSut(httpContext: httpContext);
 
@@ -119,7 +119,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         [TestMethod]
         public void ToDashboardSettingsViewModel_WhenHttpRequestWasReturnedButRequestCookieCollectionWasNotReturned_ReturnsNull()
         {
-            HttpRequest httpRequest = BuildHttpRequest(false);
+            HttpRequest httpRequest = BuildHttpRequest(hasRequestCookieCollection: false);
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequest);
             ICookieHelper sut = CreateSut(httpContext: httpContext);
 

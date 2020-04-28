@@ -81,14 +81,18 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             return httpContextMock;
         }
 
-        protected static HttpRequest BuildHttpRequest(bool hasRequestCookieCollection = true, IRequestCookieCollection requestCookieCollection = null)
+        protected static HttpRequest BuildHttpRequest(bool isHttps = false, bool hasRequestCookieCollection = true, IRequestCookieCollection requestCookieCollection = null)
         {
-            return BuildHttpRequestMock(hasRequestCookieCollection, requestCookieCollection).Object;
+            return BuildHttpRequestMock(isHttps, hasRequestCookieCollection, requestCookieCollection).Object;
         }
 
-        protected static Mock<HttpRequest> BuildHttpRequestMock(bool hasRequestCookieCollection = true, IRequestCookieCollection requestCookieCollection = null)
+        protected static Mock<HttpRequest> BuildHttpRequestMock(bool isHttps = false, bool hasRequestCookieCollection = true, IRequestCookieCollection requestCookieCollection = null)
         {
             Mock<HttpRequest> httpRequestMock = new Mock<HttpRequest>();
+            httpRequestMock.Setup(m => m.IsHttps)
+                .Returns(false);
+            httpRequestMock.Setup(m => m.Scheme)
+                .Returns(isHttps ? "https" : "http");
             httpRequestMock.Setup(m => m.Cookies)
                 .Returns(requestCookieCollection ?? BuildRequestCookieCollection());
             return httpRequestMock;

@@ -51,7 +51,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
             sut.ToCookie(dashboardSettingsViewModel);
 
-            _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Once);
+            _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Exactly(2));
         }
 
         [TestMethod]
@@ -63,6 +63,44 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             sut.ToCookie(dashboardSettingsViewModel);
 
             _contentHelperMock.Verify(m => m.ToBase64String(It.IsAny<DashboardSettingsViewModel>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void ToCookie_WhenCalledWithDashboardSettingsViewModelAndHttpContextWasReturned_AssertRequestWasCalledOnReturnedHttpContext()
+        {
+            Mock<HttpContext> httpContextMock = BuildHttpContextMock();
+            ICookieHelper sut = CreateSut(httpContext: httpContextMock.Object);
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
+            sut.ToCookie(dashboardSettingsViewModel);
+
+            httpContextMock.Verify(m => m.Request, Times.Once);
+        }
+
+        [TestMethod]
+        public void ToCookie_WhenCalledWithDashboardSettingsViewModelAndHttpRequestWasReturned_AssertIsHttpsWasCalledOnReturnedHttpRequest()
+        {
+            Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
+            ICookieHelper sut = CreateSut(httpContext: httpContext);
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
+            sut.ToCookie(dashboardSettingsViewModel);
+
+            httpRequestMock.Verify(m => m.IsHttps, Times.Once);
+        }
+
+        [TestMethod]
+        public void ToCookie_WhenCalledWithDashboardSettingsViewModelAndHttpRequestWasReturned_AssertSchemeWasCalledOnReturnedHttpRequest()
+        {
+            Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
+            ICookieHelper sut = CreateSut(httpContext: httpContext);
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
+            sut.ToCookie(dashboardSettingsViewModel);
+
+            httpRequestMock.Verify(m => m.Scheme, Times.Once);
         }
 
         [TestMethod]
@@ -143,10 +181,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         [TestMethod]
         public void ToCookie_WhenCalledWithDashboardSettingsViewModelWithoutRedditAccessTokenAndResponseCookiesWasReturnedButCookieValueToStoreWasReturned_AssertAppendWasCalledOnReturnedResponseCookies()
         {
+            bool isHttps = _random.Next(100) > 50;
+            HttpRequest httpRequest = BuildHttpRequest(isHttps);
             string cookieValueToStore = Guid.NewGuid().ToString("D");
             Mock<IResponseCookies> responseCookiesMock = BuildResponseCookiesMock();
             HttpResponse httpResponse = BuildHttpResponse(responseCookies: responseCookiesMock.Object);
-            HttpContext httpContext = BuildHttpContext(httpResponse: httpResponse);
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequest, httpResponse: httpResponse);
             ICookieHelper sut = CreateSut(cookieValueToStore: cookieValueToStore, httpContext: httpContext);
 
             DateTime expires = DateTime.Now.AddHours(8);
@@ -157,17 +197,19 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             responseCookiesMock.Verify(m => m.Append(
                     It.Is<string>(value => string.CompareOrdinal(value, DashboardSettingsViewModel.CookieName) == 0), 
                     It.Is<string>(value => string.CompareOrdinal(value, BuildBase64String(cookieValueToStore)) == 0), 
-                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure && value.SameSite == SameSiteMode.None)), 
+                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.None)), 
                 Times.Once);
         }
 
         [TestMethod]
         public void ToCookie_WhenCalledWithDashboardSettingsViewModelWithRedditAccessTokenAndResponseCookiesWasReturnedButCookieValueToStoreWasReturned_AssertAppendWasCalledOnReturnedResponseCookies()
         {
+            bool isHttps = _random.Next(100) > 50;
+            HttpRequest httpRequest = BuildHttpRequest(isHttps);
             string cookieValueToStore = Guid.NewGuid().ToString("D");
             Mock<IResponseCookies> responseCookiesMock = BuildResponseCookiesMock();
             HttpResponse httpResponse = BuildHttpResponse(responseCookies: responseCookiesMock.Object);
-            HttpContext httpContext = BuildHttpContext(httpResponse: httpResponse);
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequest, httpResponse: httpResponse);
             ICookieHelper sut = CreateSut(cookieValueToStore: cookieValueToStore, httpContext: httpContext);
 
             int expiresIn = _random.Next(5, 60) * 60;
@@ -181,7 +223,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             responseCookiesMock.Verify(m => m.Append(
                     It.Is<string>(value => string.CompareOrdinal(value, DashboardSettingsViewModel.CookieName) == 0), 
                     It.Is<string>(value => string.CompareOrdinal(value, BuildBase64String(cookieValueToStore)) == 0), 
-                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure && value.SameSite == SameSiteMode.None)), 
+                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.None)), 
                 Times.Once);
         }
 
@@ -202,7 +244,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
             sut.ToCookie(dashboardViewModel);
 
-            _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Once);
+            _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Exactly(2));
         }
 
         [TestMethod]
@@ -236,6 +278,44 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             sut.ToCookie(dashboardViewModel);
 
             _memoryCacheMock.Verify(m => m.CreateEntry(It.IsAny<object>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpContextWasReturned_AssertRequestWasCalledOnReturnedHttpContext()
+        {
+            Mock<HttpContext> httpContextMock = BuildHttpContextMock();
+            ICookieHelper sut = CreateSut(httpContext: httpContextMock.Object);
+
+            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
+            sut.ToCookie(dashboardViewModel);
+
+            httpContextMock.Verify(m => m.Request, Times.Once);
+        }
+
+        [TestMethod]
+        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpRequestWasReturned_AssertIsHttpsWasCalledOnReturnedHttpRequest()
+        {
+            Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
+            ICookieHelper sut = CreateSut(httpContext: httpContext);
+
+            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
+            sut.ToCookie(dashboardViewModel);
+
+            httpRequestMock.Verify(m => m.IsHttps, Times.Once);
+        }
+
+        [TestMethod]
+        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpRequestWasReturned_AssertSchemeWasCalledOnReturnedHttpRequest()
+        {
+            Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
+            ICookieHelper sut = CreateSut(httpContext: httpContext);
+
+            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
+            sut.ToCookie(dashboardViewModel);
+
+            httpRequestMock.Verify(m => m.Scheme, Times.Once);
         }
 
         [TestMethod]
@@ -435,10 +515,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         [TestMethod]
         public void ToCookie_WhenCalledWithDashboardViewModelAndDashboardViewModelWasConvertedToByteArray_AssertAppendWasCalledOnReturnedResponseCookies()
         {
+            bool isHttps = _random.Next(100) > 50;
+            HttpRequest httpRequest = BuildHttpRequest(isHttps);
             string cookieValueToStore = $"{DashboardViewModel.CookieName}.{Guid.NewGuid().ToString("D")}";
             Mock<IResponseCookies> responseCookiesMock = BuildResponseCookiesMock();
             HttpResponse httpResponse = BuildHttpResponse(responseCookies: responseCookiesMock.Object);
-            HttpContext httpContext = BuildHttpContext(httpResponse: httpResponse);
+            HttpContext httpContext = BuildHttpContext(httpRequest: httpRequest, httpResponse: httpResponse);
             ICookieHelper sut = CreateSut(cookieValueToStore: cookieValueToStore, httpContext: httpContext);
 
             DateTime expires = DateTime.Now.AddSeconds(30);
@@ -449,7 +531,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             responseCookiesMock.Verify(m => m.Append(
                     It.Is<string>(value => string.CompareOrdinal(value, DashboardViewModel.CookieName) == 0), 
                     It.Is<string>(value => string.CompareOrdinal(value, BuildBase64String(cookieValueToStore)) == 0), 
-                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure && value.SameSite == SameSiteMode.None)), 
+                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.None)), 
                 Times.Once);
         }
 

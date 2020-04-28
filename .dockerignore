@@ -1,7 +1,14 @@
 # Directories
-**/bin/
-**/obj/
-**/out/
+.git/
+.vs/
+.vscode/
+**/[Bb]in/
+**/[Oo]bj/
+**/[Oo]ut/
 
 # Files
-Dockerfile
+.dockerignore
+.gitignore
+OSDevGrp.MyDashboard.Web.Dockerfile
+Nginx.Dockerfile
+docker-compose.yml

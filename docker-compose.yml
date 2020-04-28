@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+
+  reverseproxy:
+    image: reverseproxy-mydashboard
+    build:
+      context: .
+      dockerfile: Nginx.Dockerfile
+      args:
+        certificateSubject: /C=DK/ST=/L=Copenhagen/O=OS Development Group/OU=/CN=localhost
+        certificatePassword: Y2NlZGZlMDgtYTYyMi00Mzk0LTg3NTgtNjBjMGIzOGVlNWUw
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+
+  dashboard:
+    image: dashboard-mydashboard
+    environment: 
+      - Authentication__Reddit__ClientId=[TBD]
+      - Authentication__Reddit__ClientSecret=[TBD]
+    depends_on:
+      - reverseproxy
+    build:
+      context: .
+      dockerfile: OSDevGrp.MyDashboard.Web.Dockerfile
+    expose:
+      - "80"
+    restart: always
