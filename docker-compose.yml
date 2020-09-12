@@ -25,6 +25,9 @@ services:
     build:
       context: .
       dockerfile: OSDevGrp.MyDashboard.Web.Dockerfile
+      args:
+        sshPassword: [TBD]
     expose:
       - "80"
+      - "2222"
     restart: always
