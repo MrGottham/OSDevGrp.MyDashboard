@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <IncludeOpenAPIAnalyzers>true</IncludeOpenAPIAnalyzers>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <UserSecretsId>36DCCFEA-32CB-4FE5-9941-6C40E67292C0</UserSecretsId>

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS builder
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS builder
 WORKDIR /src
 
 # Copy .sln and .csproj files and restore as distinct layers
@@ -14,7 +14,7 @@ COPY . .
 WORKDIR /src/OSDevGrp.MyDashboard.Web
 RUN dotnet publish -c Release -o out
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 RUN apt-get update
 RUN apt-get -y upgrade
 RUN apt-get install -y supervisor openssh-server
@@ -23,8 +23,7 @@ WORKDIR /app
 COPY --from=builder /src/OSDevGrp.MyDashboard.Web/out .
 
 ENV DOTNET_RUNNING_IN_CONTAINER=true
-ENV ASPNETCORE_URLS http://*:80
-ENV Authentication__Reddit__ClientId=[TBD] Authentication__Reddit__ClientSecret=[TBD]
+ENV ASPNETCORE_HTTP_PORTS=8080
 
 # Downgrade the SECLEVEL to 1 so we can communicate with the Version2 RSS Feed 
 RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf

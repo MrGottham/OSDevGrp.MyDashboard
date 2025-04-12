@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
@@ -7,10 +5,10 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Transforms;
 using SixLabors.Primitives;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
-    [Serializable]
     public class ImageViewModel<TViewModel> : IViewModel where TViewModel : IViewModel
     {
         #region Private constants
@@ -20,7 +18,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         #endregion
 
-        #region Constructors
+        #region Constructor
 
         public ImageViewModel(TViewModel viewModel, byte[] image)
         {
@@ -41,9 +39,6 @@ namespace OSDevGrp.MyDashboard.Web.Models
                 OriginalMimeType = imageFormat.DefaultMimeType;
                 OriginalImageAsBase64 = sourceImage.ToBase64String(imageFormat);
 
-                int centerX = sourceImage.Width / 2;
-                int centerY = sourceImage.Height / 2;
-
                 ResizeOptions resizeOptions = new ResizeOptions
                 {
                     Compand = false,
@@ -58,39 +53,23 @@ namespace OSDevGrp.MyDashboard.Web.Models
             }
         }
 
-        protected ImageViewModel(SerializationInfo info, StreamingContext context)
-        {
-        }
-
         #endregion
 
         #region Properties
 
         public TViewModel ViewModel { get; private set; }
 
-        public string MimeType
-        {
-            get
-            {
-                return string.IsNullOrWhiteSpace(TransformedMimeType) ? OriginalMimeType : TransformedMimeType;
-            }
-        }
+        public string MimeType => string.IsNullOrWhiteSpace(TransformedMimeType) ? OriginalMimeType : TransformedMimeType;
 
-        public string ImageAsBase64
-        {
-            get
-            {
-                return string.IsNullOrWhiteSpace(TransformedImageAsBase64) ? OriginalImageAsBase64 : TransformedImageAsBase64;
-            }
-        }
+        public string ImageAsBase64 => string.IsNullOrWhiteSpace(TransformedImageAsBase64) ? OriginalImageAsBase64 : TransformedImageAsBase64;
 
-        public string OriginalMimeType { get; private set; }
+        public string OriginalMimeType { get; }
 
-        public string OriginalImageAsBase64 { get; private set; }
+        public string OriginalImageAsBase64 { get; }
 
-        public string TransformedMimeType { get; private set; }
+        public string TransformedMimeType { get; }
 
-        public string TransformedImageAsBase64 { get; private set; }
+        public string TransformedImageAsBase64 { get; }
 
         #endregion
     }

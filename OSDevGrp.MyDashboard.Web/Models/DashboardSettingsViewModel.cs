@@ -1,29 +1,16 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
-    [Serializable]
     [DataContract(Name = "DashboardSettings")]
     public class DashboardSettingsViewModel : IViewModel
     {
-        #region Constructors
-
-        public DashboardSettingsViewModel()
-        {
-        }
-
-        protected DashboardSettingsViewModel(SerializationInfo info, StreamingContext context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         [Range(0, 250)]

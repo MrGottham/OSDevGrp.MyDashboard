@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
 {
@@ -16,7 +16,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         #region Private variables
 
         private Mock<IDataProtectionProvider> _dataProtectionProviderMock;
-        private Mock<IDataProtector> _dataProtectorMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Mock<IUrlHelper> _urlHelperMock;
 
@@ -26,7 +25,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         public void TestInitialize()
         {
             _dataProtectionProviderMock = new Mock<IDataProtectionProvider>(0);
-            _dataProtectorMock = new Mock<IDataProtector>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _urlHelperMock = new Mock<IUrlHelper>();
         }
@@ -114,7 +112,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpContextWasNotReturend_AssertActionWasNotCalledOnUrlHelper()
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpContextWasNotReturned_AssertActionWasNotCalledOnUrlHelper()
         {
             IContentHelper sut = CreateSut(false);
 
@@ -124,7 +122,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpContextWasNotReturend_ReturnsNull()
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpContextWasNotReturned_ReturnsNull()
         {
             IContentHelper sut = CreateSut(false);
 
@@ -134,7 +132,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpContextWasReturend_AssertRequestWasCalledOnReturnedHttpContext()
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpContextWasReturned_AssertRequestWasCalledOnReturnedHttpContext()
         {
             Mock<HttpContext> httpContextMock = BuildHttpContextMock();
             IContentHelper sut = CreateSut(httpContext: httpContextMock.Object);
@@ -145,29 +143,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasNotReturend_AssertActionWasNotCalledOnUrlHelper()
-        {
-            HttpContext httpContext = BuildHttpContext(false);
-            IContentHelper sut = CreateSut(httpContext: httpContext);
-
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"));
-
-            _urlHelperMock.Verify(m => m.Action(It.IsAny<UrlActionContext>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasNotReturend_ReturnsNull()
-        {
-            HttpContext httpContext = BuildHttpContext(false);
-            IContentHelper sut = CreateSut(httpContext: httpContext);
-
-            string result = sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"));
-
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturend_AssertSchemeWasCalledOnReturnedHttpRequest()
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturned_AssertSchemeWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
@@ -179,7 +155,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturend_AssertIsHttpsWasCalledOnReturnedHttpRequest()
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturned_AssertIsHttpsWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
@@ -191,7 +167,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturend_AssertHostWasCalledOnReturnedHttpRequest()
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturned_AssertHostWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
@@ -203,7 +179,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturend_AssertPathBaseWasCalledOnReturnedHttpRequest()
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturned_AssertPathBaseWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
@@ -215,7 +191,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturend_AssertActionWasCalledOnUrlHelper()
+        public void AbsoluteUrl_WhenCalledWithoutValuesAndHttpRequestWasReturned_AssertActionWasCalledOnUrlHelper()
         {
             IContentHelper sut = CreateSut();
 
@@ -227,7 +203,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithoutAndHttpRequestWasReturend_ReturnsAbsoluteUrl()
+        public void AbsoluteUrl_WhenCalledWithoutAndHttpRequestWasReturned_ReturnsAbsoluteUrl()
         {
             const string scheme = "http";
             const string host = "localhost";
@@ -336,7 +312,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpContextWasNotReturend_AssertActionWasNotCalledOnUrlHelper()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpContextWasNotReturned_AssertActionWasNotCalledOnUrlHelper()
         {
             IContentHelper sut = CreateSut(false);
 
@@ -346,7 +322,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpContextWasNotReturend_ReturnsNull()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpContextWasNotReturned_ReturnsNull()
         {
             IContentHelper sut = CreateSut(false);
 
@@ -356,7 +332,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpContextWasReturend_AssertRequestWasCalledOnReturnedHttpContext()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpContextWasReturned_AssertRequestWasCalledOnReturnedHttpContext()
         {
             Mock<HttpContext> httpContextMock = BuildHttpContextMock();
             IContentHelper sut = CreateSut(httpContext: httpContextMock.Object);
@@ -367,29 +343,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasNotReturend_AssertActionWasNotCalledOnUrlHelper()
-        {
-            HttpContext httpContext = BuildHttpContext(false);
-            IContentHelper sut = CreateSut(httpContext: httpContext);
-
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()});
-
-            _urlHelperMock.Verify(m => m.Action(It.IsAny<UrlActionContext>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasNotReturend_ReturnsNull()
-        {
-            HttpContext httpContext = BuildHttpContext(false);
-            IContentHelper sut = CreateSut(httpContext: httpContext);
-
-            string result = sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()});
-
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturend_AssertSchemeWasCalledOnReturnedHttpRequest()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturned_AssertSchemeWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
@@ -401,7 +355,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturend_AssertIsHttpsWasCalledOnReturnedHttpRequest()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturned_AssertIsHttpsWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
@@ -413,7 +367,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturend_AssertHostWasCalledOnReturnedHttpRequest()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturned_AssertHostWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
@@ -425,7 +379,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturend_AssertPathBaseWasCalledOnReturnedHttpRequest()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturned_AssertPathBaseWasCalledOnReturnedHttpRequest()
         {
             Mock<HttpRequest> httpRequestMock = BuildHttpRequestMock();
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequestMock.Object);
@@ -437,7 +391,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturend_AssertActionWasCalledOnUrlHelper()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturned_AssertActionWasCalledOnUrlHelper()
         {
             IContentHelper sut = CreateSut();
 
@@ -450,11 +404,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturend_ReturnsAbsoluteUrl()
+        public void AbsoluteUrl_WhenCalledWithValuesAndHttpRequestWasReturned_ReturnsAbsoluteUrl()
         {
             const string scheme = "http";
             const string host = "localhost";
-            string pathBase = $"/{Guid.NewGuid().ToString("D")}";
+            string pathBase = $"/{Guid.NewGuid():D}";
             HttpRequest httpRequest = BuildHttpRequest(scheme, host, pathBase);
             HttpContext httpContext = BuildHttpContext(httpRequest: httpRequest);
             IContentHelper sut = CreateSut(httpContext: httpContext);
@@ -478,16 +432,16 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
             return new Web.Helpers.ContentHelper(_dataProtectionProviderMock.Object, _httpContextAccessorMock.Object, _urlHelperMock.Object);
         }
 
-        public HttpContext BuildHttpContext(bool hasHttpRequest = true, HttpRequest httpRequest = null)
+        public HttpContext BuildHttpContext(HttpRequest httpRequest = null)
         {
-            return BuildHttpContextMock(hasHttpRequest, httpRequest).Object;
+            return BuildHttpContextMock(httpRequest).Object;
         }
 
-        private Mock<HttpContext> BuildHttpContextMock(bool hasHttpRequest = true, HttpRequest httpRequest = null)
+        private Mock<HttpContext> BuildHttpContextMock(HttpRequest httpRequest = null)
         {
             Mock<HttpContext> httpContextMock = new Mock<HttpContext>();
             httpContextMock.Setup(m => m.Request)
-                .Returns(hasHttpRequest == false ? (HttpRequest) null : httpRequest ?? BuildHttpRequest());
+                .Returns(httpRequest ?? BuildHttpRequest());
             return httpContextMock;
         }
 
@@ -506,7 +460,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
             httpRequestMock.Setup(m => m.Host)
                 .Returns(new HostString(host ?? "localhost"));
             httpRequestMock.Setup(m => m.PathBase)
-                .Returns(new PathString(pathBase ?? $"/{Guid.NewGuid().ToString("D")}"));
+                .Returns(new PathString(pathBase ?? $"/{Guid.NewGuid():D}"));
             return httpRequestMock;
         }
     }

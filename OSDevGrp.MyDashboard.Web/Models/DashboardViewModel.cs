@@ -1,28 +1,14 @@
-using System;
-using System.Runtime.Serialization;
-using System.Collections.Generic;
-using System.Linq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
-    [Serializable]
     public class DashboardViewModel : IViewModel
     {
-        #region Constructors
-
-        public DashboardViewModel()
-        {
-        }
-
-        protected DashboardViewModel(SerializationInfo info, StreamingContext context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         public List<InformationViewModel> Informations { get; set; }

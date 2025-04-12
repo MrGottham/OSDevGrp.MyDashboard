@@ -6,8 +6,6 @@ namespace OSDevGrp.MyDashboard.Web.Contracts.Helpers
     {
         byte[] ToByteArray(DashboardSettingsViewModel dashboardSettingsViewModel);
 
-        byte[] ToByteArray(DashboardViewModel dashboardViewModel);
-
         byte[] ToByteArray(string value);
 
         string ToBase64String(DashboardSettingsViewModel dashboardSettingsViewModel);
@@ -17,8 +15,6 @@ namespace OSDevGrp.MyDashboard.Web.Contracts.Helpers
         DashboardSettingsViewModel ToDashboardSettingsViewModel(byte[] byteArray);
 
         DashboardSettingsViewModel ToDashboardSettingsViewModel(string base64String);
-
-        DashboardViewModel ToDashboardViewModel(byte[] byteArray);
 
         string ToValue(byte[] byteArray);
 

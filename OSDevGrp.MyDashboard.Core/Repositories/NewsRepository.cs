@@ -1,19 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Security;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Core.Utilities;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml;
 
 namespace OSDevGrp.MyDashboard.Core.Repositories
 {
@@ -51,8 +49,8 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
         {
             try
             {
-                IEnumerable<INewsProvider> newsProviders = await _dataProviderFactory.BuildNewsProvidersAsync();
-                if (newsProviders == null || newsProviders.Any() == false)
+                INewsProvider[] newsProviders = (await _dataProviderFactory.BuildNewsProvidersAsync())?.ToArray();
+                if (newsProviders == null || newsProviders.Length == 0)
                 {
                     return new List<INews>(0);
                 }
@@ -88,40 +86,29 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             {
                 try
                 {
-                    EnsureSecurityProtocol(SecurityProtocolType.Tls11);
-                    EnsureSecurityProtocol(SecurityProtocolType.Tls12);
-                    using (HttpClientHandler clientHandler = new HttpClientHandler {ClientCertificateOptions = ClientCertificateOption.Automatic})
+                    using HttpClientHandler clientHandler = new HttpClientHandler();
+                    clientHandler.ClientCertificateOptions = ClientCertificateOption.Automatic;
+
+                    using HttpClient client = new HttpClient(clientHandler);
+                    using HttpResponseMessage responseMessage = await client.GetAsync(newsProvider.Uri);
+                    if (responseMessage.IsSuccessStatusCode == false)
                     {
-                        clientHandler.ServerCertificateCustomValidationCallback = (message, certificate, chain, errors) => errors == SslPolicyErrors.None;
-                        using (HttpClient client = new HttpClient(clientHandler))
-                        {
-                            using (HttpResponseMessage responseMessage = await client.GetAsync(newsProvider.Uri))
-                            {
-                                if (responseMessage.IsSuccessStatusCode == false)
-                                {
-                                    return new List<INews>(0);
-                                }
-                                using (Stream responseStream = await responseMessage.Content.ReadAsStreamAsync())
-                                {
-                                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-                                    using (XmlReader xmlReader = XmlReader.Create(responseStream, xmlReaderSettings))
-                                    {
-                                        return GenerateNews(newsProvider, xmlReader);
-                                    }
-                                }
-                            }
-                        }
+                        return new List<INews>(0);
                     }
+
+                    await using Stream responseStream = await responseMessage.Content.ReadAsStreamAsync();
+
+                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                    using XmlReader xmlReader = XmlReader.Create(responseStream, xmlReaderSettings);
+
+                    return GenerateNews(newsProvider, xmlReader);
                 }
                 catch (HttpRequestException ex)
                 {
                     StringBuilder messageBuilder = new StringBuilder($"Unable to communicate with {newsProvider.Name} ({newsProvider.Uri}): {ex.Message}");
 
                     Exception baseException = ex.GetBaseException();
-                    if (baseException != null)
-                    {
-                        messageBuilder.Append($" ({baseException.Message})");
-                    }
+                    messageBuilder.Append($" ({baseException.Message})");
 
                     throw new Exception(messageBuilder.ToString(), ex);
                 }
@@ -131,16 +118,6 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 await _exceptionHandler.HandleAsync(ex);
             }
             return new List<INews>(0);
-        }
-
-        private void EnsureSecurityProtocol(SecurityProtocolType ensureSecurityProtocol)
-        {
-            SecurityProtocolType existingSecurityProtocol = ServicePointManager.SecurityProtocol;
-            if (existingSecurityProtocol.HasFlag(ensureSecurityProtocol))
-            {
-                return;
-            }
-            ServicePointManager.SecurityProtocol = existingSecurityProtocol | ensureSecurityProtocol;
         }
 
         private IEnumerable<INews> GenerateNews(INewsProvider newsProvider, XmlReader xmlReader)
@@ -154,6 +131,10 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             IList<INews> news = new List<INews>();
 
             XmlNodeList items = xmlDocument.SelectNodes("/rss/channel/item");
+            if (items == null)
+            {
+                return news;
+            }
             foreach (XmlNode item in items)
             {
                 try
@@ -212,14 +193,12 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
 
             if (childNode.HasChildNodes)
             {
-                XmlCDataSection xmlCDataSection = childNode.FirstChild as XmlCDataSection;
-                if (xmlCDataSection != null)
+                if (childNode.FirstChild is XmlCDataSection xmlCDataSection)
                 {
                     return xmlCDataSection.Data;
                 }
 
-                XmlText xmlText = childNode.FirstChild as XmlText;
-                if (xmlText != null)
+                if (childNode.FirstChild is XmlText xmlText)
                 {
                     return xmlText.Value;
                 }
@@ -260,8 +239,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                 return null;
             }
 
-            Uri result;
-            if (Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out result))
+            if (Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out var result))
             {
                 return result;
             }

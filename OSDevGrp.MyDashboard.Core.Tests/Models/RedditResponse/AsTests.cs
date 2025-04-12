@@ -1,6 +1,6 @@
-using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
 {
@@ -24,7 +24,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
         {
             int rateLimitUsed = _random.Next(100);
             int rateLimitRemaining = _random.Next(100);
-            DateTime? rateLimitResetTime = _random.Next(100) > 50 ? DateTime.Now.AddSeconds(_random.Next(300)) : (DateTime?) null;
+            DateTime? rateLimitResetTime = _random.Next(100) > 50 ? DateTime.Now.AddSeconds(_random.Next(300)) : null;
             DateTime receivedTime = DateTime.Now.AddSeconds(_random.Next(30, 60) * -1);
             MyRedditObject data = new MyRedditObject();
 
@@ -54,7 +54,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
             IRedditResponse<MyRedditObject> sut = CreateSut();
 
             IRedditResponse<IRedditObject> result = sut.As<IRedditObject>();
-            Assert.AreNotSame(sut, result);
+            Assert.AreNotSame<IRedditObject>(sut, result);
         }
 
         [TestMethod]
@@ -63,12 +63,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
             IRedditResponse<MyRedditObject> sut = CreateSut();
 
             IRedditResponse<IRedditObject> result = sut.As<IRedditObject>();
-            Assert.AreEqual(typeof(IRedditObject), result.GetType().GetProperty("Data").PropertyType);
+            Assert.AreEqual(typeof(IRedditObject), result.GetType().GetProperty("Data")!.PropertyType);
         }
 
         private IRedditResponse<MyRedditObject> CreateSut(int? rateLimitUsed = null, int? rateLimitRemaining = null, DateTime? rateLimitResetTime = null, DateTime? receivedTime = null, MyRedditObject data = null)
         {
-            return new OSDevGrp.MyDashboard.Core.Models.RedditResponse<MyRedditObject>(
+            return new Core.Models.RedditResponse<MyRedditObject>(
                 rateLimitUsed ?? _random.Next(100),
                 rateLimitRemaining ?? _random.Next(100),
                 rateLimitResetTime,
@@ -76,7 +76,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
                 data ?? new MyRedditObject());
         }
 
-        private class MyRedditObject : OSDevGrp.MyDashboard.Core.Models.RedditObjectBase
+        private class MyRedditObject : Core.Models.RedditObjectBase
         {
         }
     }

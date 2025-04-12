@@ -1,5 +1,3 @@
-using System;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,6 +5,8 @@ using Moq;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Text.RegularExpressions;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
 {
@@ -52,17 +52,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             sut.ToCookie(dashboardSettingsViewModel);
 
             _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Exactly(2));
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardSettingsViewModelAndHttpContextWasNotReturned_AssertToBase64StringWasNotCalledOnContentHelperWithDashboardSettingsViewModel()
-        {
-            ICookieHelper sut = CreateSut(hasHttpContext: false);
-
-            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
-            sut.ToCookie(dashboardSettingsViewModel);
-
-            _contentHelperMock.Verify(m => m.ToBase64String(It.IsAny<DashboardSettingsViewModel>()), Times.Never);
         }
 
         [TestMethod]
@@ -113,18 +102,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             sut.ToCookie(dashboardSettingsViewModel);
 
             httpContextMock.Verify(m => m.Response, Times.Once);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardSettingsViewModelAndHttpContextWasReturnedButHttpResponseWasNotReturned_AssertToBase64StringWasNotCalledOnContentHelperWithDashboardSettingsViewModel()
-        {
-            HttpContext httpContext = BuildHttpContext(hasHttpResponse: false);
-            ICookieHelper sut = CreateSut(httpContext: httpContext);
-
-            DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
-            sut.ToCookie(dashboardSettingsViewModel);
-
-            _contentHelperMock.Verify(m => m.ToBase64String(It.IsAny<DashboardSettingsViewModel>()), Times.Never);
         }
 
         [TestMethod]
@@ -197,7 +174,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             responseCookiesMock.Verify(m => m.Append(
                     It.Is<string>(value => string.CompareOrdinal(value, DashboardSettingsViewModel.CookieName) == 0), 
                     It.Is<string>(value => string.CompareOrdinal(value, BuildBase64String(cookieValueToStore)) == 0), 
-                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.None)), 
+                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.Strict)), 
                 Times.Once);
         }
 
@@ -223,7 +200,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             responseCookiesMock.Verify(m => m.Append(
                     It.Is<string>(value => string.CompareOrdinal(value, DashboardSettingsViewModel.CookieName) == 0), 
                     It.Is<string>(value => string.CompareOrdinal(value, BuildBase64String(cookieValueToStore)) == 0), 
-                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.None)), 
+                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.Strict)), 
                 Times.Once);
         }
 
@@ -245,39 +222,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             sut.ToCookie(dashboardViewModel);
 
             _httpContextAccessorMock.Verify(m => m.HttpContext, Times.Exactly(2));
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpContextWasNotReturned_AssertToByteArrayWasNotCalledOnContentHelperWithDashboardViewModel()
-        {
-            ICookieHelper sut = CreateSut(hasHttpContext: false);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _contentHelperMock.Verify(m => m.ToByteArray(It.IsAny<DashboardViewModel>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpContextWasNotReturned_AssertToBase64StringWasNotCalledOnContentHelperWithValueString()
-        {
-            ICookieHelper sut = CreateSut(hasHttpContext: false);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _contentHelperMock.Verify(m => m.ToBase64String(It.IsAny<string>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpContextWasNotReturned_AssertCreateEntryWasNotCalledOnMemoryCache()
-        {
-            ICookieHelper sut = CreateSut(hasHttpContext: false);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _memoryCacheMock.Verify(m => m.CreateEntry(It.IsAny<object>()), Times.Never);
         }
 
         [TestMethod]
@@ -331,42 +275,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpContextWasReturnedButHttpResponseWasNotReturned_AssertToByteArrayWasNotCalledOnContentHelperWithDashboardViewModel()
-        {
-            HttpContext httpContext = BuildHttpContext(hasHttpResponse: false);
-            ICookieHelper sut = CreateSut(httpContext: httpContext);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _contentHelperMock.Verify(m => m.ToByteArray(It.IsAny<DashboardViewModel>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpContextWasReturnedButHttpResponseWasNotReturned_AssertToBase64StringWasNotCalledOnContentHelperWithValueString()
-        {
-            HttpContext httpContext = BuildHttpContext(hasHttpResponse: false);
-            ICookieHelper sut = CreateSut(httpContext: httpContext);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _contentHelperMock.Verify(m => m.ToBase64String(It.IsAny<string>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpContextWasReturnedButHttpResponseWasNotReturned_AssertCreateEntryWasNotCalledOnMemoryCache()
-        {
-            HttpContext httpContext = BuildHttpContext(hasHttpResponse: false);
-            ICookieHelper sut = CreateSut(httpContext: httpContext);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _memoryCacheMock.Verify(m => m.CreateEntry(It.IsAny<object>()), Times.Never);
-        }
-
-        [TestMethod]
         public void ToCookie_WhenCalledWithDashboardViewModelAndHttpResponseWasReturned_AssertCookiesWasCalledOnReturnedHttpResponse()
         {
             Mock<HttpResponse> httpResponseMock = BuildHttpResponseMock();
@@ -377,19 +285,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             sut.ToCookie(dashboardViewModel);
 
             httpResponseMock.Verify(m => m.Cookies, Times.Once);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndHttpResponseWasReturnedButResponseCookiesWasNotReturned_AssertToByteArrayWasNotCalledOnContentHelperWithDashboardViewModel()
-        {
-            HttpResponse httpResponse = BuildHttpResponse(false);
-            HttpContext httpContext = BuildHttpContext(httpResponse: httpResponse);
-            ICookieHelper sut = CreateSut(httpContext: httpContext);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _contentHelperMock.Verify(m => m.ToByteArray(It.IsAny<DashboardViewModel>()), Times.Never);
         }
 
         [TestMethod]
@@ -411,39 +306,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             HttpResponse httpResponse = BuildHttpResponse(false);
             HttpContext httpContext = BuildHttpContext(httpResponse: httpResponse);
             ICookieHelper sut = CreateSut(httpContext: httpContext);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _memoryCacheMock.Verify(m => m.CreateEntry(It.IsAny<object>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndResponseCookiesWasReturned_AssertToByteArrayWasCalledOnContentHelperWithDashboardViewModel()
-        {
-            ICookieHelper sut = CreateSut();
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _contentHelperMock.Verify(m => m.ToByteArray(It.Is<DashboardViewModel>(value => value == dashboardViewModel)), Times.Once);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndDashboardViewModelWasNotConvertedToByteArray_AssertToBase64StringWasNotCalledOnContentHelperWithValueString()
-        {
-            ICookieHelper sut = CreateSut(false);
-
-            DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
-            sut.ToCookie(dashboardViewModel);
-
-            _contentHelperMock.Verify(m => m.ToBase64String(It.IsAny<string>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void ToCookie_WhenCalledWithDashboardViewModelAndDashboardViewModelWasNotConvertedToByteArray_AssertCreateEntryWasNotCalledOnMemoryCache()
-        {
-            ICookieHelper sut = CreateSut(false);
 
             DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
             sut.ToCookie(dashboardViewModel);
@@ -496,7 +358,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             DashboardViewModel dashboardViewModel = BuildDashboardViewModel();
             sut.ToCookie(dashboardViewModel);
 
-            _cacheEntryMock.VerifySet(m => m.Value = It.Is<byte[]>(value => value != null && string.CompareOrdinal(Convert.ToBase64String(value), BuildBase64String(cookieValueToStore)) == 0), Times.Once);
+            _cacheEntryMock.VerifySet(m => m.Value = It.Is<DashboardViewModel>(value => value != null && value == dashboardViewModel), Times.Once);
         }
 
         [TestMethod]
@@ -531,21 +393,19 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             responseCookiesMock.Verify(m => m.Append(
                     It.Is<string>(value => string.CompareOrdinal(value, DashboardViewModel.CookieName) == 0), 
                     It.Is<string>(value => string.CompareOrdinal(value, BuildBase64String(cookieValueToStore)) == 0), 
-                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.None)), 
+                    It.Is<CookieOptions>(value => value != null && value.Expires >= expires.AddSeconds(-5) && value.Expires <= expires.AddSeconds(5) && value.Secure == isHttps && value.SameSite == SameSiteMode.Strict)), 
                 Times.Once);
         }
 
-        private ICookieHelper CreateSut(bool hasCookieValueToStore = true, string cookieValueToStore = null, bool hasHttpContext = true, HttpContext httpContext = null)
+        private ICookieHelper CreateSut(bool hasCookieValueToStore = true, string cookieValueToStore = null, HttpContext httpContext = null)
         {
             _contentHelperMock.Setup(m => m.ToBase64String(It.IsAny<DashboardSettingsViewModel>()))
                 .Returns(hasCookieValueToStore ? BuildBase64String(cookieValueToStore) : null);
-            _contentHelperMock.Setup(m => m.ToByteArray(It.IsAny<DashboardViewModel>()))
-                .Returns(hasCookieValueToStore ? Convert.FromBase64String(BuildBase64String(cookieValueToStore)) : null);
             _contentHelperMock.Setup(m => m.ToBase64String(It.IsAny<string>()))
                 .Returns(hasCookieValueToStore ? BuildBase64String(cookieValueToStore) : null);
 
             _httpContextAccessorMock.Setup(m => m.HttpContext)
-                .Returns(hasHttpContext ? httpContext ?? BuildHttpContext() : null);
+                .Returns(httpContext ?? BuildHttpContext());
 
             _memoryCacheMock.Setup(m => m.CreateEntry(It.IsAny<object>()))
                 .Returns(_cacheEntryMock.Object);
