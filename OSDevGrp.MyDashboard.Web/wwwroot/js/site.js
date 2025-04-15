@@ -48,6 +48,10 @@
 
             observer.disconnect();
 
+            $().reloadSubContent();
+        },
+
+        reloadSubContent: function() {
             var observeElementArray = $.merge($.merge($("#topContent"), $("#subContent")), $("#dashboardSettings"));
             if (observeElementArray.length === 0)
             {
@@ -105,7 +109,22 @@
             });
         },
 
+        enableFormValidation: function(formId) {
+            var formArray = $(document).find(formId);
+            if (formArray.length === 0) {
+                return;
+            }
+
+            $.each(formArray, function() {
+                $(this).removeData("validator");
+                $(this).removeData("unobtrusiveValidation");
+                $.validator.unobtrusive.parse($(this));
+            });
+        },
+
         setupDashboardSettings: function(document) {
+            $().enableFormValidation("#dashboardSettings");
+
             var checkboxUseReddit = document.find("#UseReddit");
             var checkboxIncludeNsfwContent = document.find("#NotNullableIncludeNsfwContent");
             var checkboxOnlyNsfwContent = document.find("#NotNullableOnlyNsfwContent");
@@ -145,7 +164,7 @@
                 checkboxOnlyNsfwContent.prop("checked", false);
                 checkboxOnlyNsfwContent.prop("disabled", true);
             });
-        }
+        },
     }),
 
     $(document).ready(function() {

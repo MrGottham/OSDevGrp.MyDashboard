@@ -182,7 +182,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
                 throw new ArgumentNullException(nameof(contentHelper));
             }
 
-            return contentHelper.AbsoluteUrl("Settings", "Home");
+            return contentHelper.AbsoluteUrl("Settings", "Home", new {DashboardSettings = contentHelper.ToBase64String(dashboardSettingsViewModel)});
         }
     }
 }

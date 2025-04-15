@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
@@ -10,6 +6,10 @@ using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Diagnostics;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Web.Controllers
 {
@@ -91,7 +91,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
         {
             if (string.IsNullOrWhiteSpace(dashboardSettings))
             {
-                throw new ArgumentNullException(nameof(dashboardSettings));
+                return BadRequest();
             }
 
             DashboardSettingsViewModel dashboardSettingsViewModel = _contentHelper.ToDashboardSettingsViewModel(dashboardSettings);
@@ -131,9 +131,14 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Settings()
+        public IActionResult Settings(string dashboardSettings)
         {
-            DashboardSettingsViewModel dashboardSettingsViewModel = _cookieHelper.ToDashboardSettingsViewModel();
+            if (string.IsNullOrWhiteSpace(dashboardSettings))
+            {
+                return BadRequest();
+            }
+
+            DashboardSettingsViewModel dashboardSettingsViewModel = _contentHelper.ToDashboardSettingsViewModel(dashboardSettings);
             if (dashboardSettingsViewModel == null)
             {
                 return BadRequest();
