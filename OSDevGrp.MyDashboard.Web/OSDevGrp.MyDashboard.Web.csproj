@@ -20,4 +20,10 @@
     <ProjectReference Include="..\OSDevGrp.MyDashboard.Core\OSDevGrp.MyDashboard.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>$(AssemblyName).Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

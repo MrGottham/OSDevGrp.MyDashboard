@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +22,7 @@ using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Factories;
 using OSDevGrp.MyDashboard.Web.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using OSDevGrp.MyDashboard.Web.Options;
 using System;
 
 namespace OSDevGrp.MyDashboard.Web
@@ -80,7 +80,8 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddRazorPages();
             services.AddControllersWithViews();
 
-            services.AddHealthChecks();
+            services.AddHealthChecks()
+                .AddCheck<RedditOptionsHealthCheck>(nameof(RedditOptions));
 
             services.AddHttpContextAccessor()
                 .AddMemoryCache();
@@ -97,6 +98,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddSingleton<ISeedGenerator, SeedGenerator>();
             services.AddSingleton<IRandomizer, Randomizer>();
             // Adds dependencies for the repositories.
+            services.Configure<RedditOptions>(Configuration.GetSection($"{ConfigurationKeys.AuthenticationSectionName}:{ConfigurationKeys.RedditSectionName}"));
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
             services.AddTransient<IRedditAccessTokenProviderFactory, RedditAccessTokenProviderFactory>();
             services.AddTransient<INewsRepository, NewsRepository>();
