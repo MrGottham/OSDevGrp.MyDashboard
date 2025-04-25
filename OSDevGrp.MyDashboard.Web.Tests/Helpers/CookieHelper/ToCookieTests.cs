@@ -20,7 +20,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         private Mock<IMemoryCache> _memoryCacheMock;
         private Mock<ICacheEntry> _cacheEntryMock;
         private Random _random;
-        private readonly Regex _memoryCacheKeyRegex = new Regex("^" + DashboardViewModel.CookieName + @".(\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1})$", RegexOptions.Compiled);
+        private readonly Regex _memoryCacheKeyRegex = new Regex("^" + DashboardViewModel.CookieName + @".(\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1})$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(32));
 
         #endregion
 
@@ -167,7 +167,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             ICookieHelper sut = CreateSut(cookieValueToStore: cookieValueToStore, httpContext: httpContext);
 
             DateTime expires = DateTime.Now.AddHours(8);
-            
+
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
             sut.ToCookie(dashboardSettingsViewModel);
 

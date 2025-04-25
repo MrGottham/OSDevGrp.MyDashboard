@@ -1,7 +1,7 @@
+using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 
 namespace OSDevGrp.MyDashboard.Web.Helpers
 {
@@ -16,10 +16,10 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                 return value;
             }
 
-            Regex regex = new Regex($"({Environment.NewLine}|\n)");
+            Regex regex = new Regex($"({Environment.NewLine}|\n)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(32));
             return regex.Replace(value, "<br />");
         }
-        
+
         public string RemoveEndingComment(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -27,7 +27,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                 return value;
             }
 
-            Regex regex = new Regex(@"<!--*(.+)$");
+            Regex regex = new Regex(@"<!--*(.+)$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(32));
             return regex.Replace(value, string.Empty);
         }
 
@@ -53,7 +53,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                 return value;
             }
 
-            Regex extractImageRegex = new Regex(@"<img[^>]*?src\s*=\s*[""']?([^'"" >]+?)[ '""][^>]*?>", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+            Regex extractImageRegex = new Regex(@"<img[^>]*?src\s*=\s*[""']?([^'"" >]+?)[ '""][^>]*?>", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled, TimeSpan.FromMilliseconds(32));
             MatchCollection matchCollection = extractImageRegex.Matches(value);
             foreach (Match match in matchCollection)
             {

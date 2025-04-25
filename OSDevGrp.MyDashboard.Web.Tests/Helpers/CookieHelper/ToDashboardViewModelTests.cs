@@ -17,7 +17,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         private Mock<IContentHelper> _contentHelperMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Mock<IMemoryCache> _memoryCacheMock;
-        private readonly Regex _memoryCacheKeyRegex = new Regex("^" + DashboardViewModel.CookieName + @".(\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1})$", RegexOptions.Compiled);
+        private readonly Regex _memoryCacheKeyRegex = new Regex("^" + DashboardViewModel.CookieName + @".(\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1})$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(32));
 
         #endregion
 
