@@ -9,5 +9,7 @@ namespace OSDevGrp.MyDashboard.Core.Contracts.Models
         Uri Link { get; set; }
 
         IAuthor Author { get; set; }
+
+        Uri MediaUrl { get; set;}
     }
 }

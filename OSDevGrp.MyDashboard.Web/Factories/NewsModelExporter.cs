@@ -1,8 +1,8 @@
-using System;
-using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Web.Factories
 {
@@ -31,6 +31,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 Details = GetValue(news.Details),
                 Provider = GetValue(news.Provider, provider => provider.Name),
                 SourceUrl = GetValue(news.Link, link => link.AbsoluteUri),
+                ImageUrl = GetValue(news.MediaUrl, mediaUrl => mediaUrl.AbsoluteUri),
                 Author = GetValue(news.Author, author => author.Name)
             };
 

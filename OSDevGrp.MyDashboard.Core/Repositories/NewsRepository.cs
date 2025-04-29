@@ -101,7 +101,17 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                     XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
                     using XmlReader xmlReader = XmlReader.Create(responseStream, xmlReaderSettings);
 
-                    return GenerateNews(newsProvider, xmlReader);
+                    XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(xmlReader.NameTable);
+                    if (xmlNamespaceManager.HasNamespace("ns") == false)
+                    {
+                        xmlNamespaceManager.AddNamespace("ns", xmlReader.NamespaceURI);
+                    }
+                    if (xmlNamespaceManager.HasNamespace("media") == false)
+                    {
+                        xmlNamespaceManager.AddNamespace("media", "http://search.yahoo.com/mrss/");
+                    }
+
+                    return GenerateNews(newsProvider, xmlReader, xmlNamespaceManager);
                 }
                 catch (HttpRequestException ex)
                 {
@@ -120,17 +130,18 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             return new List<INews>(0);
         }
 
-        private IEnumerable<INews> GenerateNews(INewsProvider newsProvider, XmlReader xmlReader)
+        private IEnumerable<INews> GenerateNews(INewsProvider newsProvider, XmlReader xmlReader, XmlNamespaceManager xmlNamespaceManager)
         {
             if (newsProvider == null) throw new ArgumentNullException(nameof(newsProvider));
             if (xmlReader == null) throw new ArgumentNullException(nameof(xmlReader));
+            if (xmlNamespaceManager == null) throw new ArgumentNullException(nameof(xmlNamespaceManager));
 
-            XmlDocument xmlDocument = new XmlDocument();
+            XmlDocument xmlDocument = new XmlDocument(xmlNamespaceManager.NameTable);
             xmlDocument.Load(xmlReader);
 
             IList<INews> news = new List<INews>();
 
-            XmlNodeList items = xmlDocument.SelectNodes("/rss/channel/item");
+            XmlNodeList items = xmlDocument.SelectNodes("/ns:rss/ns:channel/ns:item", xmlNamespaceManager);
             if (items == null)
             {
                 return news;
@@ -139,7 +150,7 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             {
                 try
                 {
-                    news.Add(GenerateNews(newsProvider, item));
+                    news.Add(GenerateNews(newsProvider, item, xmlNamespaceManager));
                 }
                 catch (Exception ex)
                 {
@@ -150,19 +161,20 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             return news;
         }
 
-        private INews GenerateNews(INewsProvider newsProvider, XmlNode item)
+        private static INews GenerateNews(INewsProvider newsProvider, XmlNode item, XmlNamespaceManager xmlNamespaceManager)
         {
             if (newsProvider == null) throw new ArgumentNullException(nameof(newsProvider));
             if (item == null) throw new ArgumentNullException(nameof(item));
+            if (xmlNamespaceManager == null) throw new ArgumentNullException(nameof(xmlNamespaceManager));
 
             try
             {
-                string title = ReadChildNodeValue(item, "title");
-                string description = ReadChildNodeValue(item, "description");
-                string pubDate = ReadChildNodeValue(item, "pubDate");
-                string link = ReadChildNodeValue(item, "link");
-                string guid = ReadChildNodeValue(item, "guid");
-                
+                string title = ReadChildNodeValue(item, "ns:title", xmlNamespaceManager);
+                string description = ReadChildNodeValue(item, "ns:description", xmlNamespaceManager);
+                string pubDate = ReadChildNodeValue(item, "ns:pubDate", xmlNamespaceManager);
+                string link = ReadChildNodeValue(item, "ns:link", xmlNamespaceManager);
+                string guid = ReadChildNodeValue(item, "ns:guid", xmlNamespaceManager);
+
                 return new News(
                     GenerateIdentifier(guid),
                     GenerateContent(title),
@@ -171,7 +183,8 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
                     newsProvider)
                 {
                     Link = GenerateUri(link),
-                    Author = ExtractAuthor(item)
+                    Author = ExtractAuthor(item, xmlNamespaceManager),
+                    MediaUrl = ExtractMediaUri(item, xmlNamespaceManager)
                 };
             }
             catch (Exception ex)
@@ -180,12 +193,13 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             }
         }
 
-        private string ReadChildNodeValue(XmlNode item, string childNodeName)
+        private static string ReadChildNodeValue(XmlNode item, string childNodeName, XmlNamespaceManager xmlNamespaceManager)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (string.IsNullOrWhiteSpace(childNodeName)) throw new ArgumentNullException(nameof(childNodeName));
+            if (xmlNamespaceManager == null) throw new ArgumentNullException(nameof(xmlNamespaceManager));
 
-            XmlNode childNode = item.SelectSingleNode(childNodeName);
+            XmlNode childNode = item.SelectSingleNode(childNodeName, xmlNamespaceManager);
             if (childNode == null)
             {
                 return null;
@@ -207,17 +221,17 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             return childNode.InnerText;
         }
 
-        private string GenerateIdentifier(string value)
+        private static string GenerateIdentifier(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? Guid.NewGuid().ToString("D") : value;
         }
 
-        private string GenerateContent(string value)
+        private static string GenerateContent(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? null : value;
         }
 
-        private DateTime GenerateTimestamp(string value)
+        private static DateTime GenerateTimestamp(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -232,41 +246,64 @@ namespace OSDevGrp.MyDashboard.Core.Repositories
             return Rfc822DateTimeParser.Parse(value);
         }
 
-        private Uri GenerateUri(string value)
+        private static Uri GenerateUri(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
                 return null;
             }
 
-            if (Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out var result))
+            if (Uri.TryCreate(value, UriKind.Absolute, out var result))
             {
                 return result;
             }
-            
+
             return null;
         }
 
-        private IAuthor ExtractAuthor(XmlNode item)
+        private static IAuthor ExtractAuthor(XmlNode item, XmlNamespaceManager xmlNamespaceManager)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (xmlNamespaceManager == null) throw new ArgumentNullException(nameof(xmlNamespaceManager));
 
-            XmlNode authorNode = item.SelectSingleNode("author");
+            XmlNode authorNode = item.SelectSingleNode("ns:author", xmlNamespaceManager);
             if (authorNode == null)
             {
                 return null;
             }
 
-            string name = ReadChildNodeValue(authorNode, "name");
-            if (string.IsNullOrWhiteSpace(name))
+            string name = ReadChildNodeValue(authorNode, "ns:name", xmlNamespaceManager);
+            if (string.IsNullOrWhiteSpace(name) == false)
             {
-                return null;
+                return new Author(name);
             }
 
-            return new Author(name);
+            if (string.IsNullOrWhiteSpace(authorNode.InnerText) == false)
+            {
+                return new Author(authorNode.InnerText);
+            }
+
+            return null;
+        }
+
+        private static Uri ExtractMediaUri(XmlNode item, XmlNamespaceManager xmlNamespaceManager)
+        {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (xmlNamespaceManager == null) throw new ArgumentNullException(nameof(xmlNamespaceManager));
+
+            XmlNode contentNone = item.SelectSingleNode("media:content", xmlNamespaceManager);
+            if (contentNone != null && string.IsNullOrEmpty(contentNone.Attributes?["url"]?.Value) == false)
+            {
+                return GenerateUri(contentNone.Attributes["url"].Value);
+            }
+
+            XmlNode thumbnailNone = item.SelectSingleNode("media:thumbnail", xmlNamespaceManager);
+            if (thumbnailNone != null && string.IsNullOrEmpty(thumbnailNone.Attributes?["url"]?.Value) == false)
+            {
+                return GenerateUri(thumbnailNone.Attributes?["url"]?.Value);
+            }
+
+            return null;
         }
 
         #endregion

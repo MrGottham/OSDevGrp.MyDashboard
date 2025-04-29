@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Collections.Generic;
 
 namespace OSDevGrp.MyDashboard.Web.Factories
 {
@@ -22,7 +22,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             {
                 throw new ArgumentNullException(nameof(htmlHelper));
             }
-            
+
             _htmlHelper = htmlHelper;
         }
 
@@ -33,6 +33,12 @@ namespace OSDevGrp.MyDashboard.Web.Factories
         protected override InformationViewModel Build(INews news)
         {
             List<Uri> imageUrlCollection = new List<Uri>();
+
+            Uri mediaUri = news.MediaUrl;
+            if (mediaUri != null)
+            {
+                imageUrlCollection.Add(mediaUri);
+            }
 
             string header = ExtractImages(_htmlHelper.Convert(news.Information, false, true), imageUrlCollection);
             string details = ExtractImages(_htmlHelper.Convert(news.Details, false, true), imageUrlCollection);
@@ -60,8 +66,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 throw new ArgumentNullException(nameof(imageUrlCollection));
             }
 
-            IList<Uri> imageUrlCollectionForValue = null;
-            string result = _htmlHelper.ExtractImages(value, out imageUrlCollectionForValue);
+            string result = _htmlHelper.ExtractImages(value, out IList<Uri> imageUrlCollectionForValue);
             if (imageUrlCollectionForValue != null && imageUrlCollectionForValue.Count > 0)
             {
                 imageUrlCollection.AddRange(imageUrlCollectionForValue);
