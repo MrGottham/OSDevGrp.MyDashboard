@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
@@ -21,6 +22,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
         private readonly IViewModelBuilder<DashboardViewModel, IDashboard> _dashboardViewModelBuilder;
         private readonly IModelExporter<DashboardExportModel, IDashboard> _dashboardModelExporter;
         private readonly IRedditAccessTokenProviderFactory _redditAccessTokenProviderFactory;
+        private readonly IRedditLogic _redditLogic;
         private readonly IContentHelper _contentHelper;
         private readonly ICookieHelper _cookieHelper;
 
@@ -28,7 +30,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
 
         #region Constructor
 
-        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IModelExporter<DashboardExportModel, IDashboard> dashboardModelExporter, IRedditAccessTokenProviderFactory redditAccessTokenProviderFactory, IContentHelper contentHelper, ICookieHelper cookieHelper)
+        public HomeController(IDashboardFactory dashboardFactory, IViewModelBuilder<DashboardViewModel, IDashboard> dashboardViewModelBuilder, IModelExporter<DashboardExportModel, IDashboard> dashboardModelExporter, IRedditAccessTokenProviderFactory redditAccessTokenProviderFactory, IRedditLogic redditLogic, IContentHelper contentHelper, ICookieHelper cookieHelper)
         {
             if (dashboardFactory == null)
             {
@@ -46,6 +48,10 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             {
                 throw new ArgumentNullException(nameof(redditAccessTokenProviderFactory));
             }
+            if (redditLogic == null)
+            {
+                throw new ArgumentNullException(nameof(redditLogic));
+            }
             if (contentHelper == null)
             {
                 throw new ArgumentNullException(nameof(contentHelper));
@@ -59,6 +65,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             _dashboardViewModelBuilder = dashboardViewModelBuilder;
             _dashboardModelExporter = dashboardModelExporter;
             _redditAccessTokenProviderFactory = redditAccessTokenProviderFactory;
+            _redditLogic = redditLogic;
             _contentHelper = contentHelper;
             _cookieHelper = cookieHelper;
         }
@@ -75,8 +82,8 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
                 NumberOfNews = 100,
                 UseReddit = false,
                 AllowNsfwContent = false,
-                IncludeNsfwContent = false,
-                OnlyNsfwContent = false,
+                IncludeNsfwContent = null,
+                OnlyNsfwContent = null,
                 RedditAccessToken = null,
                 ExportData = false
             };
@@ -166,8 +173,7 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
                 return await AcquireRedditAuthorizationTokenAsync(dashboardSettingsViewModel);
             }
 
-            dashboardSettingsViewModel.IncludeNsfwContent = dashboardSettingsViewModel.UseReddit ? dashboardSettingsViewModel.NotNullableIncludeNsfwContent : (bool?) null;
-            dashboardSettingsViewModel.OnlyNsfwContent = dashboardSettingsViewModel.UseReddit ? dashboardSettingsViewModel.NotNullableOnlyNsfwContent : (bool?) null;
+            dashboardSettingsViewModel.ApplyRules(_cookieHelper);
 
             return View("Index", dashboardSettingsViewModel);
         }
@@ -196,17 +202,22 @@ namespace OSDevGrp.MyDashboard.Web.Controllers
             }
 
             IRedditAccessToken redditAccessToken = await GetRedditAccessTokenAsync(code);
-            if (redditAccessToken != null)
+            if (redditAccessToken == null)
             {
-                dashboardSettingsViewModel.RedditAccessToken = redditAccessToken.ToBase64();
+                dashboardSettingsViewModel.ResetRules(_cookieHelper);
+
                 return View("Index", dashboardSettingsViewModel);
             }
 
-            dashboardSettingsViewModel.UseReddit = false;
-            dashboardSettingsViewModel.AllowNsfwContent = false;
-            dashboardSettingsViewModel.IncludeNsfwContent = false;
-            dashboardSettingsViewModel.OnlyNsfwContent = false;
-            dashboardSettingsViewModel.RedditAccessToken = null;
+            IRedditAuthenticatedUser redditAuthenticatedUser = await _redditLogic.GetAuthenticatedUserAsync(redditAccessToken);
+            if (redditAuthenticatedUser == null)
+            {
+                dashboardSettingsViewModel.ResetRules(_cookieHelper);
+
+                return View("Index", dashboardSettingsViewModel);
+            }
+
+            dashboardSettingsViewModel.ApplyRules(redditAuthenticatedUser, redditAccessToken, _cookieHelper);
 
             return View("Index", dashboardSettingsViewModel);
         }

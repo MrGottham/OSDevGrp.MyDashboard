@@ -1,12 +1,13 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 {
@@ -19,6 +20,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
         private Mock<IModelExporter<DashboardExportModel, IDashboard>> _dashboardModelExporterMock;
         private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
+        private Mock<IRedditLogic> _redditLogicMock;
         private Mock<IContentHelper> _contentHelperMock;
         private Mock<ICookieHelper> _cookieHelperMock;
         private Random _random;
@@ -32,6 +34,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
             _dashboardModelExporterMock = new Mock<IModelExporter<DashboardExportModel, IDashboard>>();
             _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
+            _redditLogicMock = new Mock<IRedditLogic>();
             _contentHelperMock = new Mock<IContentHelper>();
             _cookieHelperMock = new Mock<ICookieHelper>();
             _random = new Random(DateTime.Now.Millisecond);
@@ -91,6 +94,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
                 _dashboardViewModelBuilderMock.Object,
                 _dashboardModelExporterMock.Object,
                 _redditAccessTokenProviderFactoryMock.Object,
+                _redditLogicMock.Object,
                 _contentHelperMock.Object,
                 _cookieHelperMock.Object);
         }

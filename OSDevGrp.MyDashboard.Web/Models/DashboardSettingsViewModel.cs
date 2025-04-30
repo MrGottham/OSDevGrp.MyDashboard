@@ -108,9 +108,71 @@ namespace OSDevGrp.MyDashboard.Web.Models
                 throw new ArgumentNullException(nameof(cookieHelper));
             }
 
+            ApplyRules(rules.AllowNsfwContent, cookieHelper);
+        }
+
+        public void ApplyRules(IRedditAuthenticatedUser redditAuthenticatedUser, IRedditAccessToken redditAccessToken, ICookieHelper cookieHelper)
+        {
+            if (redditAuthenticatedUser == null)
+            {
+                throw new ArgumentNullException(nameof(redditAuthenticatedUser));
+            }
+            if (redditAccessToken == null)
+            {
+                throw new ArgumentNullException(nameof(redditAccessToken));
+            }
+            if (cookieHelper == null)
+            {
+                throw new ArgumentNullException(nameof(cookieHelper));
+            }
+
+            RedditAccessToken = redditAccessToken.ToBase64();
+
+            ApplyRules(new DashboardRules(redditAuthenticatedUser), cookieHelper);
+        }
+
+        public void ApplyRules(ICookieHelper cookieHelper)
+        {
+            if (cookieHelper == null)
+            {
+                throw new ArgumentNullException(nameof(cookieHelper));
+            }
+
+            if (UseReddit)
+            {
+                ApplyRules(AllowNsfwContent, cookieHelper);
+
+                return;
+            }
+
+            RedditAccessToken = null;
+
+            ApplyRules(false, cookieHelper);
+        }
+
+        public void ResetRules(ICookieHelper cookieHelper)
+        {
+            if (cookieHelper == null)
+            {
+                throw new ArgumentNullException(nameof(cookieHelper));
+            }
+
+            UseReddit = false;
+            RedditAccessToken = null;
+
+            ApplyRules(false, cookieHelper);
+        }
+
+        private void ApplyRules(bool allowNsfwContent, ICookieHelper cookieHelper)
+        {
+            if (cookieHelper == null)
+            {
+                throw new ArgumentNullException(nameof(cookieHelper));
+            }
+
             try
             {
-                AllowNsfwContent = rules.AllowNsfwContent;
+                AllowNsfwContent = allowNsfwContent;
                 if (AllowNsfwContent)
                 {
                     return;

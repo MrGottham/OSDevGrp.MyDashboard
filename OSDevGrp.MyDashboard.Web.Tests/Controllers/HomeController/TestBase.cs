@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Core.Utilities;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Collections.Generic;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 {
@@ -54,6 +54,29 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             IRedditAccessToken redditAccessToken = BuildRedditAccessToken(random, accessToken, tokenType, expiresIn, scope, refreshToken, received);
             return Convert.ToBase64String(JsonSerialization.ToByteArray(redditAccessToken));
+        }
+
+        protected static IRedditAuthenticatedUser BuildRedditAuthenticatedUser(Random random, bool? over18 = null)
+        {
+            if (random == null)
+            {
+                throw new ArgumentNullException(nameof(random));
+            }
+
+            return BuildRedditAuthenticatedUserMock(random, over18).Object;
+        }
+
+        protected static Mock<IRedditAuthenticatedUser> BuildRedditAuthenticatedUserMock(Random random, bool? over18 = null)
+        {
+            if (random == null)
+            {
+                throw new ArgumentNullException(nameof(random));
+            }
+
+            Mock<IRedditAuthenticatedUser> redditAuthenticatedUserMock = new Mock<IRedditAuthenticatedUser>();
+            redditAuthenticatedUserMock.Setup(m => m.Over18)
+                .Returns(over18 ?? random.Next(100) > 50);
+            return redditAuthenticatedUserMock;
         }
 
         protected static IDashboard BuildDashboard()
