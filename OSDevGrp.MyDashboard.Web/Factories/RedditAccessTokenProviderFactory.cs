@@ -1,8 +1,9 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using OSDevGrp.MyDashboard.Web.Options;
+using System;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Web.Factories
 {
@@ -10,25 +11,25 @@ namespace OSDevGrp.MyDashboard.Web.Factories
     {
         #region Private variables
 
-        private readonly IConfiguration _configuration;
+        private readonly IOptions<RedditOptions> _redditOptions;
         private readonly IDataProviderFactory _dataProviderFactory;
 
         #endregion
 
         #region Constructor
 
-        public RedditAccessTokenProviderFactory(IConfiguration configuration, IDataProviderFactory dataProviderFactory)
+        public RedditAccessTokenProviderFactory(IOptions<RedditOptions> redditOptions, IDataProviderFactory dataProviderFactory)
         {
-            if (configuration == null)
+            if (redditOptions == null)
             {
-                throw new ArgumentNullException(nameof(configuration));
+                throw new ArgumentNullException(nameof(redditOptions));
             }
             if (dataProviderFactory == null)
             {
                 throw new ArgumentNullException(nameof(dataProviderFactory));
             }
 
-            _configuration = configuration;
+            _redditOptions = redditOptions;
             _dataProviderFactory = dataProviderFactory;
         }
 
@@ -36,21 +37,9 @@ namespace OSDevGrp.MyDashboard.Web.Factories
 
         #region Properties
 
-        private string ClientId
-        {
-            get
-            {
-                return _configuration["Authentication:Reddit:ClientId"];
-            }
-        }
+        private string ClientId => _redditOptions.Value.ClientId;
 
-        private string ClientSecret
-        {
-            get
-            {
-                return _configuration["Authentication:Reddit:ClientSecret"];
-            }
-        }
+        private string ClientSecret => _redditOptions.Value.ClientSecret;
 
         #endregion
 

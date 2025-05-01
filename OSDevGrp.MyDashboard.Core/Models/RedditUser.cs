@@ -1,54 +1,21 @@
-using System;
-using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using System.Runtime.Serialization;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
-    [Serializable]
     [DataContract]
     public class RedditUser : RedditCreatedThingBase, IRedditUser
     {
-        #region Constructors
-
-        public RedditUser()
-        {
-        }
-
-        protected RedditUser(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         [IgnoreDataMember]
-        public override string Identifier 
-        {
-            get
-            {
-                return Id;
-            }
-        }
+        public override string Identifier => Id;
 
         [IgnoreDataMember]
-        public override string FullName
-        {
-            get
-            {
-                return $"{Kind}_{Identifier}";
-            }
-        }
+        public override string FullName => $"{Kind}_{Identifier}";
 
         [IgnoreDataMember]
-        public override string Kind
-        {
-            get
-            {
-                return "t2";
-            }
-        }
+        public override string Kind => "t2";
 
         [DataMember(Name = "comment_karma", IsRequired = true)]
 

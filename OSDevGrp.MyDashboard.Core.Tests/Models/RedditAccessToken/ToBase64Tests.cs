@@ -1,8 +1,8 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using System;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OSDevGrp.MyDashboard.Core.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditAccessToken
 {
@@ -28,7 +28,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditAccessToken
 
             string result = sut.ToBase64();
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Trim().Length % 4 == 0 && Regex.IsMatch(result.Trim(), @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None));
+            Assert.IsTrue(result.Trim().Length % 4 == 0 && Regex.IsMatch(result.Trim(), @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(32)));
         }
  
         private IRedditAccessToken CreateSut()

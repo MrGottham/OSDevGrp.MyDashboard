@@ -1,10 +1,10 @@
-using System;
-using System.Text;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Utilities;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Text;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
 {
@@ -66,18 +66,18 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(value ?? Guid.NewGuid().ToString())); 
         }
 
-        protected static HttpContext BuildHttpContext(bool hasHttpRequest = true, HttpRequest httpRequest = null, bool hasHttpResponse = true, HttpResponse httpResponse = null)
+        protected static HttpContext BuildHttpContext(HttpRequest httpRequest = null, HttpResponse httpResponse = null)
         {
-            return BuildHttpContextMock(hasHttpRequest, httpRequest, hasHttpResponse, httpResponse).Object;
+            return BuildHttpContextMock(httpRequest, httpResponse).Object;
         }
 
-        protected static Mock<HttpContext> BuildHttpContextMock(bool hasHttpRequest = true, HttpRequest httpRequest = null, bool hasHttpResponse = true, HttpResponse httpResponse = null)
+        protected static Mock<HttpContext> BuildHttpContextMock(HttpRequest httpRequest = null, HttpResponse httpResponse = null)
         {
             Mock<HttpContext> httpContextMock = new Mock<HttpContext>();
             httpContextMock.Setup(m => m.Request)
-                .Returns(hasHttpRequest ? httpRequest ?? BuildHttpRequest() : null);
+                .Returns(httpRequest ?? BuildHttpRequest());
             httpContextMock.Setup(m => m.Response)
-                .Returns(hasHttpResponse ? httpResponse ?? BuildHttpResponse() : null);
+                .Returns(httpResponse ?? BuildHttpResponse());
             return httpContextMock;
         }
 

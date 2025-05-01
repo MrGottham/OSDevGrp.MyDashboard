@@ -390,7 +390,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditSubredditToObjectViewMo
                 throw new ArgumentNullException(nameof(displayNamePrefixed));
             }
 
-            StringBuilder htmlBuilder = new StringBuilder("<div class=\"card mb-3\">");
+            StringBuilder htmlBuilder = new StringBuilder("<div class=\"card h-100\">");
             if (imageUrl != null)
             {
                 htmlBuilder.Append($"<img class=\"card-img-top img-fluid\" src=\"{imageUrl.AbsoluteUri}\" />");
@@ -406,13 +406,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditSubredditToObjectViewMo
                 htmlBuilder.Append(displayNamePrefixed);
             }
             htmlBuilder.Append("</h5>");
-            htmlBuilder.Append("<p class=\"card-text\">");
             if (string.IsNullOrWhiteSpace(publicDescription) == false)
             {
-                htmlBuilder.Append($"{publicDescription}<br><br>");
+                htmlBuilder.Append($"<p class=\"card-text\">{publicDescription}</p>");
             }
-            htmlBuilder.Append($"Subscribers: {subscribers:N0}");
-            htmlBuilder.Append("</p>");
+            htmlBuilder.Append($"<p class=\"card-text\">Subscribers: {subscribers:N0}</p>");
             htmlBuilder.Append("</div>");
             htmlBuilder.Append("</div>");
 

@@ -1,54 +1,22 @@
+using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using System;
 using System.Runtime.Serialization;
-using OSDevGrp.MyDashboard.Core.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
-    [Serializable]
     [DataContract]
     public abstract class RedditCreatedThingBase : RedditThingBase, IRedditCreatedThing
     {
-        #region Constructors
-
-        protected RedditCreatedThingBase()
-        {
-        }
-
-        protected RedditCreatedThingBase(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         [IgnoreDataMember]
-        public virtual DateTime CreatedTime
-        { 
-            get
-            {
-                return CreatedUtcTime.ToLocalTime();
-            }
-        }
+        public virtual DateTime CreatedTime => CreatedUtcTime.ToLocalTime();
 
         [IgnoreDataMember]
-        public virtual DateTime CreatedUtcTime
-        { 
-            get
-            {
-                return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Convert.ToInt64(CreatedUnixUtcTimestamp));
-            }
-        }
+        public virtual DateTime CreatedUtcTime => new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(Convert.ToInt64(CreatedUnixUtcTimestamp));
 
         [IgnoreDataMember]
-        public virtual DateTime Timestamp
-        {
-            get
-            {
-                return CreatedTime;
-            }
-        }
+        public virtual DateTime Timestamp => CreatedTime;
 
         [DataMember(Name = "created", IsRequired = true)]
         protected virtual decimal CreatedUnixTimestamp

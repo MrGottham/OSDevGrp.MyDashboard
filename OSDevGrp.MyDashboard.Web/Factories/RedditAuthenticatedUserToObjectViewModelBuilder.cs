@@ -15,34 +15,21 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             int linkKarma = redditAuthenticatedUser.LinkKarma;
             bool hasUnreadMail = redditAuthenticatedUser.HasUnreadMail;
 
-            StringBuilder htmlBuilder = new StringBuilder("<div class=\"card\">");
+            StringBuilder htmlBuilder = new StringBuilder("<div class=\"card h-100\">");
             htmlBuilder.Append("<img class=\"card-img-top img-fluid\" src=\"/images/reddit_logo_and_wordmark.png\" />");
             htmlBuilder.Append("<div class=\"card-body\">");
-            htmlBuilder.Append($"<h4 class=\"card-title\">{redditAuthenticatedUser.UserName}</h4>");
-            if (commentKarma > 0 || linkKarma > 0 || hasUnreadMail)
+            htmlBuilder.Append($"<h5 class=\"card-title\">{redditAuthenticatedUser.UserName}</h5>");
+            if (commentKarma > 0)
             {
-                htmlBuilder.Append("<p class=\"card-text\">");
-                if (commentKarma > 0)
-                {
-                    htmlBuilder.Append($"Comment karma: {commentKarma}");
-                }
-                if (commentKarma > 0 && linkKarma > 0)
-                {
-                    htmlBuilder.Append("<br>");
-                }
-                if (linkKarma > 0)
-                {
-                    htmlBuilder.Append($"Link karma: {linkKarma}");
-                }
-                if ((commentKarma > 0 || linkKarma > 0) && hasUnreadMail)
-                {
-                    htmlBuilder.Append("<br><br>");
-                }
-                if (hasUnreadMail)
-                {
-                    htmlBuilder.Append("You have unread mail");
-                }
-                htmlBuilder.Append("</p>");
+                htmlBuilder.Append($"<p class=\"card-text\">Comment karma: {commentKarma}</p>");
+            }
+            if (linkKarma > 0)
+            {
+                htmlBuilder.Append($"<p class=\"card-text\">Link karma: {linkKarma}</p>");
+            }
+            if (hasUnreadMail)
+            {
+                htmlBuilder.Append("<p class=\"card-text\">You have unread mail</p>");
             }
             htmlBuilder.Append("</div>");
             htmlBuilder.Append("</div>");

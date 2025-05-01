@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
@@ -6,6 +5,7 @@ using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Helpers
 {
@@ -53,7 +53,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
             }
 
             StoreCookie(DashboardSettingsViewModel.CookieName, dashboardSettingsViewModel,
-                viewModel => _contentHelper.ToBase64String(viewModel),
+                _contentHelper.ToBase64String,
                 (viewModel, secureHttpRequest) => 
                 {
                     DateTime expires = DateTime.Now.AddHours(8);
@@ -70,7 +70,7 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                     {
                         Expires = expires,
                         Secure = secureHttpRequest,
-                        SameSite = SameSiteMode.None
+                        SameSite = SameSiteMode.Strict
                     };
                 });
         }
@@ -87,38 +87,27 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
             StoreCookie(DashboardViewModel.CookieName, dashboardViewModel,
                 viewModel =>
                 {
-                    byte[] dashboardViewModelAsByteArray = _contentHelper.ToByteArray(viewModel);
-                    if (dashboardViewModelAsByteArray == null)
-                    {
-                        return null;
-                    }
-
-                    string memoryCacheKey = $"{DashboardViewModel.CookieName}.{Guid.NewGuid().ToString("D")}";
+                    string memoryCacheKey = $"{DashboardViewModel.CookieName}.{Guid.NewGuid():D}";
 
                     using (ICacheEntry cacheEntry = _memoryCache.CreateEntry(memoryCacheKey))
                     {
-                        if (cacheEntry == null)
-                        {
-                            return null;
-                        }
-                        
-                        cacheEntry.Value = dashboardViewModelAsByteArray;
-                        cacheEntry.AbsoluteExpiration = expires;
+                        cacheEntry.Value = viewModel;
+                        cacheEntry.AbsoluteExpiration= expires;
                     }
 
                     return _contentHelper.ToBase64String(memoryCacheKey);
                 },
-                (viewModel, secureHttpRequest) => new CookieOptions {Expires = expires, Secure = secureHttpRequest, SameSite = SameSiteMode.None});
+                (_, secureHttpRequest) => new CookieOptions {Expires = expires, Secure = secureHttpRequest, SameSite = SameSiteMode.Strict});
         }
 
         public DashboardSettingsViewModel ToDashboardSettingsViewModel()
         {
-            return RestoreFromCookie<DashboardSettingsViewModel>(DashboardSettingsViewModel.CookieName, cookieValue => _contentHelper.ToDashboardSettingsViewModel(cookieValue));
+            return RestoreFromCookie(DashboardSettingsViewModel.CookieName, _contentHelper.ToDashboardSettingsViewModel);
         }
 
         public DashboardViewModel ToDashboardViewModel()
         {
-            return RestoreFromCookie<DashboardViewModel>(DashboardViewModel.CookieName, cookieValue => 
+            return RestoreFromCookie(DashboardViewModel.CookieName, cookieValue => 
             {
                 string memoryCacheKey = _contentHelper.ToValue(cookieValue);
                 if (string.IsNullOrWhiteSpace(memoryCacheKey))
@@ -126,12 +115,12 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
                     return null;
                 }
 
-                if (_memoryCache.TryGetValue(memoryCacheKey, out byte[] memoryCacheValue) == false)
+                if (_memoryCache.TryGetValue(memoryCacheKey, out DashboardViewModel memoryCacheValue) == false)
                 {
                     return null;
                 }
 
-                return _contentHelper.ToDashboardViewModel(memoryCacheValue);
+                return memoryCacheValue;
             });
         }
 
@@ -233,41 +222,17 @@ namespace OSDevGrp.MyDashboard.Web.Helpers
 
         private IRequestCookieCollection ResolveRequestCookies()
         {
-            HttpRequest httpRequest = ResolveHttpRequest();
-            if (httpRequest == null)
-            {
-                return null;
-            }
-
-            return httpRequest.Cookies;
+            return ResolveHttpRequest().Cookies;
         }
 
         private IResponseCookies ResolveResponseCookies()
         {
-            HttpContext httpContext = ResolveHttpContext();
-            if (httpContext == null)
-            {
-                return null;
-            }
-
-            HttpResponse httpResponse = httpContext.Response;
-            if (httpResponse == null)
-            {
-                return null;
-            }
-
-            return httpResponse.Cookies;
+            return ResolveHttpContext().Response.Cookies;
         }
 
         private HttpRequest ResolveHttpRequest()
         {
-            HttpContext httpContext = ResolveHttpContext();
-            if (httpContext == null)
-            {
-                return null;
-            }
-
-            return httpContext.Request;
+            return ResolveHttpContext().Request;
         }
 
         private HttpContext ResolveHttpContext()

@@ -1,11 +1,12 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
+using OSDevGrp.MyDashboard.Web.Options;
+using System;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFactory
 {
@@ -14,7 +15,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
     {
         #region Private variables
 
-        private Mock<IConfiguration> _configurationMock;
+        private Mock<IOptions<RedditOptions>> _redditOptionsMock;
         private Mock<IDataProviderFactory> _dataProviderFactoryMock;
 
         #endregion
@@ -22,7 +23,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
         [TestInitialize]
         public void TestInitialize()
         {
-            _configurationMock = new Mock<IConfiguration>();
+            _redditOptionsMock = new Mock<IOptions<RedditOptions>>();
             _dataProviderFactoryMock = new Mock<IDataProviderFactory>();
         }
 
@@ -71,7 +72,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
         }
 
         [TestMethod]
-        public async Task RenewRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientIdWasCalledOnConfiguration()
+        public async Task RenewRedditAccessTokenAsync_WhenCalled_AssertValueWasCalledTwiceOnRedditOptions()
         {
             string refreshToken = Guid.NewGuid().ToString("D");
 
@@ -79,19 +80,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             await sut.RenewRedditAccessTokenAsync(refreshToken);
 
-            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)], Times.Once);
-        }
-
-        [TestMethod]
-        public async Task RenewRedditAccessTokenAsync_WhenCalled_AssertAuthenticationRedditClientSecretWasCalledOnConfiguration()
-        {
-            string refreshToken = Guid.NewGuid().ToString("D");
-
-            IRedditAccessTokenProviderFactory sut = CreateSut();
-
-            await sut.RenewRedditAccessTokenAsync(refreshToken);
-
-            _configurationMock.Verify(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientSecret", value, StringComparison.Ordinal) == 0)], Times.Once);
+            _redditOptionsMock.Verify(m => m.Value, Times.Exactly(2));
         }
 
         [TestMethod]
@@ -127,17 +116,24 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
         private IRedditAccessTokenProviderFactory CreateSut(string clientId = null, string clientSecret = null, Task<IRedditAccessToken> renewRedditAccessTokenTask = null)
         {
-            _configurationMock.Setup(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientId", value, StringComparison.Ordinal) == 0)])
-                .Returns(clientId ?? Guid.NewGuid().ToString("D"));
-            _configurationMock.Setup(m => m[It.Is<string>(value => string.Compare("Authentication:Reddit:ClientSecret", value, StringComparison.Ordinal) == 0)])
-                .Returns(clientSecret ?? Guid.NewGuid().ToString("D"));
+            _redditOptionsMock.Setup(m => m.Value)
+                .Returns(CreateRedditOptions(clientId, clientSecret));
 
             _dataProviderFactoryMock.Setup(m => m.RenewRedditAccessTokenAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(renewRedditAccessTokenTask ?? Task.Run<IRedditAccessToken>(() => CreateRedditAccessToken()));
 
-            return new OSDevGrp.MyDashboard.Web.Factories.RedditAccessTokenProviderFactory(
-                _configurationMock.Object,
+            return new Web.Factories.RedditAccessTokenProviderFactory(
+                _redditOptionsMock.Object,
                 _dataProviderFactoryMock.Object);
+        }
+
+        private RedditOptions CreateRedditOptions(string clientId = null, string clientSecret = null)
+        {
+            return new RedditOptions
+            {
+                ClientId = clientId ?? Guid.NewGuid().ToString("D"),
+                ClientSecret = clientSecret ?? Guid.NewGuid().ToString("D")
+            };
         }
 
         private IRedditAccessToken CreateRedditAccessToken()

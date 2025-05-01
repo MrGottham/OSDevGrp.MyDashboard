@@ -1,11 +1,11 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 {
@@ -33,17 +33,16 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             Assert.IsNotNull(newsProviders);
             Assert.AreEqual(5, newsProviders.Count());
-            
-            AssertNewsProvider(newsProviders.ElementAt(0), "DR", "https://www.dr.dk/nyheder/service/feeds/allenyheder");
-            AssertNewsProvider(newsProviders.ElementAt(1), "TV 2 Lorry", "https://www.tv2lorry.dk/rss");
+            AssertNewsProvider(newsProviders.ElementAt(0), "DR", "https://www.dr.dk/nyheder/service/feeds/senestenyt");
+            AssertNewsProvider(newsProviders.ElementAt(1), "TV 2 Kosmopol", "https://www.tv2kosmopol.dk/rss");
             AssertNewsProvider(newsProviders.ElementAt(2), "Børsen", "https://borsen.dk/rss");
             AssertNewsProvider(newsProviders.ElementAt(3), "Computerworld", "https://www.computerworld.dk/rss/all");
-            AssertNewsProvider(newsProviders.ElementAt(4), "Version2", "https://www.version2.dk/it-nyheder/rss");
+            AssertNewsProvider(newsProviders.ElementAt(4), "Version2", "https://www.version2.dk/rss");
         }
 
         private IDataProviderFactory CreateSut()
         {
-            return new OSDevGrp.MyDashboard.Core.Factories.DataProviderFactory(_randomizerMock.Object);
+            return new Core.Factories.DataProviderFactory(_randomizerMock.Object);
         }
 
         private void AssertNewsProvider(INewsProvider newsProvider, string name, string url)

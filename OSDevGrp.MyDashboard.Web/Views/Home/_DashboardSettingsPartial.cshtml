@@ -1,7 +1,6 @@
 @inject IContentHelper contentHelper
 @model DashboardSettingsViewModel;
-<div class="row" data-url="@Model.GetSettingsUrl(contentHelper)">
-    <h2>Settings</h2>
+<div data-url="@Model.GetSettingsUrl(contentHelper)">
     <form asp-controller="Home" asp-action="Commit" method="post">
         @if (Model.AllowNsfwContent)
         {

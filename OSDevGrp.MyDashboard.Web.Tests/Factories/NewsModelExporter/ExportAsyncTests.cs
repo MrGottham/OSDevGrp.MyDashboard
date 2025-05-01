@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
@@ -7,6 +5,8 @@ using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsModelExporter
 {
@@ -124,6 +124,17 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsModelExporter
             await sut.ExportAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Link, Times.Once);
+        }
+
+        [TestMethod]
+        public async Task ExportAsync_WhenCalled_AssertMediaUrlWasCalledOnNews()
+        {
+            IModelExporter<DashboardItemExportModel, INews> sut = CreateSut();
+
+            Mock<INews> newsMock = BuildNewsMock();
+            await sut.ExportAsync(newsMock.Object);
+
+            newsMock.Verify(m => m.MediaUrl, Times.Once);
         }
 
         [TestMethod]
@@ -277,6 +288,31 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsModelExporter
         }
 
         [TestMethod]
+        public async Task ExportAsync_WhenNewsIsWithoutMediaUrl_ReturnsDashboardItemExportModelWithoutImageUrl()
+        {
+            IModelExporter<DashboardItemExportModel, INews> sut = CreateSut();
+
+            INews news = BuildNews();
+            DashboardItemExportModel result = await sut.ExportAsync(news);
+
+            Assert.IsNotNull(result);
+            Assert.IsNull(result.ImageUrl);
+        }
+
+        [TestMethod]
+        public async Task ExportAsync_WhenNewsIsWithMediaUrl_ReturnsDashboardItemExportModelWithImageUrlFromNews()
+        {
+            IModelExporter<DashboardItemExportModel, INews> sut = CreateSut();
+
+            Uri mediaUrl = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}/{Guid.NewGuid().ToString("D")}.png");
+            INews news = BuildNews(mediaUrl: mediaUrl);
+            DashboardItemExportModel result = await sut.ExportAsync(news);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(mediaUrl.AbsoluteUri, result.ImageUrl);
+        }
+
+        [TestMethod]
         public async Task ExportAsync_WhenNewsIsWithoutAuthor_ReturnsDashboardItemExportModelWithoutAuthor()
         {
             IModelExporter<DashboardItemExportModel, INews> sut = CreateSut();
@@ -336,12 +372,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsModelExporter
             return new Web.Factories.NewsModelExporter(_exceptionHandlerMock.Object);
         }
 
-        private INews BuildNews(string identifier = null, DateTime? timestamp = null, string information = null, string details = null, INewsProvider newsProvider = null, Uri link = null, IAuthor author = null)
+        private INews BuildNews(string identifier = null, DateTime? timestamp = null, string information = null, string details = null, INewsProvider newsProvider = null, Uri link = null, IAuthor author = null, Uri mediaUrl = null)
         {
-            return BuildNewsMock(identifier, timestamp, information, details, newsProvider, link, author).Object;
+            return BuildNewsMock(identifier, timestamp, information, details, newsProvider, link, author, mediaUrl).Object;
         }
 
-        private Mock<INews> BuildNewsMock(string identifier = null, DateTime? timestamp = null, string information = null, string details = null, INewsProvider newsProvider = null, Uri link = null, IAuthor author = null)
+        private Mock<INews> BuildNewsMock(string identifier = null, DateTime? timestamp = null, string information = null, string details = null, INewsProvider newsProvider = null, Uri link = null, IAuthor author = null, Uri mediaUrl = null)
         {
             Mock<INews> newsMock = new Mock<INews>();
             newsMock.Setup(m => m.Identifier)
@@ -358,6 +394,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsModelExporter
                 .Returns(link);
             newsMock.Setup(m => m.Author)
                 .Returns(author);
+            newsMock.Setup(m => m.MediaUrl)
+                .Returns(mediaUrl);
             return newsMock;
         }
 

@@ -1,24 +1,10 @@
-using System;
-using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
-    [Serializable]
     public class SystemErrorViewModel : IViewModel
     {
-        #region Constructors
-
-        public SystemErrorViewModel()
-        {
-        }
-
-        protected SystemErrorViewModel(SerializationInfo info, StreamingContext context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         public string SystemErrorIdentifier { get; set; }
@@ -31,7 +17,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
         {
             get
             {
-                string message = Message == null ? null : Message.Trim();
+                string message = Message?.Trim();
                 if (message == null || message.Length < 100)
                 {
                     return message;

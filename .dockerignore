@@ -9,6 +9,7 @@
 # Files
 .dockerignore
 .gitignore
+.env
 OSDevGrp.MyDashboard.Web.Dockerfile
 Nginx.Dockerfile
 docker-compose.yml

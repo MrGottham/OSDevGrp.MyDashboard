@@ -1,6 +1,3 @@
-using System;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +6,9 @@ using Moq;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
 {
@@ -22,7 +22,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
         private Mock<IUrlHelper> _urlHelperMock;
         private Random _random;
-        private readonly Regex _base64StringRegex = new Regex(@"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.Compiled);
+        private readonly Regex _base64StringRegex = new Regex(@"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(32));
 
         #endregion
 

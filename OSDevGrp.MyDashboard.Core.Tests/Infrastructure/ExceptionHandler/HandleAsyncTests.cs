@@ -80,7 +80,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.ExceptionHandler
 
             _loggerMock.Verify(m => m.Log(
                     It.Is<LogLevel>(value => value == LogLevel.Error),
-                    It.Is<EventId>(value => value != null && value.Id == 0 && string.IsNullOrWhiteSpace(value.Name)),
+                    It.Is<EventId>(value => value.Id == 0 && string.IsNullOrWhiteSpace(value.Name)),
                     It.Is<It.IsAnyType>((value, type) => value.ToString() == $"{methodName}: {exceptionMessage}"),
                     It.Is<Exception>(value => value == exception),
                     It.Is<Func<It.IsAnyType, Exception, string>>((value, type) => true)),
@@ -141,7 +141,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.ExceptionHandler
 
             _loggerMock.Verify(m => m.Log(
                     It.Is<LogLevel>(value => value == LogLevel.Error),
-                    It.Is<EventId>(value => value != null && value.Id == 0 && string.IsNullOrWhiteSpace(value.Name)),
+                    It.Is<EventId>(value => value.Id == 0 && string.IsNullOrWhiteSpace(value.Name)),
                     It.Is<It.IsAnyType>((value, type) => value.ToString() == $"{methodName}: {exceptionMessage}"),
                     It.Is<Exception>(value => value == exception),
                     It.Is<Func<It.IsAnyType, Exception, string>>((value, type) => true)),

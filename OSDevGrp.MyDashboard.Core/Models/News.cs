@@ -1,5 +1,5 @@
-using System;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
@@ -7,7 +7,8 @@ namespace OSDevGrp.MyDashboard.Core.Models
     {
         #region Constructor
 
-        public News(string identifier, string inforamtion, string details, DateTime timestamp, INewsProvider provider) : base(identifier, inforamtion, details, timestamp)
+        public News(string identifier, string inforamtion, string details, DateTime timestamp, INewsProvider provider) 
+            : base(identifier, inforamtion, details, timestamp)
         {
             if (provider == null)
             {
@@ -33,6 +34,12 @@ namespace OSDevGrp.MyDashboard.Core.Models
         }
 
         public IAuthor Author
+        {
+            get;
+            set;
+        }
+
+        public Uri MediaUrl
         {
             get;
             set;

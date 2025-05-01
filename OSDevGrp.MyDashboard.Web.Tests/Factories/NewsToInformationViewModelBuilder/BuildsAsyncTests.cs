@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
@@ -8,6 +5,9 @@ using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBuilder
 {
@@ -17,7 +17,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         #region private variables
 
         private Mock<IHtmlHelper> _htmlHelperMock;
-
         private Random _random;
 
         #endregion
@@ -60,6 +59,18 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             await sut.BuildAsync(newsMock.Object);
 
             newsMock.Verify(m => m.Timestamp, Times.Once);
+        }
+
+        [TestMethod]
+        public async Task BuildAsync_WhenCalled_AssertMediaUrlWasCalledOnNews()
+        {
+            Mock<INews> newsMock = CreateNewsMock();
+
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
+
+            await sut.BuildAsync(newsMock.Object);
+
+            newsMock.Verify(m => m.MediaUrl, Times.Once);
         }
 
         [TestMethod]
@@ -237,8 +248,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             bool hasLink = _random.Next(0, 100) > 50;
             bool hasAuthor = _random.Next(0, 100) > 50;
-            bool hasImage = _random.Next(0, 100) > 50;
-            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            bool hasMediaUrl = _random.Next(0, 100) > 50;
+            bool hasExtractedImage = _random.Next(0, 100) > 50;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasMediaUrl, hasExtractedImage);
         }
 
         [TestMethod]
@@ -246,8 +258,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             const bool hasLink = true;
             bool hasAuthor = _random.Next(0, 100) > 50;
-            bool hasImage = _random.Next(0, 100) > 50;
-            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            bool hasMediaUrl = _random.Next(0, 100) > 50;
+            bool hasExtractedImage = _random.Next(0, 100) > 50;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasMediaUrl, hasExtractedImage);
         }
 
         [TestMethod]
@@ -255,8 +268,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             const bool hasLink = false;
             bool hasAuthor = _random.Next(0, 100) > 50;
-            bool hasImage = _random.Next(0, 100) > 50;
-            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            bool hasMediaUrl = _random.Next(0, 100) > 50;
+            bool hasExtractedImage = _random.Next(0, 100) > 50;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasMediaUrl, hasExtractedImage);
         }
 
         [TestMethod]
@@ -264,8 +278,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             bool hasLink = _random.Next(0, 100) > 50;
             const bool hasAuthor = true;
-            bool hasImage = _random.Next(0, 100) > 50;
-            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            bool hasMediaUrl = _random.Next(0, 100) > 50;
+            bool hasExtractedImage = _random.Next(0, 100) > 50;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasMediaUrl, hasExtractedImage);
         }
 
         [TestMethod]
@@ -273,29 +288,52 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         {
             bool hasLink = _random.Next(0, 100) > 50;
             const bool hasAuthor = false;
-            bool hasImage = _random.Next(0, 100) > 50;
-            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            bool hasMediaUrl = _random.Next(0, 100) > 50;
+            bool hasExtractedImage = _random.Next(0, 100) > 50;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasMediaUrl, hasExtractedImage);
         }
 
         [TestMethod]
-        public async Task BuildAsync_WhenCalledWhereNewsIncludesImage_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWhereNewsHasMediaUrlAndIncludesExtractedImage_ReturnsInitializedInformationViewModel()
         {
             bool hasLink = _random.Next(0, 100) > 50;
             bool hasAuthor = _random.Next(0, 100) > 50;
-            const bool hasImage = true;
-            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            const bool hasMediaUrl = true;
+            const bool hasExtractedImage = true;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink,  hasAuthor, hasMediaUrl, hasExtractedImage);
         }
 
         [TestMethod]
-        public async Task BuildAsync_WhenCalledWhereNewsDoesNotIncludeImage_ReturnsInitializedInformationViewModel()
+        public async Task BuildAsync_WhenCalledWhereNewsHasMediaUrlAndDoesNotIncludeExtractedImage_ReturnsInitializedInformationViewModel()
         {
             bool hasLink = _random.Next(0, 100) > 50;
             bool hasAuthor = _random.Next(0, 100) > 50;
-            const bool hasImage = false;
-            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasImage);
+            const bool hasMediaUrl = true;
+            const bool hasExtractedImage = false;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasMediaUrl, hasExtractedImage);
         }
 
-        private async Task BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(bool hasLink, bool hasAuthor, bool hasImage)
+        [TestMethod]
+        public async Task BuildAsync_WhenCalledWhereNewsDoesNotHaveMediaUrlButIncludesExtractedImage_ReturnsInitializedInformationViewModel()
+        {
+            bool hasLink = _random.Next(0, 100) > 50;
+            bool hasAuthor = _random.Next(0, 100) > 50;
+            const bool hasMediaUrl = false;
+            const bool hasExtractedImage = true;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink,  hasAuthor, hasMediaUrl, hasExtractedImage);
+        }
+
+        [TestMethod]
+        public async Task BuildAsync_WhenCalledWhereNewsDoesNotHaveMediaUrlAndDoesNotIncludeExtractedImage_ReturnsInitializedInformationViewModel()
+        {
+            bool hasLink = _random.Next(0, 100) > 50;
+            bool hasAuthor = _random.Next(0, 100) > 50;
+            const bool hasMediaUrl = false;
+            const bool hasExtractedImage = false;
+            await BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(hasLink, hasAuthor, hasMediaUrl, hasExtractedImage);
+        }
+
+        private async Task BuildAsync_WhenCalled_ReturnsInitializedInformationViewModel(bool hasLink, bool hasAuthor, bool hasMediaUrl, bool hasExtractedImage)
         {
             string identifier = Guid.NewGuid().ToString("D");
             DateTime timestamp = DateTime.Now.AddTicks(_random.Next(-5000, 5000));
@@ -305,6 +343,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             INewsProvider provider = CreateNewsProvider(providerName);
             Uri link = hasLink ? new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}") : null;
             string authorName = hasAuthor ? null : Guid.NewGuid().ToString("D");
+            Uri mediaUrl = hasMediaUrl ? new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}/media.png") : null;
             INews news = CreateNews(
                 identifier, 
                 timestamp,
@@ -312,14 +351,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
                 details,
                 provider,
                 link,
-                string.IsNullOrWhiteSpace(authorName) == false ? CreateAuthor(authorName) : null);
+                string.IsNullOrWhiteSpace(authorName) == false ? CreateAuthor(authorName) : null,
+                mediaUrl);
 
-            Uri imageUrl = null;
-            if (hasImage)
+            Uri extractedImageUrl = null;
+            if (hasExtractedImage)
             {
-                imageUrl = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
+                extractedImageUrl = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}");
             }
-            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut(imageUrl: imageUrl);
+            IViewModelBuilder<InformationViewModel, INews> sut = CreateSut(extractedImageUrl: extractedImageUrl);
 
             InformationViewModel result = await sut.BuildAsync(news);
 
@@ -353,10 +393,15 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
                 Assert.IsNotNull(result.ExternalUrl);
                 Assert.AreEqual("#", result.ExternalUrl);
             }
-            if (imageUrl != null)
+            if (mediaUrl != null)
             {
                 Assert.IsNotNull(result.ImageUrl);
-                Assert.AreEqual(imageUrl.AbsoluteUri, result.ImageUrl);
+                Assert.AreEqual(mediaUrl.AbsoluteUri, result.ImageUrl);
+            }
+            else if (extractedImageUrl != null)
+            {
+                Assert.IsNotNull(result.ImageUrl);
+                Assert.AreEqual(extractedImageUrl.AbsoluteUri, result.ImageUrl);
             }
             else
             {
@@ -364,12 +409,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
             }
         }
 
-        private IViewModelBuilder<InformationViewModel, INews> CreateSut(Uri imageUrl = null)
+        private IViewModelBuilder<InformationViewModel, INews> CreateSut(Uri extractedImageUrl = null)
         {
             IList<Uri> imageUrlCollection = new List<Uri>();
-            if (imageUrl != null)
+            if (extractedImageUrl != null)
             {
-                imageUrlCollection.Add(imageUrl);
+                imageUrlCollection.Add(extractedImageUrl);
             }
 
             _htmlHelperMock.Setup(m => m.ConvertNewLines(It.IsAny<string>()))
@@ -378,16 +423,16 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
                 .Returns<string, bool, bool>((value, convertNewLines, removeEndingComment) => $"HtmlHelper.Convert:{value}");
             _htmlHelperMock.Setup(m => m.ExtractImages(It.IsAny<string>(), out imageUrlCollection))
                 .Returns<string, IList<Uri>>((value, urlCollection) => $"HtmlHelper.ExtractImages:{value}");
-            
-            return new OSDevGrp.MyDashboard.Web.Factories.NewsToInformationViewModelBuilder(_htmlHelperMock.Object);
+
+            return new Web.Factories.NewsToInformationViewModelBuilder(_htmlHelperMock.Object);
         }
 
-        private INews CreateNews(string identifier = null, DateTime? timestamp = null, string information = null, string details = null, INewsProvider provider = null, Uri link = null, IAuthor author = null)
+        private INews CreateNews(string identifier = null, DateTime? timestamp = null, string information = null, string details = null, INewsProvider provider = null, Uri link = null, IAuthor author = null, Uri mediaUrl = null)
         {
-            return CreateNewsMock(identifier, timestamp, information, details, provider, link, author).Object;
+            return CreateNewsMock(identifier, timestamp, information, details, provider, link, author, mediaUrl).Object;
         }
 
-        private Mock<INews> CreateNewsMock(string identifier = null, DateTime? timestamp = null, string information = null, string details = null, INewsProvider provider = null, Uri link = null, IAuthor author = null)
+        private Mock<INews> CreateNewsMock(string identifier = null, DateTime? timestamp = null, string information = null, string details = null, INewsProvider provider = null, Uri link = null, IAuthor author = null, Uri mediaUrl = null)
         {
             Mock<INews> newsMock = new Mock<INews>();
             newsMock.Setup(m => m.Identifier)
@@ -404,6 +449,8 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
                 .Returns(link);
             newsMock.Setup(m => m.Author)
                 .Returns(author);
+            newsMock.Setup(m => m.MediaUrl)
+                .Returns(mediaUrl);
             return newsMock;
         }
 

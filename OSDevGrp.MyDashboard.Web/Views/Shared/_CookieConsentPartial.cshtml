@@ -1,24 +1,28 @@
 @using Microsoft.AspNetCore.Http.Features
-
 @{
-    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
-    var showBanner = !consentFeature?.CanTrack ?? false;
-    var cookieString = consentFeature?.CreateConsentCookie();
+    ITrackingConsentFeature trackingConsentFeature = Context.Features.Get<ITrackingConsentFeature>();
+    bool showBanner = !trackingConsentFeature?.CanTrack ?? false;
+    string cookieString = trackingConsentFeature?.CreateConsentCookie();
 }
-
 @if (showBanner)
 {
-    <div id="cookieConsent" class="alert alert-info alert-dismissible fade show" role="alert">
-        OS Development Group uses cookies on this domain to customize content, features and optimize the user experience.<br>By clicking Accept, you consent to the use of cookies on the domain. You can always revoke your consent.
-        <button type="button" class="accept-policy close" data-dismiss="alert" aria-label="Close" data-cookie-string="@cookieString">
-            <span aria-hidden="true">Accept</span>
-        </button>
+    <div id="cookieConsent" class="row pt-3 alert alert-info alert-dismissible fade show" role="alert">
+        <div class="col-9 col-sm-9 col-md-10 col-lg-10 col-xl-10">
+            <p class="text-wrap">OS Development Group uses cookies on this domain to customize content, features and optimize the user experience.</p>
+            <p class="text-wrap">By clicking Accept, you consent to the use of cookies on the domain. You can always revoke your consent.</p>
+        </div>
+        <div class="col-3 col-sm-3 col-md-2 col-lg-2 col-xl-2">
+            <button type="button" class="accept-policy close" data-dismiss="alert" aria-label="Close" data-cookie-string="@cookieString">
+                <span aria-hidden="true">Accept</span>
+            </button>
+        </div>
     </div>
     <script>
         (function () {
             var button = document.querySelector("#cookieConsent button[data-cookie-string]");
             button.addEventListener("click", function (event) {
                 document.cookie = button.dataset.cookieString;
+                $().reloadSubContent();
             }, false);
         })();
     </script>

@@ -1,12 +1,13 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 {
@@ -19,6 +20,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
         private Mock<IModelExporter<DashboardExportModel, IDashboard>> _dashboardModelExporterMock;
         private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
+        private Mock<IRedditLogic> _redditLogicMock;
         private Mock<IContentHelper> _contentHelperMock;
         private Mock<ICookieHelper> _cookieHelperMock;
         private Random _random;
@@ -32,6 +34,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
             _dashboardModelExporterMock = new Mock<IModelExporter<DashboardExportModel, IDashboard>>();
             _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
+            _redditLogicMock = new Mock<IRedditLogic>();
             _contentHelperMock = new Mock<IContentHelper>();
             _cookieHelperMock = new Mock<ICookieHelper>();
             _random = new Random(DateTime.Now.Millisecond);
@@ -40,7 +43,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public void Index_WhenCalled_AssertToDashboardSettingsViewModelWasCalledOnCookieHelper()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             sut.Index();
 
@@ -50,7 +53,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public void Index_WhenCookieWithDashboardSettingsWasNotFound_ReturnsViewResultWithDashboardSettingsViewModel()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             IActionResult result = sut.Index();
             Assert.IsNotNull(result);
@@ -68,11 +71,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.AreEqual(100, dashboardSettingsViewModel.NumberOfNews);
             Assert.IsFalse(dashboardSettingsViewModel.UseReddit);
             Assert.IsFalse(dashboardSettingsViewModel.AllowNsfwContent);
-            Assert.IsNotNull(dashboardSettingsViewModel.IncludeNsfwContent);
-            Assert.IsFalse(dashboardSettingsViewModel.IncludeNsfwContent.Value);
+            Assert.IsNull(dashboardSettingsViewModel.IncludeNsfwContent);
+            Assert.IsFalse(dashboardSettingsViewModel.IncludeNsfwContent.HasValue);
             Assert.IsFalse(dashboardSettingsViewModel.NotNullableIncludeNsfwContent);
-            Assert.IsNotNull(dashboardSettingsViewModel.OnlyNsfwContent);
-            Assert.IsFalse(dashboardSettingsViewModel.OnlyNsfwContent.Value);
+            Assert.IsNull(dashboardSettingsViewModel.OnlyNsfwContent);
+            Assert.IsFalse(dashboardSettingsViewModel.OnlyNsfwContent.HasValue);
             Assert.IsFalse(dashboardSettingsViewModel.NotNullableOnlyNsfwContent);
             Assert.IsNull(dashboardSettingsViewModel.RedditAccessToken);
             Assert.IsFalse(dashboardSettingsViewModel.ExportData);
@@ -89,7 +92,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             string redditAccessToken = BuildRedditAccessTokenAsBase64(_random);
             bool exportData = _random.Next(100) > 50;
             DashboardSettingsViewModel dashboardSettingsViewModelInCookie = BuildDashboardSettingsViewModel(_random, numberOfNews, useReddit, allowNsfwContent, includeNsfwContent, onlyNsfwContent, redditAccessToken, exportData);
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(true, dashboardSettingsViewModelInCookie);
+            Web.Controllers.HomeController sut = CreateSut(true, dashboardSettingsViewModelInCookie);
 
             IActionResult result = sut.Index();
             Assert.IsNotNull(result);
@@ -118,16 +121,17 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.AreEqual(exportData, dashboardSettingsViewModel.ExportData);
         }
 
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(bool hasDashboardSettingsViewModelInCookie = false, DashboardSettingsViewModel dashboardSettingsViewModelInCookie = null)
+        private Web.Controllers.HomeController CreateSut(bool hasDashboardSettingsViewModelInCookie = false, DashboardSettingsViewModel dashboardSettingsViewModelInCookie = null)
         {
             _cookieHelperMock.Setup(m => m.ToDashboardSettingsViewModel())
                 .Returns(hasDashboardSettingsViewModelInCookie ? dashboardSettingsViewModelInCookie ?? BuildDashboardSettingsViewModel(_random) : null);
 
-            return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
+            return new Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
                 _dashboardModelExporterMock.Object,
                 _redditAccessTokenProviderFactoryMock.Object,
+                _redditLogicMock.Object,
                 _contentHelperMock.Object,
                 _cookieHelperMock.Object);
         }

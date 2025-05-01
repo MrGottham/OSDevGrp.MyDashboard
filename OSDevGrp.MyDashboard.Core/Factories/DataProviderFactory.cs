@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Models;
 using OSDevGrp.MyDashboard.Core.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Core.Factories
 {
@@ -31,18 +31,18 @@ namespace OSDevGrp.MyDashboard.Core.Factories
         }
 
         #endregion
-        
+
         #region Methods
 
         public Task<IEnumerable<INewsProvider>> BuildNewsProvidersAsync()
         {
             IEnumerable<INewsProvider> newsProviders = new List<INewsProvider>
             {
-                new NewsProvider("DR", new Uri("https://www.dr.dk/nyheder/service/feeds/allenyheder")),
-                new NewsProvider("TV 2 Lorry", new Uri("https://www.tv2lorry.dk/rss")),
+                new NewsProvider("DR", new Uri("https://www.dr.dk/nyheder/service/feeds/senestenyt")),
+                new NewsProvider("TV 2 Kosmopol", new Uri("https://www.tv2kosmopol.dk/rss")),
                 new NewsProvider("Børsen", new Uri("https://borsen.dk/rss")),
                 new NewsProvider("Computerworld", new Uri("https://www.computerworld.dk/rss/all")),
-                new NewsProvider("Version2", new Uri("https://www.version2.dk/it-nyheder/rss"))
+                new NewsProvider("Version2", new Uri("https://www.version2.dk/rss"))
             };
 
             return Task.Run(() => newsProviders);
@@ -159,22 +159,30 @@ namespace OSDevGrp.MyDashboard.Core.Factories
                 new RedditKnownSubreddit("gonewildplus", CalculateRank()),
                 new RedditKnownSubreddit("bigboobsgw", CalculateRank()),
                 new RedditKnownSubreddit("homegrowntits", CalculateRank()),
-                new RedditKnownSubreddit("hugehangers", CalculateRank()),
-                new RedditKnownSubreddit("cleavagegw", CalculateRank()),
                 new RedditKnownSubreddit("milf", CalculateRank()),
                 new RedditKnownSubreddit("gonewild30plus", CalculateRank()),
                 new RedditKnownSubreddit("40plusgonewild", CalculateRank()),
-                new RedditKnownSubreddit("gonewild50plus", CalculateRank()),
+                new RedditKnownSubreddit("50plusgw", CalculateRank()),
                 new RedditKnownSubreddit("onmww", CalculateRank()),
                 new RedditKnownSubreddit("wouldyoufuckmywife", CalculateRank()),
                 new RedditKnownSubreddit("wifesharing", CalculateRank()),
                 new RedditKnownSubreddit("gifsgonewild", CalculateRank()),
                 new RedditKnownSubreddit("gwnerdy", CalculateRank()),
                 new RedditKnownSubreddit("chubby", CalculateRank()),
-                new RedditKnownSubreddit("swingersgw", CalculateRank())
+                new RedditKnownSubreddit("swingersgw", CalculateRank()),
+                new RedditKnownSubreddit("saggy", CalculateRank()),
+                new RedditKnownSubreddit("obsf", CalculateRank()),
+                new RedditKnownSubreddit("fupawives", CalculateRank()),
+                new RedditKnownSubreddit("bbw", CalculateRank()),
+                new RedditKnownSubreddit("ratemyboobs", CalculateRank()),
+                new RedditKnownSubreddit("slutwife", CalculateRank()),
+                new RedditKnownSubreddit("churchwife", CalculateRank()),
+                new RedditKnownSubreddit("workgonewild", CalculateRank()),
+                new RedditKnownSubreddit("gwpublic", CalculateRank()),
+                new RedditKnownSubreddit("nofans", CalculateRank())
             };
 
-            return Task.Run<IEnumerable<IRedditKnownSubreddit>>(() => knownNsfwSubreddits);
+            return Task.Run(() => knownNsfwSubreddits);
         }
 
         private int CalculateRank()

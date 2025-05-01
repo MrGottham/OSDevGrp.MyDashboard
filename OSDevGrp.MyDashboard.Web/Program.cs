@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
 namespace OSDevGrp.MyDashboard.Web
@@ -7,9 +7,21 @@ namespace OSDevGrp.MyDashboard.Web
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            CreateWebHostBuilder(args).Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) => WebHost.CreateDefaultBuilder(args).UseStartup<Startup>();
+        public static WebApplication CreateWebHostBuilder(string[] args)
+        {
+            WebApplicationBuilder applicationBuilder = WebApplication.CreateBuilder(args);
+            applicationBuilder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
+
+            Startup startup = new Startup(applicationBuilder.Configuration);
+            startup.ConfigureServices(applicationBuilder.Services);
+
+            WebApplication application = applicationBuilder.Build();
+            startup.Configure(application, application.Environment);
+
+            return application;
+        }
     }
 }

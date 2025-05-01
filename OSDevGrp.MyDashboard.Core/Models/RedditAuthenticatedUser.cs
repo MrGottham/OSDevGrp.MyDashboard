@@ -1,26 +1,11 @@
-using System;
-using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using System.Runtime.Serialization;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
-    [Serializable]
     [DataContract]
     public class RedditAuthenticatedUser : RedditUser, IRedditAuthenticatedUser
     {
-        #region Constructors
-
-        public RedditAuthenticatedUser()
-        {
-        }
-
-        protected RedditAuthenticatedUser(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         [DataMember(Name = "has_mail", IsRequired = true)]

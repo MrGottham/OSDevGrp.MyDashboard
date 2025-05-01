@@ -4,51 +4,19 @@ using OSDevGrp.MyDashboard.Core.Contracts.Models;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
-    [Serializable]
     [DataContract]
     public class RedditSubreddit : RedditCreatedThingBase, IRedditSubreddit
     {
-        #region Constructors
-
-        public RedditSubreddit()
-        {
-        }
-
-        protected RedditSubreddit(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         [IgnoreDataMember]
-        public override string Identifier 
-        {
-            get
-            {
-                return Id;
-            }
-        }
+        public override string Identifier => Id;
 
         [IgnoreDataMember]
-        public override string FullName
-        {
-            get
-            {
-                return $"{Kind}_{Identifier}";
-            }
-        }
+        public override string FullName => $"{Kind}_{Identifier}";
 
         [IgnoreDataMember]
-        public override string Kind
-        {
-            get
-            {
-                return "t5";
-            }
-        }
+        public override string Kind => "t5";
 
         [DataMember(Name = "id", IsRequired = true)]
         protected string Id { get; set; }
@@ -129,13 +97,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
         public bool UserIsBanned { get; protected set; }
 
         [IgnoreDataMember]
-        public bool UserBanned
-        {
-            get
-            {
-                return UserIsBanned;
-            }
-        }
+        public bool UserBanned => UserIsBanned;
 
         [DataMember(Name = "over18", IsRequired = true)]
         public bool Over18 { get; protected set; }

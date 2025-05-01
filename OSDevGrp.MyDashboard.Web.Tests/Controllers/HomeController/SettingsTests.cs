@@ -1,12 +1,13 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 {
@@ -19,6 +20,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
         private Mock<IModelExporter<DashboardExportModel, IDashboard>> _dashboardModelExporterMock;
         private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
+        private Mock<IRedditLogic> _redditLogicMock;
         private Mock<IContentHelper> _contentHelperMock;
         private Mock<ICookieHelper> _cookieHelperMock;
         private Random _random;
@@ -32,38 +34,81 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
             _dashboardModelExporterMock = new Mock<IModelExporter<DashboardExportModel, IDashboard>>();
             _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
+            _redditLogicMock = new Mock<IRedditLogic>();
             _contentHelperMock = new Mock<IContentHelper>();
             _cookieHelperMock = new Mock<ICookieHelper>();
             _random = new Random(DateTime.Now.Millisecond);
         }
 
         [TestMethod]
-        public void Settings_WhenCalled_AssertToToDashboardSettingsViewModelWasCalledOnCookieHelper()
+        public void Settings_WhenDashboardSettingsIsNull_ReturnsBadRequestResult()
         {
             Web.Controllers.HomeController sut = CreateSut();
 
-            sut.Settings();
+            IActionResult result = sut.Settings(null);
 
-            _cookieHelperMock.Verify(m => m.ToDashboardSettingsViewModel());
+            Assert.IsInstanceOfType(result, typeof(BadRequestResult));
         }
 
         [TestMethod]
-        public void Settings_WhenToDashboardSettingsViewModelWasNotStoredInCoookie_ReturnsBadRequestResult()
+        public void Settings_WhenDashboardSettingsIsEmpty_ReturnsBadRequestResult()
+        {
+            Web.Controllers.HomeController sut = CreateSut();
+
+            IActionResult result = sut.Settings(string.Empty);
+
+            Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        }
+
+        [TestMethod]
+        public void Settings_WhenDashboardSettingsIsWhiteSpace_ReturnsBadRequestResult()
+        {
+            Web.Controllers.HomeController sut = CreateSut();
+
+            IActionResult result = sut.Settings(" ");
+
+            Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        }
+
+        [TestMethod]
+        public void Settings_WhenDashboardSettingsIsWhiteSpaces_ReturnsBadRequestResult()
+        {
+            Web.Controllers.HomeController sut = CreateSut();
+
+            IActionResult result = sut.Settings("  ");
+
+            Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        }
+
+        [TestMethod]
+        public void Settings_WhenCalled_AssertToDashboardSettingsViewModelWasCalledOnContentHelperWithDashboardSettings()
+        {
+            Web.Controllers.HomeController sut = CreateSut();
+
+            string dashboardSettings = Guid.NewGuid().ToString("D"); 
+            sut.Settings(dashboardSettings);
+
+            _contentHelperMock.Verify(m => m.ToDashboardSettingsViewModel(It.Is<string>(value => string.CompareOrdinal(value, dashboardSettings) == 0)), Times.Once);
+        }
+
+        [TestMethod]
+        public void Settings_WhenDashboardSettingsCannotBeConvertedToDashboardSettingsViewModel_ReturnsBadRequestResult()
         {
             Web.Controllers.HomeController sut = CreateSut(false);
 
-            IActionResult result = sut.Settings();
+            IActionResult result = sut.Settings(Guid.NewGuid().ToString("D"));
+
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(BadRequestResult));
         }
 
         [TestMethod]
-        public void Settings_WhenToDashboardSettingsViewModelWasStoredInCoookie_ReturnsPartialViewResultForDashboardSettings()
+        public void Settings_WhenDashboardSettingsCanBeConvertedToDashboardSettingsViewModel_ReturnsPartialViewResultForDashboardSettings()
         {
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
             Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModel: dashboardSettingsViewModel);
 
-            IActionResult result = sut.Settings();
+            IActionResult result = sut.Settings(Guid.NewGuid().ToString("D"));
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(PartialViewResult));
 
@@ -75,16 +120,17 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.AreEqual(dashboardSettingsViewModel, viewResult.Model);
         }
 
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(bool hasDashboardSettingsViewModel = true, DashboardSettingsViewModel dashboardSettingsViewModel = null)
+        private Web.Controllers.HomeController CreateSut(bool hasDashboardSettingsViewModel = true, DashboardSettingsViewModel dashboardSettingsViewModel = null)
         {
-            _cookieHelperMock.Setup(m => m.ToDashboardSettingsViewModel())
+            _contentHelperMock.Setup(m => m.ToDashboardSettingsViewModel(It.IsAny<string>()))
                 .Returns(hasDashboardSettingsViewModel ? dashboardSettingsViewModel ?? BuildDashboardSettingsViewModel(_random) : null);
 
-            return new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
+            return new Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
                 _dashboardModelExporterMock.Object,
                 _redditAccessTokenProviderFactoryMock.Object,
+                _redditLogicMock.Object,
                 _contentHelperMock.Object,
                 _cookieHelperMock.Object);
         }

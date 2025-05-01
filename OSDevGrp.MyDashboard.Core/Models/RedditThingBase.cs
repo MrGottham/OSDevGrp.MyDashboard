@@ -1,26 +1,11 @@
-using System;
-using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
+using System.Runtime.Serialization;
 
 namespace OSDevGrp.MyDashboard.Core.Models
 {
-    [Serializable]
     [DataContract]
     public abstract class RedditThingBase : RedditObjectBase, IRedditThing
     {
-        #region Constructors
-
-        protected RedditThingBase()
-        {
-        }
-
-        protected RedditThingBase(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         [IgnoreDataMember]
@@ -33,13 +18,7 @@ namespace OSDevGrp.MyDashboard.Core.Models
         public abstract string Kind { get; }
 
         [IgnoreDataMember]
-        public virtual IRedditObject Data 
-        { 
-            get
-            {
-                return this;
-            }
-        }
+        public virtual IRedditObject Data => this;
 
         #endregion
     }

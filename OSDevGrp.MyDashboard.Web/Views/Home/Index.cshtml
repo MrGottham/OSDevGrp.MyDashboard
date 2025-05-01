@@ -3,36 +3,38 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-
 <div class="row">
-    <div id="topContent" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="display: none">
+    <div id="topContent" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
         <div class="spinner-border mb-3" role="status" data-url="@Model.GetTopContentUrl(contentHelper)">
-            <span class="sr-only">Henter data...</span>
+            <span class="sr-only">Getting data...</span>
         </div>
     </div>
 </div>
 <div class="row">
-    <div id="mainContent" class="col-6 col-sm-7 col-md-8 col-lg-8 col-xl-9" data-url-instant-loading>
-        <div class="spinner-border" role="status" data-url="@Model.GetBuildUrl(contentHelper)">
-            <span class="sr-only">Henter data...</span>
-        </div>
-    </div>
-    <div class="col-6 col-sm-5 col-md-4 col-lg-4 col-xl-3">
-        <div class="row">
-            <div id="dashboardSettings" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 mb-3">
-                @await Html.PartialAsync("_DashboardSettingsPartial", Model)
-            </div>
-        </div>
-        <div class="row">
-            <div id="subContent" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="display: none">
-                <div class="spinner-border" role="status" data-url="@Model.GetSubContentUrl(contentHelper)">
-                    <span class="sr-only">Henter data...</span>
-                </div>
-            </div>
+    <div id="mainContent" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" data-url-instant-loading>
+        <div class="spinner-border mb-3" role="status" data-url="@Model.GetBuildUrl(contentHelper)">
+            <span class="sr-only">Getting data...</span>
         </div>
     </div>
 </div>
-
+<div class="row">
+    <div id="subContent" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+        <div class="spinner-border mb-3" role="status" data-url="@Model.GetSubContentUrl(contentHelper)">
+            <span class="sr-only">Getting data...</span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6 col-sm-6 col-md-5 col-lg-4 col-xl-3">
+        <hr />
+        <div id="dashboardSettings">
+            @await Html.PartialAsync("_DashboardSettingsPartial", Model)
+        </div>
+    </div>
+    <div class="col-6 col-sm-6 col-md-7 col-lg-8 col-xl-9">
+        <hr />
+    </div>
+</div>
 @section Scripts
 {
     @await Html.PartialAsync("_ValidationScriptsPartial")

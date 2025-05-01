@@ -1,15 +1,16 @@
-using System;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
+using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 {
@@ -22,6 +23,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         private Mock<IViewModelBuilder<DashboardViewModel, IDashboard>> _dashboardViewModelBuilderMock;
         private Mock<IModelExporter<DashboardExportModel, IDashboard>> _dashboardModelExporterMock;
         private Mock<IRedditAccessTokenProviderFactory> _redditAccessTokenProviderFactoryMock;
+        private Mock<IRedditLogic> _redditLogicMock;
         private Mock<IContentHelper> _contentHelperMock;
         private Mock<ICookieHelper> _cookieHelperMock;
         private Random _random;
@@ -35,6 +37,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _dashboardViewModelBuilderMock = new Mock<IViewModelBuilder<DashboardViewModel, IDashboard>>();
             _dashboardModelExporterMock = new Mock<IModelExporter<DashboardExportModel, IDashboard>>();
             _redditAccessTokenProviderFactoryMock = new Mock<IRedditAccessTokenProviderFactory>();
+            _redditLogicMock = new Mock<IRedditLogic>();
             _contentHelperMock = new Mock<IContentHelper>();
             _cookieHelperMock = new Mock<ICookieHelper>();
             _random = new Random(DateTime.Now.Millisecond);
@@ -44,7 +47,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [ExpectedArgumentNullException("dashboardSettingsViewModel")]
         public async Task Commit_WhenDashboardSettingsViewModelIsNull_ThrowsArgumentNullExcpetion()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             await sut.Commit(null);
         }
@@ -52,7 +55,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenCalledWithInvalidDashboardSettingsViewModel_ReturnsRedirectToActionResult()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(false);
+            Web.Controllers.HomeController sut = CreateSut(false);
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random);
 
@@ -71,7 +74,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithoutRedditAccessToken_AssertToBase64StringWasCalledOnContentHelperWithDashboardSettingsViewModel()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: null);
 
@@ -83,7 +86,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithoutRedditAccessToken_AssertAbsoluteUrlWasCalledOnContentHelper()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: null);
 
@@ -99,7 +102,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithoutRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasCalledOnRedditAccessTokenProviderFactory()
         {
             string dashboardSettingsViewModelAsBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("D")));
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
+            Web.Controllers.HomeController sut = CreateSut(dashboardSettingsViewModelAsBase64: dashboardSettingsViewModelAsBase64);
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: null);
 
@@ -115,7 +118,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithoutRedditAccessToken_ReturnsRedirectResultToUrlFromAcquireRedditAuthorizationTokenAsyncOnRedditAccessTokenProviderFactory()
         {
             Uri acquireRedditAuthorizationTokenUri = new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}/{Guid.NewGuid().ToString("D")}");
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut(acquireRedditAuthorizationTokenUri: acquireRedditAuthorizationTokenUri);
+            Web.Controllers.HomeController sut = CreateSut(acquireRedditAuthorizationTokenUri: acquireRedditAuthorizationTokenUri);
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: null);
 
@@ -132,7 +135,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithRedditAccessToken_AssertToBase64StringWasNotCalledOnContentHelperWithDashboardSettingsViewModel()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: BuildRedditAccessTokenAsBase64(_random));
 
@@ -144,7 +147,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithRedditAccessToken_AssertAbsoluteUrlWasNotCalledOnContentHelper()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: BuildRedditAccessTokenAsBase64(_random));
 
@@ -156,7 +159,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithRedditAccessToken_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: BuildRedditAccessTokenAsBase64(_random));
 
@@ -168,7 +171,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithUseOfRedditAndWithRedditAccessToken_ReturnsViewResultWithDashboardSettingsViewModel()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: true, redditAccessToken: BuildRedditAccessTokenAsBase64(_random));
 
@@ -187,7 +190,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithoutUseOfReddit_AssertToBase64StringWasNotCalledOnContentHelperWithDashboardSettingsViewModel()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: false);
 
@@ -199,7 +202,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithoutUseOfReddit_AssertAbsoluteUrlWasNotCalledOnContentHelper()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: false);
 
@@ -211,7 +214,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithoutUseOfReddit_AssertAcquireRedditAuthorizationTokenAsyncWasNotCalledOnRedditAccessTokenProviderFactory()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: false);
 
@@ -223,7 +226,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         [TestMethod]
         public async Task Commit_WhenDashboardSettingsViewModelIsWithoutUseOfReddit_ReturnsViewResultWithDashboardSettingsViewModel()
         {
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController sut = CreateSut();
+            Web.Controllers.HomeController sut = CreateSut();
 
             DashboardSettingsViewModel dashboardSettingsViewModel = BuildDashboardSettingsViewModel(_random, useReddit: false);
 
@@ -239,7 +242,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             Assert.AreEqual(dashboardSettingsViewModel, viewResult.Model);
         }
 
-        private OSDevGrp.MyDashboard.Web.Controllers.HomeController CreateSut(bool modelIsValid = true, string dashboardSettingsViewModelAsBase64 = null, Uri acquireRedditAuthorizationTokenUri = null)
+        private Web.Controllers.HomeController CreateSut(bool modelIsValid = true, string dashboardSettingsViewModelAsBase64 = null, Uri acquireRedditAuthorizationTokenUri = null)
         {
             _contentHelperMock.Setup(m => m.ToBase64String(It.IsAny<DashboardSettingsViewModel>()))
                 .Returns(dashboardSettingsViewModelAsBase64 ?? Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("D"))));
@@ -249,11 +252,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
             _redditAccessTokenProviderFactoryMock.Setup(m => m.AcquireRedditAuthorizationTokenAsync(It.IsAny<string>(), It.IsAny<Uri>()))
                 .Returns(Task.Run(() => acquireRedditAuthorizationTokenUri ?? new Uri($"http://localhost/{Guid.NewGuid().ToString("D")}/{Guid.NewGuid().ToString("D")}")));
 
-            OSDevGrp.MyDashboard.Web.Controllers.HomeController homeController = new OSDevGrp.MyDashboard.Web.Controllers.HomeController(
+            Web.Controllers.HomeController homeController = new Web.Controllers.HomeController(
                 _dashboardFactoryMock.Object,
                 _dashboardViewModelBuilderMock.Object,
                 _dashboardModelExporterMock.Object,
                 _redditAccessTokenProviderFactoryMock.Object,
+                _redditLogicMock.Object,
                 _contentHelperMock.Object,
                 _cookieHelperMock.Object);
 

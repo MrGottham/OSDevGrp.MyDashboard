@@ -16,7 +16,7 @@ namespace OSDevGrp.MyDashboard.Web.Factories
             Uri url = redditSubreddit.Url;
             Uri imageUrl = redditSubreddit.BannerImageUrl ?? redditSubreddit.HeaderImageUrl;
 
-            StringBuilder htmlBuilder = new StringBuilder("<div class=\"card mb-3\">");
+            StringBuilder htmlBuilder = new StringBuilder("<div class=\"card h-100\">");
             if (imageUrl != null)
             {
                 htmlBuilder.Append($"<img class=\"card-img-top img-fluid\" src=\"{imageUrl.AbsoluteUri}\" />");
@@ -32,13 +32,11 @@ namespace OSDevGrp.MyDashboard.Web.Factories
                 htmlBuilder.Append(displayNamePrefixed);
             }
             htmlBuilder.Append("</h5>");
-            htmlBuilder.Append("<p class=\"card-text\">");
             if (string.IsNullOrWhiteSpace(publicDescription) == false)
             {
-                htmlBuilder.Append($"{publicDescription}<br><br>");
+                htmlBuilder.Append($"<p class=\"card-text\">{publicDescription}</p>");
             }
-            htmlBuilder.Append($"Subscribers: {redditSubreddit.Subscribers:N0}");
-            htmlBuilder.Append("</p>");
+            htmlBuilder.Append($"<p class=\"card-text\">Subscribers: {redditSubreddit.Subscribers:N0}</p>");
             htmlBuilder.Append("</div>");
             htmlBuilder.Append("</div>");
 

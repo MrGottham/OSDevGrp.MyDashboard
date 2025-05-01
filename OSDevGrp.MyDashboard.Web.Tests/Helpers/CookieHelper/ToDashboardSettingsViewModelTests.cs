@@ -1,10 +1,10 @@
-using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
 {
@@ -40,26 +40,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenHttpContextWasNotReturned_AssertToDashboardSettingsViewModelWasNotCalledOnContentHelper()
-        {
-            ICookieHelper sut = CreateSut(hasHttpContext: false);
-
-            sut.ToDashboardSettingsViewModel();
-
-            _contentHelperMock.Verify(m => m.ToDashboardSettingsViewModel(It.IsAny<string>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenHttpContextWasNotReturned_ReturnsNull()
-        {
-            ICookieHelper sut = CreateSut(hasHttpContext: false);
-
-            DashboardSettingsViewModel result = sut.ToDashboardSettingsViewModel();
-
-            Assert.IsNull(result);
-        }
-
-        [TestMethod]
         public void ToDashboardSettingsViewModel_WhenHttpContextWasReturned_AssertRequestWasCalledOnReturnedHttpContext()
         {
             Mock<HttpContext> httpContextMock = BuildHttpContextMock();
@@ -68,28 +48,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             sut.ToDashboardSettingsViewModel();
 
             httpContextMock.Verify(m => m.Request, Times.Once);
-        }
-
-        [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenHttpContextWasReturnedButHttpRequestWasNotReturned_AssertToDashboardSettingsViewModelWasNotCalledOnContentHelper()
-        {
-            HttpContext httpContext = BuildHttpContext(false);
-            ICookieHelper sut = CreateSut(httpContext: httpContext);
-
-            sut.ToDashboardSettingsViewModel();
-
-            _contentHelperMock.Verify(m => m.ToDashboardSettingsViewModel(It.IsAny<string>()), Times.Never);
-        }
-
-        [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenHttpContextWasReturnedButHttpRequestWasNotReturned_ReturnsNull()
-        {
-            HttpContext httpContext = BuildHttpContext(false);
-            ICookieHelper sut = CreateSut(httpContext: httpContext);
-
-            DashboardSettingsViewModel result = sut.ToDashboardSettingsViewModel();
-
-            Assert.IsNull(result);
         }
 
         [TestMethod]
@@ -129,7 +87,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectiontWasReturned_AssertContainsKeyWasCalledOnReturnedRequestCookieCollectionWithCookieNameForDashboardSettingsViewModel()
+        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectionWasReturned_AssertContainsKeyWasCalledOnReturnedRequestCookieCollectionWithCookieNameForDashboardSettingsViewModel()
         {
             Mock<IRequestCookieCollection> requestCookieCollectionMock = BuildRequestCookieCollectionMock(BuildBase64String());
             HttpRequest httpRequest = BuildHttpRequest(requestCookieCollection: requestCookieCollectionMock.Object);
@@ -142,7 +100,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectiontWasReturnedButDoNotContainCookieNameForDashboardSettingsViewModel_AssertItemWasNotCalledOnReturnedRequestCookieCollectionWithCookieNameForDashboardSettingsViewModel()
+        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectionWasReturnedButDoNotContainCookieNameForDashboardSettingsViewModel_AssertItemWasNotCalledOnReturnedRequestCookieCollectionWithCookieNameForDashboardSettingsViewModel()
         {
             Mock<IRequestCookieCollection> requestCookieCollectionMock = BuildRequestCookieCollectionMock();
             HttpRequest httpRequest = BuildHttpRequest(requestCookieCollection: requestCookieCollectionMock.Object);
@@ -155,7 +113,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectiontWasReturnedButDoNotContainCookieNameForDashboardSettingsViewModel_AssertToDashboardSettingsViewModelWasNotCalledOnContentHelper()
+        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectionWasReturnedButDoNotContainCookieNameForDashboardSettingsViewModel_AssertToDashboardSettingsViewModelWasNotCalledOnContentHelper()
         {
             IRequestCookieCollection requestCookieCollection = BuildRequestCookieCollection();
             HttpRequest httpRequest = BuildHttpRequest(requestCookieCollection: requestCookieCollection);
@@ -168,7 +126,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectiontWasReturnedButDoNotContainCookieNameForDashboardSettingsViewModel_ReturnsNull()
+        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectionWasReturnedButDoNotContainCookieNameForDashboardSettingsViewModel_ReturnsNull()
         {
             IRequestCookieCollection requestCookieCollection = BuildRequestCookieCollection();
             HttpRequest httpRequest = BuildHttpRequest(requestCookieCollection: requestCookieCollection);
@@ -181,7 +139,7 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectiontContainingCookieNameForDashboardSettingsViewModelWasReturned_AssertItemWasCalledOnReturnedRequestCookieCollectionWithCookieNameForDashboardSettingsViewModel()
+        public void ToDashboardSettingsViewModel_WhenRequestCookieCollectionContainingCookieNameForDashboardSettingsViewModelWasReturned_AssertItemWasCalledOnReturnedRequestCookieCollectionWithCookieNameForDashboardSettingsViewModel()
         {
             Mock<IRequestCookieCollection> requestCookieCollectionMock = BuildRequestCookieCollectionMock(BuildBase64String());
             HttpRequest httpRequest = BuildHttpRequest(requestCookieCollection: requestCookieCollectionMock.Object);
@@ -234,13 +192,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
             Assert.IsNull(result);
         }
 
-        private ICookieHelper CreateSut(bool hasDashboardSettingsViewModelInCookie = true, DashboardSettingsViewModel dashboardSettingsViewModelInCookie = null, bool hasHttpContext = true, HttpContext httpContext = null)
+        private ICookieHelper CreateSut(bool hasDashboardSettingsViewModelInCookie = true, DashboardSettingsViewModel dashboardSettingsViewModelInCookie = null, HttpContext httpContext = null)
         {
             _contentHelperMock.Setup(m => m.ToDashboardSettingsViewModel(It.IsAny<string>()))
                 .Returns(hasDashboardSettingsViewModelInCookie ? dashboardSettingsViewModelInCookie ?? BuildDashboardSettingsViewModel(_random) : null);
             
             _httpContextAccessorMock.Setup(m => m.HttpContext)
-                .Returns(hasHttpContext ? httpContext ?? BuildHttpContext() : null);
+                .Returns(httpContext ?? BuildHttpContext());
 
             return new Web.Helpers.CookieHelper(_contentHelperMock.Object, _httpContextAccessorMock.Object, _memoryCacheMock.Object);
         }

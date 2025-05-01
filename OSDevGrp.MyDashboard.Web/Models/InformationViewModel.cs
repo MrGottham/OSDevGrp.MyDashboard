@@ -1,24 +1,10 @@
-using System;
-using System.Runtime.Serialization;
 using OSDevGrp.MyDashboard.Web.Contracts.Models;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web.Models
 {
-    [Serializable]
     public class InformationViewModel : IViewModel
     {
-        #region Constructors
-
-        public InformationViewModel()
-        {
-        }
-
-        protected InformationViewModel(SerializationInfo info, StreamingContext context)
-        {
-        }
-
-        #endregion
-
         #region Properties
 
         public string InformationIdentifier { get; set; }
@@ -37,13 +23,7 @@ namespace OSDevGrp.MyDashboard.Web.Models
 
         public string Author { get; set; }
 
-        public string AuthorOrProvider
-        {
-            get
-            {
-                return string.IsNullOrWhiteSpace(Author) == false ? Author : Provider;
-            }
-        }
+        public string AuthorOrProvider => string.IsNullOrWhiteSpace(Author) == false ? Author : Provider;
 
         public string ExternalUrl { get; set; }
 

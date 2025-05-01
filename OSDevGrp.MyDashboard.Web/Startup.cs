@@ -1,10 +1,8 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +22,8 @@ using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Factories;
 using OSDevGrp.MyDashboard.Web.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
+using OSDevGrp.MyDashboard.Web.Options;
+using System;
 
 namespace OSDevGrp.MyDashboard.Web
 {
@@ -42,16 +42,34 @@ namespace OSDevGrp.MyDashboard.Web
         {
             services.Configure<ForwardedHeadersOptions>(opt => 
             {
-                opt.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                opt.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto;
                 opt.KnownNetworks.Clear();
                 opt.KnownProxies.Clear();
             });
 
             services.Configure<CookiePolicyOptions>(opt =>
             {
-                opt.CheckConsentNeeded = context => true;
-                opt.MinimumSameSitePolicy = SameSiteMode.None;
-                opt.Secure = CookieSecurePolicy.SameAsRequest;
+                opt.CheckConsentNeeded = _ => true;
+                opt.ConsentCookie.Name = $"{GetType().Namespace!}.Consent";
+                opt.MinimumSameSitePolicy = SameSiteMode.Lax;
+                opt.Secure = CookieSecurePolicy.Always;
+            });
+
+            services.ConfigureApplicationCookie(opt =>
+            {
+                opt.Cookie.SameSite = SameSiteMode.Strict;
+                opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                opt.Cookie.Name = $"{GetType().Namespace}.Application";
+                opt.DataProtectionProvider = DataProtectionProvider.Create(GetType().Namespace!);
+            });
+
+            services.AddAntiforgery(opt =>
+            {
+                opt.FormFieldName = "__CSRF";
+                opt.HeaderName = $"X-{GetType().Namespace!}-CSRF-TOKEN";
+                opt.Cookie.SameSite = SameSiteMode.Strict;
+                opt.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                opt.Cookie.Name = $"{GetType().Namespace!}.Antiforgery";
             });
 
             services.AddDataProtection()
@@ -59,27 +77,28 @@ namespace OSDevGrp.MyDashboard.Web
                 .UseEphemeralDataProtectionProvider()
                 .SetDefaultKeyLifetime(new TimeSpan(30, 0, 0, 0));
 
-            services.AddAntiforgery();
-
-            services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddControllersWithViews();
 
-            services.AddHealthChecks();
+            services.AddHealthChecks()
+                .AddCheck<RedditOptionsHealthCheck>(nameof(RedditOptions));
 
-            services.AddHttpContextAccessor();
+            services.AddHttpContextAccessor()
+                .AddMemoryCache();
+
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddScoped<IUrlHelper>(factory => 
+            services.AddScoped(factory => 
             {
                 IActionContextAccessor actionContextAccessor = factory.GetRequiredService<IActionContextAccessor>();
-                return factory.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(actionContextAccessor.ActionContext);
+                return factory.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(actionContextAccessor.ActionContext!);
             });
-            services.AddMemoryCache();
 
             // Adds dependencies for the infrastructure. 
             services.AddScoped<IExceptionHandler, ExceptionHandler>();
             services.AddSingleton<ISeedGenerator, SeedGenerator>();
             services.AddSingleton<IRandomizer, Randomizer>();
             // Adds dependencies for the repositories.
+            services.Configure<RedditOptions>(Configuration.GetSection($"{ConfigurationKeys.AuthenticationSectionName}:{ConfigurationKeys.RedditSectionName}"));
             services.AddTransient<IDataProviderFactory, DataProviderFactory>();
             services.AddTransient<IRedditAccessTokenProviderFactory, RedditAccessTokenProviderFactory>();
             services.AddTransient<INewsRepository, NewsRepository>();
@@ -116,7 +135,7 @@ namespace OSDevGrp.MyDashboard.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(WebApplication app, IWebHostEnvironment env)
         {
             app.UseForwardedHeaders();
 
@@ -134,19 +153,19 @@ namespace OSDevGrp.MyDashboard.Web
             {
                 app.UseHttpsRedirection();
             }
-            app.UseStaticFiles();
-            app.UseRouting();
+
+            app.UseDefaultFiles();
+            app.MapStaticAssets();
 
             app.UseCookiePolicy();
 
+            app.UseRouting();
+
             app.UseCors("default");
 
-            app.UseEndpoints(endpoints => 
-            {
-                endpoints.MapRazorPages();
-                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapHealthChecks("/health");
-            });
+            app.MapDefaultControllerRoute().WithStaticAssets();
+            app.MapRazorPages().WithStaticAssets();
+            app.MapHealthChecks("/health");
         }
 
         private static bool RunningInDocker()
