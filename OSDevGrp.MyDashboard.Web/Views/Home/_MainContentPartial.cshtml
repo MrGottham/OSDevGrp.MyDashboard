@@ -1,18 +1,12 @@
 @model DashboardViewModel
-@if (Model.Informations != null && Model.Informations.Any())
-{
-    @for (int elementNo = 0; elementNo < Model.Informations.Count(); elementNo += 3)
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4">
+    @if (Model.Informations != null && Model.Informations.Any())
     {
-        <div class="card-deck mb-3">
-            @await Html.PartialAsync("_InformationPartial", Model.Informations.ElementAt(elementNo))
-            @if (elementNo + 1 < Model.Informations.Count())
-            {
-                @await Html.PartialAsync("_InformationPartial", Model.Informations.ElementAt(elementNo + 1))
-            }
-            @if (elementNo + 2 < Model.Informations.Count())
-            {
-                @await Html.PartialAsync("_InformationPartial", Model.Informations.ElementAt(elementNo + 2))
-            }
-        </div>
+        foreach (InformationViewModel information in Model.Informations)
+        {
+            <div class="col mb-3">
+                @await Html.PartialAsync("_InformationPartial", information)
+            </div>
+        }
     }
-}
+</div>

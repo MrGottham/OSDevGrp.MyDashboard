@@ -1,5 +1,5 @@
 @model InformationViewModel
-<div class="card">
+<div class="card h-100">
     @if (string.IsNullOrWhiteSpace(Model.ImageUrl) == false)
     {
         <img class="card-img-top img-fluid" src="@Model.ImageUrl" />
@@ -7,11 +7,11 @@
     <div class="card-body">
         @if (string.Compare(@Model.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0 && string.IsNullOrWhiteSpace(Model.Header) == false)
         {
-            <h4 class="card-title"><a href="#" onclick="javascript:$().openLink('@Model.ExternalUrl');">@Model.Header</a></h4>
+            <h5 class="card-title"><a href="#" onclick="javascript:$().openLink('@Model.ExternalUrl');">@Model.Header</a></h5>
         }
         else if (string.IsNullOrWhiteSpace(Model.Header) == false)
         {
-            <h4 class="card-title">@Model.Header</h4>
+            <h5 class="card-title">@Model.Header</h5>
         }
         @if (string.IsNullOrWhiteSpace(Model.Summary) == false)
         {
@@ -21,11 +21,11 @@
     <div class="card-footer">
         @if (Model.AgeInDays < 7)
         {
-            <p class="text-left">@Model.Timestamp.ToString("dddd") @Model.Timestamp.ToShortTimeString() - @Html.Raw(Model.AuthorOrProvider)</p>
+            <small class="text-muted">@Model.Timestamp.ToString("dddd") @Model.Timestamp.ToShortTimeString() - @Html.Raw(Model.AuthorOrProvider)</small>
         }
         else
         {
-            <p class="text-left">@Model.AgeInDays days ago - @Html.Raw(Model.AuthorOrProvider)</p>
+            <small class="text-muted">@Model.AgeInDays days ago - @Html.Raw(Model.AuthorOrProvider)</small>
         }
     </div>
 </div>

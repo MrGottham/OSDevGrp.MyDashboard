@@ -1,35 +1,50 @@
 @model DashboardViewModel
-@if (Model.RedditSubreddits != null && Model.RedditSubreddits.Any())
+@if (Model.RedditAuthenticatedUser != null || (Model.RedditSubreddits != null && Model.RedditSubreddits.Any()))
 {
-    <div class="row">
-        <h2>Subreddits</h2>
-        @foreach (ObjectViewModel<IRedditSubreddit> objectViewModelForRedditSubreddit in Model.RedditSubreddits)
+    <hr />
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4">
+        @if (Model.RedditAuthenticatedUser != null)
         {
-            @Html.Raw(objectViewModelForRedditSubreddit.Html);
+            <div class="col mb-3">
+                @Html.Raw(Model.RedditAuthenticatedUser.Html)
+            </div>
+        }
+        @if (Model.RedditSubreddits != null && Model.RedditSubreddits.Any())
+        {
+            foreach (ObjectViewModel<IRedditSubreddit> objectViewModelForRedditSubreddit in Model.RedditSubreddits)
+            {
+                <div class="col mb-3">
+                    @Html.Raw(objectViewModelForRedditSubreddit.Html)
+                </div>
+            }
         }
     </div>
 }
 @if (Model.SystemErrors != null && Model.SystemErrors.Any())
 {
-    <div class="row">
-        <h2>System errors</h2>
+    <hr />
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4">
         @foreach (SystemErrorViewModel systemErrorViewModel in Model.SystemErrors)
         {
-            <div class="card mb-3">
-                <div class="card-header text-danger">System error</div>
-                <div class="card-body">@Html.Raw(systemErrorViewModel.TruncatedMessage)</div> 
-                <div class="card-footer">
-                    <form asp-controller="Home" asp-action="SystemError" method="post">
-                        <input asp-for="@systemErrorViewModel.SystemErrorIdentifier" type="hidden" />
-                        <input asp-for="@systemErrorViewModel.Timestamp" type="hidden" />
-                        <input asp-for="@systemErrorViewModel.Message" type="hidden" />
-                        <input asp-for="@systemErrorViewModel.Details" type="hidden" />
-                        <div class="text-center">
-                            <div class="btn-group">
-                                <button type="submit" class="btn btn-info">View</button>
+            <div class="col mb-3">
+                <div class="card h-100">
+                    <div class="card-header text-danger">System error</div>
+                    <div class="card-body">
+                        <p class="card-text">@Html.Raw(systemErrorViewModel.TruncatedMessage)</p>
+                    </div>
+                    <div class="card-footer">
+                        <form asp-controller="Home" asp-action="SystemError" method="post">
+                            <input asp-for="@systemErrorViewModel.SystemErrorIdentifier" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Timestamp" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Message" type="hidden" />
+                            <input asp-for="@systemErrorViewModel.Details" type="hidden" />
+                            <div class="text-center">
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-info">View</button>
+                                </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         }

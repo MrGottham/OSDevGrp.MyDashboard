@@ -3,13 +3,13 @@
     ViewData["Title"] = "System error";
 }
 
-<div class="row">
-    <div class="col-md-12">
-        <h2>System error</h2>
-        <div class="card">
-            <div class="card-header text-danger">@Html.Raw(Model.Message)</div>
-            <div class="card-body">@Html.Raw(Model.Details)</div>
-            <div class="card-footer text-right">Occurred at @Model.Timestamp.ToShortTimeString()</div>
-        </div>
+<h1 class="text-danger">System error</h2>
+<div class="card">
+    <div class="card-header text-danger">@Html.Raw(Model.Message)</div>
+    <div class="card-body">
+        <p class="card-text">@Html.Raw(Model.Details)</p>
+    </div>
+    <div class="card-footer">
+        <small class="text-muted">Occurred at @Model.Timestamp.ToShortTimeString()</small>
     </div>
 </div>

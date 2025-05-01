@@ -2,10 +2,10 @@
 <img class="d-block w-100" src="@Model.ImageAsBase64" />
 @if (string.IsNullOrWhiteSpace(@Model.ViewModel.Header) == false)
 {
-    <div class="carousel-caption d-none d-md-block d-lg-block d-xl-block">
+    <div class="carousel-caption d-none d-sm-none d-md-block d-lg-block d-xl-block">
         @if (string.Compare(Model.ViewModel.ExternalUrl, "#", StringComparison.OrdinalIgnoreCase) != 0)
         {
-            <h3><a class="text-primary" href="#" onclick="javascript:$().openLink('@Model.ViewModel.ExternalUrl');">@Model.ViewModel.Header</a></h3>
+            <h5><a class="text-primary" href="#" onclick="javascript:$().openLink('@Model.ViewModel.ExternalUrl');">@Model.ViewModel.Header</a></h5>
         }
         else
         {
