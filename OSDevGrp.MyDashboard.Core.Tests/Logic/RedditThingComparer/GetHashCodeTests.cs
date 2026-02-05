@@ -3,7 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditThingComparer
 {
@@ -11,14 +10,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditThingComparer
     public class GetHashCodeTests
     {
         [TestMethod]
-        [ExpectedArgumentNullException("redditThing")]
         public void GetHashCode_WhenRedditThingIsNull_ThrowsArgumentNullException()
         {
             const IRedditThing redditThing = null;
 
             IRedditThingComparer<IRedditThing> sut = CreateSut();
 
-            sut.GetHashCode(redditThing);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.GetHashCode(redditThing));
+
+            Assert.AreEqual("redditThing", result.ParamName);
         }
 
         [TestMethod]
@@ -34,14 +34,16 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditThingComparer
         }
 
         [TestMethod]
-        [ExpectedArgumentException("The full name for the Reddit thing has not been initialized.", "FullName")]
         public void GetHashCode_WhenFullNameOnRedditThingIsNull_ThrowsArgumentException()
         {
             IRedditThing redditThing = CreateRedditThing(fullNameIsNull: true);
 
             IRedditThingComparer<IRedditThing> sut = CreateSut();
 
-            sut.GetHashCode(redditThing);
+            ArgumentException result = Assert.Throws<ArgumentException>(() => sut.GetHashCode(redditThing));
+
+            Assert.StartsWith("The full name for the Reddit thing has not been initialized.", result.Message);
+            Assert.AreEqual("FullName", result.ParamName);
         }
 
         [TestMethod]

@@ -4,7 +4,6 @@ using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
@@ -44,12 +43,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardSettingsViewModel")]
         public async Task Commit_WhenDashboardSettingsViewModelIsNull_ThrowsArgumentNullExcpetion()
         {
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.Commit(null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.Commit(null));
+
+            Assert.AreEqual("dashboardSettingsViewModel", result.ParamName);
         }
 
         [TestMethod]

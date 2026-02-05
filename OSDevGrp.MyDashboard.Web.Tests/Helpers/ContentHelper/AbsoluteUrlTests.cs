@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using System;
 
@@ -30,75 +29,83 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("action")]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndActionIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(null, Guid.NewGuid().ToString("D"));
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(null, Guid.NewGuid().ToString("D")));
+
+            Assert.AreEqual("action", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("action")]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndActionIsEmpty_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(string.Empty, Guid.NewGuid().ToString("D"));
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(string.Empty, Guid.NewGuid().ToString("D")));
+
+            Assert.AreEqual("action", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("action")]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndActionIsWhiteSpace_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(" ", Guid.NewGuid().ToString("D"));
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(" ", Guid.NewGuid().ToString("D")));
+
+            Assert.AreEqual("action", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("action")]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndActionIsWhiteSpaces_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl("  ", Guid.NewGuid().ToString("D"));
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl("  ", Guid.NewGuid().ToString("D")));
+
+            Assert.AreEqual("action", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("controller")]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndControllerIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), null));
+
+            Assert.AreEqual("controller", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("controller")]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndControllerIsEmpty_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), string.Empty);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), string.Empty));
+
+            Assert.AreEqual("controller", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("controller")]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndControllerIsWhiteSpace_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), " ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), " "));
+
+            Assert.AreEqual("controller", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("controller")]
         public void AbsoluteUrl_WhenCalledWithoutValuesAndControllerIsWhiteSpaces_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), "  ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), "  "));
+
+            Assert.AreEqual("controller", result.ParamName);
         }
 
         [TestMethod]
@@ -221,84 +228,93 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("action")]
         public void AbsoluteUrl_WhenCalledWithValuesAndActionIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(null, Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()});
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(null, Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()}));
+            
+            Assert.AreEqual("action", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("action")]
         public void AbsoluteUrl_WhenCalledWithValuesAndActionIsEmpty_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(string.Empty, Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()});
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(string.Empty, Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()}));
+            
+            Assert.AreEqual("action", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("action")]
         public void AbsoluteUrl_WhenCalledWithValuesAndActionIsWhiteSpace_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(" ", Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()});
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(" ", Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()}));
+            
+            Assert.AreEqual("action", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("action")]
         public void AbsoluteUrl_WhenCalledWithValuesAndActionIsWhiteSpaces_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl("  ", Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()});
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl("  ", Guid.NewGuid().ToString("D"), new {id = Guid.NewGuid()}));
+            
+            Assert.AreEqual("action", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("controller")]
         public void AbsoluteUrl_WhenCalledWithValuesAndControllerIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), null, new {id = Guid.NewGuid()});
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), null, new {id = Guid.NewGuid()}));
+            
+            Assert.AreEqual("controller", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("controller")]
         public void AbsoluteUrl_WhenCalledWithValuesAndControllerIsEmpty_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), string.Empty, new {id = Guid.NewGuid()});
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), string.Empty, new {id = Guid.NewGuid()}));
+            
+            Assert.AreEqual("controller", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("controller")]
         public void AbsoluteUrl_WhenCalledWithValuesAndControllerIsWhiteSpace_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), " ", new {id = Guid.NewGuid()});
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), " ", new {id = Guid.NewGuid()}));
+            
+            Assert.AreEqual("controller", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("controller")]
         public void AbsoluteUrl_WhenCalledWithValuesAndControllerIsWhiteSpaces_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), "  ", new {id = Guid.NewGuid()});
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), "  ", new {id = Guid.NewGuid()}));
+            
+            Assert.AreEqual("controller", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("values")]
         public void AbsoluteUrl_WhenCalledWithValuesAndValuesIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"), null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.AbsoluteUrl(Guid.NewGuid().ToString("D"), Guid.NewGuid().ToString("D"), null));
+
+            Assert.AreEqual("values", result.ParamName);
         }
 
         [TestMethod]

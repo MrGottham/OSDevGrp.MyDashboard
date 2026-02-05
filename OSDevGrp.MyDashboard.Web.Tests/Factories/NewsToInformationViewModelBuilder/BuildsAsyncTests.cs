@@ -1,7 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
@@ -29,12 +28,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.NewsToInformationViewModelBui
         }
 
         [TestMethod]
-        [ExpectedArgumentNullExceptionAttribute("input")]
         public async Task BuildAsync_WhenSystemErrorIsNull_ThrowsArgumentNullException()
         {
             IViewModelBuilder<InformationViewModel, INews> sut = CreateSut();
 
-            await sut.BuildAsync(null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.BuildAsync(null));
+
+            Assert.AreEqual("input", result.ParamName);
         }
 
         [TestMethod]

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 using System;
@@ -35,12 +34,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardSettingsViewModel")]
         public void ToByteArray_WhenDashboardSettingsViewModelIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToByteArray((DashboardSettingsViewModel) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToByteArray((DashboardSettingsViewModel) null));
+
+            Assert.AreEqual("dashboardSettingsViewModel", result.ParamName);
         }
 
         [TestMethod]
@@ -78,39 +78,43 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("value")]
         public void ToByteArray_WhenStringValueIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToByteArray((string) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToByteArray((string) null));
+
+            Assert.AreEqual("value", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("value")]
         public void ToByteArray_WhenStringValueIsEmpty_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToByteArray(string.Empty);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToByteArray(string.Empty));
+
+            Assert.AreEqual("value", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("value")]
         public void ToByteArray_WhenStringValueIsWhiteSpace_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToByteArray(" ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToByteArray(" "));
+
+            Assert.AreEqual("value", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("value")]
         public void ToByteArray_WhenStringValueIsWhiteSpaces_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToByteArray("  ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToByteArray("  "));
+
+            Assert.AreEqual("value", result.ParamName);
         }
 
         [TestMethod]

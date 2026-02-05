@@ -1,7 +1,6 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
 {
@@ -21,13 +20,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditResponse
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("data")]
         public void Constructor_WhenCalledWhereDataIsNull_ThrowsArgumentNullException()
         {
             const MyRedditObject data = null;
             const bool hasData = false;
 
-            IRedditResponse<MyRedditObject> sut = CreateSut(data: data, hasData: hasData);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => CreateSut(data: data, hasData: hasData));
+
+            Assert.AreEqual("data", result.ParamName);
         }
 
         [TestMethod]

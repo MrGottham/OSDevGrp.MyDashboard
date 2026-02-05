@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 using System;
@@ -35,12 +34,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardSettingsViewModel")]
         public void ToCookie_WhenDashboardSettingsViewModelIsNull_ThrowsArgumentNullException()
         {
             ICookieHelper sut = CreateSut();
 
-            sut.ToCookie((DashboardSettingsViewModel) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToCookie((DashboardSettingsViewModel) null));
+
+            Assert.AreEqual("dashboardSettingsViewModel", result.ParamName);
         }
 
         [TestMethod]
@@ -205,12 +205,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.CookieHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardViewModel")]
         public void ToCookie_WhenDashboardViewModelIsNull_ThrowsArgumentNullException()
         {
             ICookieHelper sut = CreateSut();
 
-            sut.ToCookie((DashboardViewModel) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToCookie((DashboardViewModel) null));
+
+            Assert.AreEqual("dashboardViewModel", result.ParamName);
         }
 
         [TestMethod]

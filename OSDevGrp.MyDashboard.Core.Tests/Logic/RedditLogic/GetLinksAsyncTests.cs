@@ -9,7 +9,6 @@ using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 {
@@ -41,7 +40,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("accessToken")]
         public async Task GetLinksAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
@@ -51,11 +49,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
             IRedditLogic sut = CreateSut();
 
-            await sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent));
+
+            Assert.AreEqual("accessToken", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("subreddit")]
         public async Task GetLinksAsync_WhenSubredditIsNull_ThrowsArgumentNullException()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
@@ -65,7 +64,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
             IRedditLogic sut = CreateSut();
 
-            await sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetLinksAsync(accessToken, subreddit, includeNsfwContent, onlyNsfwContent));
+
+            Assert.AreEqual("subreddit", result.ParamName);
         }
 
         [TestMethod]

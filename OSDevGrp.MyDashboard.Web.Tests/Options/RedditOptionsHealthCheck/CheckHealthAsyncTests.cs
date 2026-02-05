@@ -40,7 +40,7 @@ public class CheckHealthAsyncTests
 
         ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.CheckHealthAsync(null));
 
-        Assert.AreEqual(result.ParamName, "context");
+        Assert.AreEqual("context", result.ParamName);
     }
 
     [TestMethod]
@@ -70,7 +70,7 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut(hasRedditOptions: false);
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult? result = await sut.CheckHealthAsync(context);
 
         Assert.IsNotNull(result);
     }
@@ -81,9 +81,9 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut(hasRedditOptions: false);
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult result = await sut.CheckHealthAsync(context)!;
 
-        Assert.AreEqual(result.Status, HealthStatus.Unhealthy);
+        Assert.AreEqual(HealthStatus.Unhealthy, result.Status);
     }
 
     [TestMethod]
@@ -94,7 +94,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Description, $"{nameof(RedditOptions)} are misconfigured.");
+        Assert.AreEqual($"{nameof(RedditOptions)} are misconfigured.", result.Description);
     }
 
     [TestMethod]
@@ -104,7 +104,7 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut(hasRedditOptions: true, redditOptions: redditOptions);
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult? result = await sut.CheckHealthAsync(context);
 
         Assert.IsNotNull(result);
     }
@@ -118,7 +118,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Status, HealthStatus.Unhealthy);
+        Assert.AreEqual(HealthStatus.Unhealthy, result.Status);
     }
 
     [TestMethod]
@@ -130,7 +130,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Description, $"{nameof(redditOptions.ClientId)} in {nameof(RedditOptions)} are misconfigured.");
+        Assert.AreEqual($"{nameof(redditOptions.ClientId)} in {nameof(RedditOptions)} are misconfigured.", result.Description);
     }
 
     [TestMethod]
@@ -140,7 +140,7 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut(hasRedditOptions: true, redditOptions: redditOptions);
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult? result = await sut.CheckHealthAsync(context);
 
         Assert.IsNotNull(result);
     }
@@ -154,7 +154,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Status, HealthStatus.Unhealthy);
+        Assert.AreEqual(HealthStatus.Unhealthy, result.Status);
     }
 
     [TestMethod]
@@ -166,7 +166,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Description, $"{nameof(redditOptions.ClientId)} in {nameof(RedditOptions)} are misconfigured.");
+        Assert.AreEqual($"{nameof(redditOptions.ClientId)} in {nameof(RedditOptions)} are misconfigured.", result.Description);
     }
 
     [TestMethod]
@@ -176,7 +176,7 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut(hasRedditOptions: true, redditOptions: redditOptions);
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult? result = await sut.CheckHealthAsync(context);
 
         Assert.IsNotNull(result);
     }
@@ -190,7 +190,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Status, HealthStatus.Unhealthy);
+        Assert.AreEqual(HealthStatus.Unhealthy, result.Status);
     }
 
     [TestMethod]
@@ -202,7 +202,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Description, $"{nameof(redditOptions.ClientId)} in {nameof(RedditOptions)} are misconfigured.");
+        Assert.AreEqual($"{nameof(redditOptions.ClientId)} in {nameof(RedditOptions)} are misconfigured.", result.Description);
     }
 
     [TestMethod]
@@ -212,7 +212,7 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut(hasRedditOptions: true, redditOptions: redditOptions);
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult? result = await sut.CheckHealthAsync(context);
 
         Assert.IsNotNull(result);
     }
@@ -226,7 +226,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Status, HealthStatus.Unhealthy);
+        Assert.AreEqual(HealthStatus.Unhealthy, result.Status);
     }
 
     [TestMethod]
@@ -238,7 +238,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Description, $"{nameof(redditOptions.ClientSecret)} in {nameof(RedditOptions)} are misconfigured.");
+        Assert.AreEqual($"{nameof(redditOptions.ClientSecret)} in {nameof(RedditOptions)} are misconfigured.", result.Description);
     }
 
     [TestMethod]
@@ -248,7 +248,7 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut(hasRedditOptions: true, redditOptions: redditOptions);
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult? result = await sut.CheckHealthAsync(context);
 
         Assert.IsNotNull(result);
     }
@@ -262,7 +262,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Status, HealthStatus.Unhealthy);
+        Assert.AreEqual(HealthStatus.Unhealthy, result.Status);
     }
 
     [TestMethod]
@@ -274,7 +274,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Description, $"{nameof(redditOptions.ClientSecret)} in {nameof(RedditOptions)} are misconfigured.");
+        Assert.AreEqual($"{nameof(redditOptions.ClientSecret)} in {nameof(RedditOptions)} are misconfigured.", result.Description);
     }
 
     [TestMethod]
@@ -284,7 +284,7 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut(hasRedditOptions: true, redditOptions: redditOptions);
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult? result = await sut.CheckHealthAsync(context);
 
         Assert.IsNotNull(result);
     }
@@ -298,7 +298,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Status, HealthStatus.Unhealthy);
+        Assert.AreEqual(HealthStatus.Unhealthy, result.Status);
     }
 
     [TestMethod]
@@ -310,7 +310,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Description, $"{nameof(redditOptions.ClientSecret)} in {nameof(RedditOptions)} are misconfigured.");
+        Assert.AreEqual($"{nameof(redditOptions.ClientSecret)} in {nameof(RedditOptions)} are misconfigured.", result.Description);
     }
 
     [TestMethod]
@@ -319,7 +319,7 @@ public class CheckHealthAsyncTests
         IHealthCheck sut = CreateSut();
 
         HealthCheckContext context = CreateHealthCheckContext();
-        HealthCheckResult result = await sut.CheckHealthAsync(context);
+        HealthCheckResult? result = await sut.CheckHealthAsync(context);
 
         Assert.IsNotNull(result);
     }
@@ -332,7 +332,7 @@ public class CheckHealthAsyncTests
         HealthCheckContext context = CreateHealthCheckContext();
         HealthCheckResult result = await sut.CheckHealthAsync(context);
 
-        Assert.AreEqual(result.Status, HealthStatus.Healthy);
+        Assert.AreEqual(HealthStatus.Healthy, result.Status);
     }
 
     private IHealthCheck CreateSut(bool hasRedditOptions = true, RedditOptions redditOptions = null)

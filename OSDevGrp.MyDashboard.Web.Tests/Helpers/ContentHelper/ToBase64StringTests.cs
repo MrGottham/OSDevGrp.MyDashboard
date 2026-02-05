@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 using System;
@@ -37,12 +36,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardSettingsViewModel")]
         public void ToBase64String_WhenDashboardSettingsViewModelIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToBase64String((DashboardSettingsViewModel) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToBase64String((DashboardSettingsViewModel) null));
+
+            Assert.AreEqual("dashboardSettingsViewModel", result.ParamName);
         }
 
         [TestMethod]
@@ -81,39 +81,43 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("value")]
         public void ToBase64String_WhenStringValueIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToBase64String((string) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToBase64String((string) null));
+
+            Assert.AreEqual("value", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("value")]
         public void ToBase64String_WhenStringValueIsEmpty_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToBase64String(string.Empty);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToBase64String(string.Empty));
+
+            Assert.AreEqual("value", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("value")]
         public void ToBase64String_WhenStringValueIsWhiteSpace_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToBase64String(" ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToBase64String(" "));
+
+            Assert.AreEqual("value", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("value")]
         public void ToBase64String_WhenStringValueIsWhiteSpaces_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToBase64String("  ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToBase64String("  "));
+
+            Assert.AreEqual("value", result.ParamName);
         }
 
         [TestMethod]

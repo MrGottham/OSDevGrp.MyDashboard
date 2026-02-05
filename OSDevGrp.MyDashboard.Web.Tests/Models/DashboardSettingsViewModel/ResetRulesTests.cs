@@ -1,6 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using System;
 
@@ -24,12 +23,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("cookieHelper")]
         public void ResetRules_WhenCookieHelperIsNull_ThrowsArgumentNullException()
         {
             Web.Models.DashboardSettingsViewModel sut = CreateSut();
 
-            sut.ResetRules(null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ResetRules(null));
+
+            Assert.AreEqual("cookieHelper", result.ParamName);
         }
 
         [TestMethod]

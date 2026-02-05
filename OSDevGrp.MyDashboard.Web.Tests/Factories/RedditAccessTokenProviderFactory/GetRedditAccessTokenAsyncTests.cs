@@ -3,7 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Options;
 using System;
 using System.Threading.Tasks;
@@ -28,7 +27,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task GetRedditAccessTokenAsync_WhenCodeIsNull_ThrowsArgumentNullException()
         {
             const string code = null;
@@ -36,11 +34,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(code, redirectUri));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task GetRedditAccessTokenAsync_WhenCodeIsEmpty_ThrowsArgumentNullException()
         {
             string code = string.Empty;
@@ -48,11 +47,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(code, redirectUri));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task GetRedditAccessTokenAsync_WhenCodeIsWhitespace_ThrowsArgumentNullException()
         {
             const string code = " ";
@@ -60,11 +60,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(code, redirectUri));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task GetRedditAccessTokenAsync_WhenCodeIsWhitespaces_ThrowsArgumentNullException()
         {
             const string code = "  ";
@@ -72,11 +73,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(code, redirectUri));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("redirectUri")]
         public async Task GetRedditAccessTokenAsync_WhenRedirectUriIsNull_ThrowsArgumentNullException()
         {
             string code = Guid.NewGuid().ToString("D");
@@ -84,7 +86,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(code, redirectUri));
+
+            Assert.AreEqual("redirectUri", result.ParamName);
         }
 
         [TestMethod]

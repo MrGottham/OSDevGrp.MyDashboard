@@ -3,7 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Options;
 using System;
 using System.Threading.Tasks;
@@ -28,47 +27,51 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("refreshToken")]
         public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsNull_ThrowsArgumentNullException()
         {
             const string refreshToken = null;
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.RenewRedditAccessTokenAsync(refreshToken);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RenewRedditAccessTokenAsync(refreshToken));
+
+            Assert.AreEqual("refreshToken", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("refreshToken")]
         public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsEmpty_ThrowsArgumentNullException()
         {
             string refreshToken = string.Empty;
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.RenewRedditAccessTokenAsync(refreshToken);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RenewRedditAccessTokenAsync(refreshToken));
+
+            Assert.AreEqual("refreshToken", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("refreshToken")]
         public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespace_ThrowsArgumentNullException()
         {
             const string refreshToken = " ";
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.RenewRedditAccessTokenAsync(refreshToken);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RenewRedditAccessTokenAsync(refreshToken));
+
+            Assert.AreEqual("refreshToken", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("refreshToken")]
         public async Task RenewRedditAccessTokenAsync_WhenRefreshTokenIsWhitespaces_ThrowsArgumentNullException()
         {
             const string refreshToken = "  ";
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.RenewRedditAccessTokenAsync(refreshToken);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RenewRedditAccessTokenAsync(refreshToken));
+
+            Assert.AreEqual("refreshToken", result.ParamName);
         }
 
         [TestMethod]

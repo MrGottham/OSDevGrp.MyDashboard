@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Models;
 
@@ -38,12 +37,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.DashboardModelExporter
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("input")]
         public async Task ExportAsync_WhenInputIsNull_ThrowsArgumentNullException()
         {
             IModelExporter<DashboardExportModel, IDashboard> sut = CreateSut();
 
-            await sut.ExportAsync(null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.ExportAsync(null));
+
+            Assert.AreEqual("input", result.ParamName);
         }
 
         [TestMethod]

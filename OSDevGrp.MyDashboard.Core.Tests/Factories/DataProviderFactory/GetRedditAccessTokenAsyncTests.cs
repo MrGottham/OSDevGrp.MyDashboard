@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 {
@@ -24,7 +23,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("clientId")]
         public async Task GetRedditAccessTokenAsync_WhenClientIdIsNull_ThrowsArgumentNullException()
         {
             const string clientId = null;
@@ -34,11 +32,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("clientId", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("clientId")]
         public async Task GetRedditAccessTokenAsync_WhenClientIdIsEmpty_ThrowsArgumentNullException()
         {
             string clientId = string.Empty;
@@ -48,11 +47,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("clientId", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("clientId")]
         public async Task GetRedditAccessTokenAsync_WhenClientIdIsWhitespace_ThrowsArgumentNullException()
         {
             const string clientId = " ";
@@ -62,11 +62,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("clientId", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("clientId")]
         public async Task GetRedditAccessTokenAsync_WhenClientIdIsWhitespaces_ThrowsArgumentNullException()
         {
             const string clientId = "  ";
@@ -76,11 +77,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("clientId", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("clientSecret")]
         public async Task GetRedditAccessTokenAsync_WhenClientSecretIsNull_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -90,11 +92,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("clientSecret", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("clientSecret")]
         public async Task GetRedditAccessTokenAsync_WhenClientSecretIsEmpty_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -104,11 +107,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("clientSecret", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("clientSecret")]
         public async Task GetRedditAccessTokenAsync_WhenClientSecretIsWhitespace_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -118,11 +122,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("clientSecret", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("clientSecret")]
         public async Task GetRedditAccessTokenAsync_WhenClientSecretIsWhitespaces_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -132,11 +137,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("clientSecret", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task GetRedditAccessTokenAsync_WhenCodeIsNull_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -146,11 +152,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task GetRedditAccessTokenAsync_WhenCodeIsEmpty_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -160,11 +167,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task GetRedditAccessTokenAsync_WhenCodeIsWhitespace_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -174,11 +182,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task GetRedditAccessTokenAsync_WhenCodeIsWhitespaces_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -188,11 +197,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("redirectUri")]
         public async Task GetRedditAccessTokenAsync_WhenRedirectUriIsNull_ThrowsArgumentNullException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -202,11 +212,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("redirectUri", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedUnauthorizedAccessException("You are not authorized to perform this operation against Reddit.")]
         public async Task GetRedditAccessTokenAsync_WhenCalled_ThrowsUnauthorizedAccessException()
         {
             string clientId = Guid.NewGuid().ToString("D");
@@ -216,7 +227,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DataProviderFactory
 
             IDataProviderFactory sut = CreateSut();
 
-            await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri);
+            UnauthorizedAccessException result = await Assert.ThrowsAsync<UnauthorizedAccessException>(async () => await sut.GetRedditAccessTokenAsync(clientId, clientSecret, code, redirectUri));
+
+            Assert.AreEqual("You are not authorized to perform this operation against Reddit.", result.Message);
         }
 
         private IDataProviderFactory CreateSut()

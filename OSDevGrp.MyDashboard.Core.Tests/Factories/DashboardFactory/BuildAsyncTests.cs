@@ -8,7 +8,6 @@ using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
 {
@@ -38,12 +37,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardFactory
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardSettings")]
         public async Task BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
         {
             IDashboardFactory sut = CreateSut();
 
-            await sut.BuildAsync(null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.BuildAsync(null));
+
+            Assert.AreEqual("dashboardSettings", result.ParamName);
         }
 
         [TestMethod]

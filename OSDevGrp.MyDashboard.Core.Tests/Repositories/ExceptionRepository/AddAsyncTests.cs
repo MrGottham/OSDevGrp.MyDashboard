@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
 {
@@ -10,14 +9,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.ExceptionRepository
     public class AddAsyncTests
     {
         [TestMethod]
-        [ExpectedArgumentNullException("exception")]
         public async Task AddAsync_WhenExceptionIsNull_ThrowsArgumentNullException()
         {
             Exception exception = null;
 
             IExceptionRepository sut = CreateSut();
 
-            await sut.AddAsync(exception);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.AddAsync(exception));
+            
+            Assert.AreEqual("exception", result.ParamName);
         }
 
         [TestMethod]

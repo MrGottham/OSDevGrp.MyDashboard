@@ -2,7 +2,6 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.HttpHelper
@@ -11,12 +10,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.HttpHelper
     public class ReadAsyncTests
     {
         [TestMethod]
-        [ExpectedArgumentNullException("url")]
         public async Task ReadAsync_WhenUrlIsNull_ThrowsArgumentNullException()
         {
             IHttpHelper sut = CreateSut();
 
-            await sut.ReadAsync(null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.ReadAsync(null));
+
+            Assert.AreEqual("url", result.ParamName);
         }
 
         [TestMethod]

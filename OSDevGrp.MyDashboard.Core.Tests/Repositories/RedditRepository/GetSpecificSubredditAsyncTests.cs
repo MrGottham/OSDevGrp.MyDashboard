@@ -5,7 +5,6 @@ using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
 {
@@ -25,7 +24,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("accessToken")]
         public async Task GetSpecificSubredditAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
         {
             const IRedditAccessToken accessToken = null;
@@ -33,11 +31,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
 
             IRedditRepository sut = CreateSut();
 
-            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit));
+
+            Assert.AreEqual("accessToken", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("knownSubreddit")]
         public async Task GetSpecificSubredditAsync_WhenKnownSubredditIsNull_ThrowsArgumentNullException()
         {
             IRedditAccessToken accessToken = CreateRedditAccessToken();
@@ -45,7 +44,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
 
             IRedditRepository sut = CreateSut();
 
-            await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetSpecificSubredditAsync(accessToken, knownSubreddit));
+
+            Assert.AreEqual("knownSubreddit", result.ParamName);
         }
 
         [TestMethod]

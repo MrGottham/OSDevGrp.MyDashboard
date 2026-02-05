@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
 
@@ -41,12 +40,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("byteArray")]
         public void ToDashboardSettingsViewModel_WhenByteArrayIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToDashboardSettingsViewModel((byte[]) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToDashboardSettingsViewModel((byte[]) null));
+
+            Assert.AreEqual("byteArray", result.ParamName);
         }
 
         [TestMethod]
@@ -208,39 +208,43 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64String")]
         public void ToDashboardSettingsViewModel_WhenBase64StringIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToDashboardSettingsViewModel((string) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToDashboardSettingsViewModel((string) null));
+
+            Assert.AreEqual("base64String", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64String")]
         public void ToDashboardSettingsViewModel_WhenBase64StringIsEmpty_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToDashboardSettingsViewModel(string.Empty);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToDashboardSettingsViewModel(string.Empty));
+
+            Assert.AreEqual("base64String", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64String")]
         public void ToDashboardSettingsViewModel_WhenBase64StringIsWhiteSpace_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToDashboardSettingsViewModel(" ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToDashboardSettingsViewModel(" "));
+
+            Assert.AreEqual("base64String", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64String")]
         public void ToDashboardSettingsViewModel_WhenBase64StringIsWhiteSpaces_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToDashboardSettingsViewModel("  ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToDashboardSettingsViewModel("  "));
+
+            Assert.AreEqual("base64String", result.ParamName);
         }
 
         [TestMethod]
