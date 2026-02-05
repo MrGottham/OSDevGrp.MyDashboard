@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
@@ -40,12 +39,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("byteArray")]
         public void ToValue_WhenByteArrayIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToValue((byte[]) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToValue((byte[]) null));
+
+            Assert.AreEqual("byteArray", result.ParamName);
         }
 
         [TestMethod]
@@ -96,39 +96,43 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Helpers.ContentHelper
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64String")]
         public void ToValue_WhenBase64StringIsNull_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToValue((string) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToValue((string) null));
+
+            Assert.AreEqual("base64String", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64String")]
         public void ToValue_WhenBase64StringIsEmpty_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToValue(string.Empty);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToValue(string.Empty));
+
+            Assert.AreEqual("base64String", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64String")]
         public void ToValue_WhenBase64StringIsWhiteSpace_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToValue(" ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToValue(" "));
+            
+            Assert.AreEqual("base64String", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64String")]
         public void ToValue_WhenBase64StringIsWhiteSpaces_ThrowsArgumentNullException()
         {
             IContentHelper sut = CreateSut();
 
-            sut.ToValue("  ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ToValue("  "));
+
+            Assert.AreEqual("base64String", result.ParamName);
         }
 
         [TestMethod]

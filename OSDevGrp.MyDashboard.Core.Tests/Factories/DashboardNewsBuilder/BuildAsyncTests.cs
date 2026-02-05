@@ -7,7 +7,6 @@ using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
 {
@@ -31,25 +30,27 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardNewsBuilder
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardSettings")]
         public async Task BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
         {
             IDashboard dashboard = CreateDashboard();
 
             IDashboardNewsBuilder sut = CreateSut();
 
-            await sut.BuildAsync(null, dashboard);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.BuildAsync(null, dashboard));
+
+            Assert.AreEqual("dashboardSettings", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("dashboard")]
         public async Task BuildAsync_WhenDashboardIsNull_ThrowsArgumentNullException()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings();
 
             IDashboardNewsBuilder sut = CreateSut();
 
-            await sut.BuildAsync(dashboardSettings, null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.BuildAsync(dashboardSettings, null));
+
+            Assert.AreEqual("dashboard", result.ParamName);
         }
 
         [TestMethod]

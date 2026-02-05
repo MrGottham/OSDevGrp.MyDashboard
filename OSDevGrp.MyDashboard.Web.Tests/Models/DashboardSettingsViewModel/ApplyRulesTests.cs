@@ -1,7 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using System;
 
@@ -25,25 +24,27 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("rules")]
         public void ApplyRules_WhenDashboardRulesIsNull_ThrowsArgumentNullException()
         {
             const IDashboardRules dashboardRules = null;
 
             Web.Models.DashboardSettingsViewModel sut = CreateSut();
 
-            sut.ApplyRules(dashboardRules, _cookieHelperMock.Object);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ApplyRules(dashboardRules, _cookieHelperMock.Object));
+
+            Assert.AreEqual("rules", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("cookieHelper")]
         public void ApplyRules_WhenCalledWithDashboardRulesAndCookieHelperIsNull_ThrowsArgumentNullException()
         {
             IDashboardRules dashboardRules = CreateDashboardRules();
 
             Web.Models.DashboardSettingsViewModel sut = CreateSut();
 
-            sut.ApplyRules(dashboardRules, null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ApplyRules(dashboardRules, null));
+
+            Assert.AreEqual("cookieHelper", result.ParamName);
         }
 
         [TestMethod]
@@ -123,7 +124,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("redditAuthenticatedUser")]
         public void ApplyRules_WhenRedditAuthenticatedUserIsNull_ThrowsArgumentNullException()
         {
             const IRedditAuthenticatedUser redditAuthenticatedUser = null;
@@ -131,22 +131,24 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
 
             Web.Models.DashboardSettingsViewModel sut = CreateSut();
 
-            sut.ApplyRules(redditAuthenticatedUser, redditAccessToken, _cookieHelperMock.Object);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ApplyRules(redditAuthenticatedUser, redditAccessToken, _cookieHelperMock.Object));
+
+            Assert.AreEqual("redditAuthenticatedUser", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("redditAccessToken")]
         public void ApplyRules_WhenCalledWithRedditAuthenticatedUserAndRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser();
 
             Web.Models.DashboardSettingsViewModel sut = CreateSut();
 
-            sut.ApplyRules(redditAuthenticatedUser, null, _cookieHelperMock.Object);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ApplyRules(redditAuthenticatedUser, null, _cookieHelperMock.Object));
+
+            Assert.AreEqual("redditAccessToken", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("cookieHelper")]
         public void ApplyRules_WhenCalledWithRedditAuthenticatedUserAndCookieHelperIsNull_ThrowsArgumentNullException()
         {
             IRedditAuthenticatedUser redditAuthenticatedUser = CreateRedditAuthenticatedUser();
@@ -154,7 +156,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
 
             Web.Models.DashboardSettingsViewModel sut = CreateSut();
 
-            sut.ApplyRules(redditAuthenticatedUser, redditAccessToken, null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ApplyRules(redditAuthenticatedUser, redditAccessToken, null));
+
+            Assert.AreEqual("cookieHelper", result.ParamName);
         }
 
         [TestMethod]
@@ -260,12 +264,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Models.DashboardSettingsViewModel
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("cookieHelper")]
         public void ApplyRules_WhenWithOnlyCookieHelperEqualToNull_ThrowsArgumentNullException()
         {
             Web.Models.DashboardSettingsViewModel sut = CreateSut();
 
-            sut.ApplyRules(null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ApplyRules(null));
+
+            Assert.AreEqual("cookieHelper", result.ParamName);
         }
 
         [TestMethod]

@@ -5,7 +5,6 @@ using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilder
 {
@@ -29,12 +28,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardSettings")]
         public void ShouldBuild_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
         {
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            sut.ShouldBuild(null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.ShouldBuild(null));
+
+            Assert.AreEqual("dashboardSettings", result.ParamName);
         }
 
         [TestMethod]

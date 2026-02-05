@@ -4,7 +4,6 @@ using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
@@ -43,7 +42,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task RedditCallback_WhenCodeIsNull_ThrowsArgumentNullException()
         {
             const string code = null;
@@ -51,11 +49,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.RedditCallback(code, state);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RedditCallback(code, state));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task RedditCallback_WhenCodeIsEmpty_ThrowsArgumentNullException()
         {
             string code = string.Empty;
@@ -63,11 +62,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.RedditCallback(code, state);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RedditCallback(code, state));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task RedditCallback_WhenCodeIsWhitespace_ThrowsArgumentNullException()
         {
             const string code = " ";
@@ -75,11 +75,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.RedditCallback(code, state);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RedditCallback(code, state));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("code")]
         public async Task RedditCallback_WhenCodeIsWhitespaces_ThrowsArgumentNullException()
         {
             const string code = "  ";
@@ -87,11 +88,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.RedditCallback(code, state);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RedditCallback(code, state));
+
+            Assert.AreEqual("code", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("state")]
         public async Task RedditCallback_WhenStateIsNull_ThrowsArgumentNullException()
         {
             string code = Guid.NewGuid().ToString("D");
@@ -99,11 +101,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.RedditCallback(code, state);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RedditCallback(code, state));
+
+            Assert.AreEqual("state", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("state")]
         public async Task RedditCallback_WhenStateIsEmpty_ThrowsArgumentNullException()
         {
             string code = Guid.NewGuid().ToString("D");
@@ -111,11 +114,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.RedditCallback(code, state);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RedditCallback(code, state));
+
+            Assert.AreEqual("state", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("state")]
         public async Task RedditCallback_WhenStateIsWhitespace_ThrowsArgumentNullException()
         {
             string code = Guid.NewGuid().ToString("D");
@@ -123,11 +127,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.RedditCallback(code, state);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RedditCallback(code, state));
+
+            Assert.AreEqual("state", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("state")]
         public async Task RedditCallback_WhenStateIsWhitespaces_ThrowsArgumentNullException()
         {
             string code = Guid.NewGuid().ToString("D");
@@ -135,7 +140,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
 
             Web.Controllers.HomeController sut = CreateSut();
 
-            await sut.RedditCallback(code, state);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RedditCallback(code, state));
+
+            Assert.AreEqual("state", result.ParamName);
         }
 
         [TestMethod]

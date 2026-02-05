@@ -9,7 +9,6 @@ using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 {
@@ -41,7 +40,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("accessToken")]
         public async Task GetSubredditsForAuthenticatedUserAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             bool includeNsfwContent = _random.Next(1, 100) > 50;
@@ -49,7 +47,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 
             IRedditLogic sut = CreateSut();
 
-            await sut.GetSubredditsForAuthenticatedUserAsync(null, includeNsfwContent, onlyNsfwContent);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetSubredditsForAuthenticatedUserAsync(null, includeNsfwContent, onlyNsfwContent));
+
+            Assert.AreEqual("accessToken", result.ParamName);
         }
 
         [TestMethod]

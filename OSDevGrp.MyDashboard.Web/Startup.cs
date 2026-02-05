@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -43,7 +45,7 @@ namespace OSDevGrp.MyDashboard.Web
             services.Configure<ForwardedHeadersOptions>(opt => 
             {
                 opt.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto;
-                opt.KnownNetworks.Clear();
+                opt.KnownIPNetworks.Clear();
                 opt.KnownProxies.Clear();
             });
 
@@ -86,11 +88,14 @@ namespace OSDevGrp.MyDashboard.Web
             services.AddHttpContextAccessor()
                 .AddMemoryCache();
 
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddScoped(factory => 
             {
-                IActionContextAccessor actionContextAccessor = factory.GetRequiredService<IActionContextAccessor>();
-                return factory.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(actionContextAccessor.ActionContext!);
+                IHttpContextAccessor httpContextAccessor = factory.GetRequiredService<IHttpContextAccessor>();
+                ActionContext actionContext = new ActionContext(
+                    httpContextAccessor.HttpContext!, 
+                    httpContextAccessor.HttpContext!.GetRouteData()!, 
+                    new ActionDescriptor());
+                return factory.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(actionContext);
             });
 
             // Adds dependencies for the infrastructure. 

@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
 {
@@ -26,12 +25,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditFilterLogic
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("filterableCollection")]
         public async Task RemoveNoneNsfwContentAsync_WhenFilterableCollectionIsNull_ThrowsArgumentNullException()
         {
             IRedditFilterLogic sut = CreateSut();
 
-            await sut.RemoveNoneNsfwContentAsync((IEnumerable<IRedditFilterable>) null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.RemoveNoneNsfwContentAsync((IEnumerable<IRedditFilterable>) null));
+
+            Assert.AreEqual("filterableCollection", result.ParamName);
         }
 
         [TestMethod]

@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Utilities.Rfc822DateTimeParser
 {
@@ -134,7 +133,7 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Utilities.Rfc822DateTimeParser
             DateTime time = new DateTime(2009, 8, 6, 11, 36, 44, DateTimeKind.Utc);
             
             DateTime result = Parse_WhenCalledWithString_ExpectTime("Thu, 06 Aug 2009 11:36:44", time, false);
-            Assert.AreEqual(result.Kind, DateTimeKind.Unspecified);
+            Assert.AreEqual(DateTimeKind.Unspecified, result.Kind);
         }
         
         [TestMethod]

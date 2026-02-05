@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.ExceptionHandler
 {
@@ -30,14 +29,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.ExceptionHandler
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("exception")]
         public async Task HandleAsync_WhenExceptionIsNull_ThrowsArgumentNullException()
         {
             Exception exception = null;
 
             IExceptionHandler sut = CreateSut();
 
-            await sut.HandleAsync(exception);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.HandleAsync(exception));
+
+            Assert.AreEqual("exception", result.ParamName);
         }
 
         [TestMethod]
@@ -88,14 +88,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.ExceptionHandler
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("exception")]
         public async Task HandleAsync_WhenAggregateExceptionIsNull_ThrowsArgumentNullException()
         {
             AggregateException aggregateException = null;
 
             IExceptionHandler sut = CreateSut();
 
-            await sut.HandleAsync(aggregateException);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.HandleAsync(aggregateException));
+
+            Assert.AreEqual("exception", result.ParamName);
         }
 
         [TestMethod]

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Web.Tests.Resolvers;
 
@@ -10,10 +9,11 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Resolvers;
 public class GetLinkerTimestampTests
 {
     [TestMethod]
-    [ExpectedArgumentNullException("assembly")]
     public void GetLinkerTimestamp_WhenAssemblyIsNull_ThrowsArgumentNullException()
     {
-        Web.Resolvers.LinkerTimestampResolver.GetLinkerTimestamp(null);
+        ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => Web.Resolvers.LinkerTimestampResolver.GetLinkerTimestamp(null));
+
+        Assert.AreEqual("assembly", result.ParamName);
     }
 
     [TestMethod]

@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
 {
@@ -11,14 +11,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
     public class ReplaceTests
     {
         [TestMethod]
-        [ExpectedArgumentNullException("news")]
         public void Replace_WhenCalledWithNewsEqualToNull_ThrowsArgumentNullExcpetion()
         {
             const IEnumerable<INews> news = null;
 
             IDashboard sut = CreateSut();
 
-            sut.Replace(news);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.Replace(news));
+
+            Assert.AreEqual("news", result.ParamName);
         }
         
         [TestMethod]
@@ -41,14 +42,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("redditAuthenticatedUser")]
         public void Replace_WhenCalledWithRedditAuthenticatedUserEqualToNull_ThrowsArgumentNullExcpetion()
         {
             const IRedditAuthenticatedUser redditAuthenticatedUser = null;
 
             IDashboard sut = CreateSut();
 
-            sut.Replace(redditAuthenticatedUser);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.Replace(redditAuthenticatedUser));
+
+            Assert.AreEqual("redditAuthenticatedUser", result.ParamName);
         }
         
         [TestMethod]
@@ -65,14 +67,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("redditSubreddits")]
         public void Replace_WhenCalledWithRedditSubredditsEqualToNull_ThrowsArgumentNullExcpetion()
         {
             const IEnumerable<IRedditSubreddit> redditSubreddits = null;
 
             IDashboard sut = CreateSut();
 
-            sut.Replace(redditSubreddits);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.Replace(redditSubreddits));
+
+            Assert.AreEqual("redditSubreddits", result.ParamName);
         }
 
         [TestMethod]
@@ -95,14 +98,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("redditLinks")]
         public void Replace_WhenCalledWithRedditLinksEqualToNull_ThrowsArgumentNullExcpetion()
         {
             const IEnumerable<IRedditLink> redditLinks = null;
 
             IDashboard sut = CreateSut();
 
-            sut.Replace(redditLinks);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.Replace(redditLinks));
+
+            Assert.AreEqual("redditLinks", result.ParamName);
         }
 
         [TestMethod]
@@ -125,14 +129,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("systemErrors")]
         public void Replace_WhenCalledWithSystemErrorsEqualToNull_ThrowsArgumentNullExcpetion()
         {
             const IEnumerable<ISystemError> systemErrors = null;
 
             IDashboard sut = CreateSut();
 
-            sut.Replace(systemErrors);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.Replace(systemErrors));
+
+            Assert.AreEqual("systemErrors", result.ParamName);
         }
         
         [TestMethod]
@@ -155,14 +160,15 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.Dashboard
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("settings")]
         public void Replace_WhenCalledWithDashboardSettingsEqualToNull_ThrowsArgumentNullExcpetion()
         {
             const IDashboardSettings dashboardSettings = null;
 
             IDashboard sut = CreateSut();
 
-            sut.Replace(dashboardSettings);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.Replace(dashboardSettings));
+
+            Assert.AreEqual("settings", result.ParamName);
         }
         
         [TestMethod]

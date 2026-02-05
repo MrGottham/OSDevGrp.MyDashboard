@@ -5,7 +5,6 @@ using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
 {
@@ -25,13 +24,14 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Repositories.RedditRepository
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("accessToken")]
 
         public async Task GetAuthenticatedUserAsync_WhenAccessTokenIsNull_ThrowsArgumentNullException()
         {
             IRedditRepository sut = CreateSut();
 
-            await sut.GetAuthenticatedUserAsync(null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetAuthenticatedUserAsync(null));
+
+            Assert.AreEqual("accessToken", result.ParamName);
         }
 
         [TestMethod]

@@ -1,10 +1,10 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Contracts.Factories;
 using OSDevGrp.MyDashboard.Web.Contracts.Helpers;
 using OSDevGrp.MyDashboard.Web.Models;
@@ -39,12 +39,13 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Controllers.HomeController
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("systemErrorViewModel")]
         public void SystemError_WhenSystemErrorViewModelIsNull_ThrowsArgumentNullExcpetion()
         {
             Web.Controllers.HomeController sut = CreateSut();
 
-            sut.SystemError(null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => sut.SystemError(null));
+
+            Assert.AreEqual("systemErrorViewModel", result.ParamName);
         }
 
         [TestMethod]

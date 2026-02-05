@@ -7,7 +7,6 @@ using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
 using OSDevGrp.MyDashboard.Core.Contracts.Repositories;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
 {
@@ -39,12 +38,13 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Logic.RedditLogic
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("accessToken")]
         public async Task GetAuthenticatedUserAsync_WhenRedditAccessTokenIsNull_ThrowsArgumentNullException()
         {
             IRedditLogic sut = CreateSut();
 
-            await sut.GetAuthenticatedUserAsync(null);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.GetAuthenticatedUserAsync(null));
+
+            Assert.AreEqual("accessToken", result.ParamName);
         }
 
         [TestMethod]

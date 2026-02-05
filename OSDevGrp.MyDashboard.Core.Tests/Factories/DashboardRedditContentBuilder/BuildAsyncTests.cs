@@ -8,7 +8,6 @@ using OSDevGrp.MyDashboard.Core.Contracts.Factories;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
 using OSDevGrp.MyDashboard.Core.Contracts.Logic;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilder
 {
@@ -32,7 +31,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("dashboardSettings")]
         public async Task BuildAsync_WhenDashboardSettingsIsNull_ThrowsArgumentNullException()
         {
             const IDashboardSettings dashboardSettings = null; 
@@ -40,11 +38,12 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            await sut.BuildAsync(dashboardSettings, dashboard);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.BuildAsync(dashboardSettings, dashboard));
+
+            Assert.AreEqual("dashboardSettings", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("dashboard")]
         public async Task BuildAsync_WhenDashboardIsNull_ThrowsArgumentNullException()
         {
             IDashboardSettings dashboardSettings = CreateDashboardSettings(); 
@@ -52,7 +51,9 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Factories.DashboardRedditContentBuilde
 
             IDashboardRedditContentBuilder sut = CreateSut();
 
-            await sut.BuildAsync(dashboardSettings, dashboard);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.BuildAsync(dashboardSettings, dashboard));
+
+            Assert.AreEqual("dashboard", result.ParamName);
         }
 
         [TestMethod]

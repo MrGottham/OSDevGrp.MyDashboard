@@ -2,7 +2,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Factories;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 using OSDevGrp.MyDashboard.Web.Options;
 using System;
 using System.Threading.Tasks;
@@ -27,7 +26,6 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("state")]
         public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsNull_ThrowsArgumentNullException()
         {
             const string state = null;
@@ -35,11 +33,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri));
+
+            Assert.AreEqual("state", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("state")]
         public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsEmpty_ThrowsArgumentNullException()
         {
             string state = string.Empty;
@@ -47,11 +46,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri));
+
+            Assert.AreEqual("state", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("state")]
         public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespace_ThrowsArgumentNullException()
         {
             const string state = " ";
@@ -59,11 +59,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri));
+
+            Assert.AreEqual("state", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("state")]
         public async Task AcquireRedditAuthorizationTokenAsync_WhenStateIsWhitespaces_ThrowsArgumentNullException()
         {
             const string state = "  ";
@@ -71,11 +72,12 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri));
+
+            Assert.AreEqual("state", result.ParamName);
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("redirectUri")]
         public async Task AcquireRedditAuthorizationTokenAsync_WhenRedirectUriIsNull_ThrowsArgumentNullException()
         {
             string state = Guid.NewGuid().ToString("D");
@@ -83,7 +85,9 @@ namespace OSDevGrp.MyDashboard.Web.Tests.Factories.RedditAccessTokenProviderFact
 
             IRedditAccessTokenProviderFactory sut = CreateSut();
 
-            await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri);
+            ArgumentNullException result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.AcquireRedditAuthorizationTokenAsync(state, redirectUri));
+
+            Assert.AreEqual("redirectUri", result.ParamName);
         }
 
         [TestMethod]

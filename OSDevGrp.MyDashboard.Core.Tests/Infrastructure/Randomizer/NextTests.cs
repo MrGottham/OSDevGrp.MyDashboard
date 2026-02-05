@@ -2,7 +2,6 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using OSDevGrp.MyDashboard.Core.Contracts.Infrastructure;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.Randomizer
 {
@@ -24,7 +23,6 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.Randomizer
         }
 
         [TestMethod]
-        [ExpectedArgumentException("The maximum value cannot be lower than the minimum value.", "maxValue")]
         public void Next_WhenMaxValueLowerThanMinValue_ThrowsArgumentException()
         {
             int minValue = _random.Next(1, 100);
@@ -32,7 +30,10 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Infrastructure.Randomizer
 
             IRandomizer sut = CreateSut();
 
-            sut.Next(minValue, maxValue);
+            ArgumentException result = Assert.Throws<ArgumentException>(() => sut.Next(minValue, maxValue));
+
+            Assert.StartsWith("The maximum value cannot be lower than the minimum value.", result.Message);
+            Assert.AreEqual("maxValue", result.ParamName);
         }
 
         [TestMethod]

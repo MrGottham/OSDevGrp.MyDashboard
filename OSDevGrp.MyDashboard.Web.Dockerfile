@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS builder
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS builder
 WORKDIR /src
 
 # Copy .sln and .csproj files and restore as distinct layers
@@ -16,11 +16,11 @@ COPY . .
 WORKDIR /src/OSDevGrp.MyDashboard.Web
 RUN dotnet publish -c Release -o out
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
-RUN apt-get update
-RUN apt-get -y upgrade
-RUN apt-get install -y supervisor openssh-server sudo
-RUN apt-get install -y locales
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+RUN apt-get update \
+    && apt-get -y upgrade \
+    && apt-get install -y supervisor openssh-server sudo \
+    && apt-get install -y locales
 
 RUN sed -i "s/^# *\(da_DK\)/\1/" /etc/locale.gen
 RUN dpkg-reconfigure --frontend=noninteractive locales

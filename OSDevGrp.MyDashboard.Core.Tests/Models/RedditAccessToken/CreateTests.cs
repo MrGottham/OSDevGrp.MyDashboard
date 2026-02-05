@@ -2,7 +2,6 @@ using System;
 using System.Runtime.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OSDevGrp.MyDashboard.Core.Contracts.Models;
-using OSDevGrp.MyDashboard.Core.Tests.Helpers.Attributes;
 
 namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditAccessToken
 {
@@ -22,31 +21,35 @@ namespace OSDevGrp.MyDashboard.Core.Tests.Models.RedditAccessToken
         }
 
         [TestMethod]
-        [ExpectedArgumentNullException("base64")]
         public void Create_WhenBase64IsNull_ThrowsArgumentNullException()
         {
-            OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create((string) null);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create((string) null));
+
+            Assert.AreEqual("base64", result.ParamName);
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("base64")]
         public void Create_WhenBase64IsEmpty_ThrowsArgumentNullException()
         {
-            OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(string.Empty);
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(string.Empty));
+
+            Assert.AreEqual("base64", result.ParamName);
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("base64")]
         public void Create_WhenBase64IsWhitespace_ThrowsArgumentNullException()
         {
-            OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(" ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create(" "));
+
+            Assert.AreEqual("base64", result.ParamName);
         }
         
         [TestMethod]
-        [ExpectedArgumentNullException("base64")]
         public void Create_WhenBase64IsWhitespaces_ThrowsArgumentNullException()
         {
-            OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create("  ");
+            ArgumentNullException result = Assert.Throws<ArgumentNullException>(() => OSDevGrp.MyDashboard.Core.Models.RedditAccessToken.Create("  "));
+
+            Assert.AreEqual("base64", result.ParamName);
         }
         
         [TestMethod]
