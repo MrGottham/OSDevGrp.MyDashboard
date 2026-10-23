@@ -14,7 +14,8 @@ COPY . .
 
 # Build the application
 WORKDIR /src/OSDevGrp.MyDashboard.Web
-RUN dotnet publish -c Release -o out
+RUN --mount=type=secret,id=sixlabors_license,target=/run/secrets/sixlabors.lic \
+    dotnet publish -c Release -o out -p:SixLaborsLicenseFile=/run/secrets/sixlabors.lic
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 RUN apt-get update \

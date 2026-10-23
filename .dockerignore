@@ -2,6 +2,7 @@
 .git/
 .vs/
 .vscode/
+licenses/
 **/[Bb]in/
 **/[Oo]bj/
 **/[Oo]ut/
