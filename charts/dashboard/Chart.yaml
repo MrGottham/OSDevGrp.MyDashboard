@@ -1,0 +1,8 @@
+apiVersion: v2
+name: mydashboard
+description: A Helm chart for the My Dashboard application
+type: application
+maintainers:
+  - name: OS Development Group
+    url: https://osdevgrp.dk/
+version: 2026.10.27

@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mvc-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.deployments.mvc.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mvc-selector
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mvc-selector
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-mvc
+          image: {{ .Values.deployments.mvc.containerImage }}
+          imagePullPolicy: {{ .Values.deployments.mvc.containerImagePullPolicy }}
+          ports:
+            - name: {{ .Values.deployments.mvc.containerPortName }}
+              containerPort: {{ .Values.deployments.mvc.containerPort }}
+              protocol: TCP
+          env:
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: TZ
+            - name: DOTNET_RUNNING_IN_CONTAINER
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: RUNNING_IN_CONTAINER
+            - name: ASPNETCORE_HTTP_PORTS
+              value: {{ .Values.deployments.mvc.containerPort | quote}}
+            - name: NON_ROOT_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: NON_ROOT_USER
+            - name: SUDO_ASKPASS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: SUDO_ASKPASS
+            - name: Authentication__Reddit__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: authenticationRedditClientId
+            - name: Authentication__Reddit__ClientSecret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: authenticationRedditClientSecret
+          readinessProbe:
+            httpGet:
+              scheme: HTTP
+              port: {{ .Values.deployments.mvc.containerPort }}
+              path: {{ .Values.deployments.mvc.healthCheck.endpoint }}
+            periodSeconds: {{ .Values.deployments.mvc.healthCheck.readinessProbe.checkInterval }}
+            timeoutSeconds: {{ .Values.deployments.mvc.healthCheck.readinessProbe.timeout }}
+            successThreshold: {{ .Values.deployments.mvc.healthCheck.readinessProbe.successThreshold }}
+            failureThreshold:  {{ .Values.deployments.mvc.healthCheck.readinessProbe.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              port: {{ .Values.deployments.mvc.containerPort }}
+              path: {{ .Values.deployments.mvc.healthCheck.endpoint }}
+            periodSeconds: {{ .Values.deployments.mvc.healthCheck.livenessProbe.checkInterval }}
+            timeoutSeconds: {{ .Values.deployments.mvc.healthCheck.livenessProbe.timeout }}
+            successThreshold: {{ .Values.deployments.mvc.healthCheck.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.deployments.mvc.healthCheck.livenessProbe.failureThreshold }}
+          startupProbe:
+            httpGet:
+              scheme: HTTP
+              port: {{ .Values.deployments.mvc.containerPort }}
+              path: {{ .Values.deployments.mvc.healthCheck.endpoint }}
+            periodSeconds: {{ .Values.deployments.mvc.healthCheck.startupProbe.checkInterval }}
+            timeoutSeconds: {{ .Values.deployments.mvc.healthCheck.startupProbe.timeout }}
+            successThreshold: {{ .Values.deployments.mvc.healthCheck.startupProbe.successThreshold }}
+            failureThreshold:  {{ .Values.deployments.mvc.healthCheck.startupProbe.failureThreshold }}

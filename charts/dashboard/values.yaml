@@ -1,0 +1,48 @@
+settings:
+  authentication:
+    reddit:
+      clientId: ''
+      clientSecret: ''
+
+infrastructure:
+  dotnet:
+    TZ: Europe/Copenhagen
+  images:
+    RUNNING_IN_CONTAINER: true
+    NON_ROOT_USER: apprunner
+    SUDO_ASKPASS: /usr/local/bin/askpw
+
+tls:
+  certFile: 'files/osdevgrp.localhost.crt'
+  keyFile: 'files/osdevgrp.localhost.key'
+
+ingress:
+  secureEntryPoint: websecure
+
+deployments:
+  mvc:
+    replicaCount: 1
+    containerImage: dashboard-mydashboard
+    containerImagePullPolicy: Never
+    containerServiceType: ClusterIP
+    containerPortName: http
+    containerPort: 8080
+    healthCheck:
+      endpoint: /health
+      readinessProbe:
+        checkInterval: 15
+        timeout: 10
+        successThreshold: 1
+        failureThreshold: 3
+      livenessProbe:
+        checkInterval: 300
+        timeout: 10
+        successThreshold: 1
+        failureThreshold: 3
+      startupProbe:
+        checkInterval: 15
+        timeout: 10
+        successThreshold: 1
+        failureThreshold: 3
+    ingress:
+      host: dashboard.osdevgrp.localhost

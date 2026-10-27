@@ -43,6 +43,11 @@ TestResult.xml
 [Rr]eleasePS/
 dlldata.c
 
+# Local Helm credentials
+/charts/dashboard/values.local.yaml
+/charts/dashboard/files/osdevgrp.localhost.crt
+/charts/dashboard/files/osdevgrp.localhost.key
+
 # DNX
 project.lock.json
 artifacts/

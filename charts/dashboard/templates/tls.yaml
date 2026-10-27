@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-tls-secret
+  namespace: {{ .Release.Namespace }}
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ required "TLS certificate file is missing or empty" (.Files.Get .Values.tls.certFile) | b64enc | quote }}
+  tls.key: {{ required "TLS private key file is missing or empty" (.Files.Get .Values.tls.keyFile) | b64enc | quote }}
