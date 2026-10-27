@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-mvc-route
+  namespace: {{ .Release.Namespace }}
+spec:
+  entryPoints:
+    - {{ .Values.ingress.secureEntryPoint }}
+  routes:
+    - kind: Rule
+      match: Host(`{{ .Values.deployments.mvc.ingress.host }}`)
+      services:
+        - name: {{ .Release.Name }}-mvc-service
+          passHostHeader: true
+          port: {{ .Values.deployments.mvc.containerPort }}
+          scheme: http
+  tls:
+    secretName: {{ .Release.Name }}-tls-secret

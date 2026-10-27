@@ -2,6 +2,7 @@
 .git/
 .vs/
 .vscode/
+charts/
 licenses/
 **/[Bb]in/
 **/[Oo]bj/
